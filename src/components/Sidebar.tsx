@@ -3,7 +3,7 @@ import SidebarButton from './ui/SidebarButton'
 
 const Sidebar = () => {
   return (
-    <div className='w-55 flex flex-col justify-between items-center border-r-1 border-gray-300 h-full'>
+    <div className='w-65 flex flex-col justify-between items-center border-r-1 border-gray-200 h-full'>
       
       <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>
         <SidebarButton page_name='Início' to='/' />
