@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface TextBoxInputProps{
     label: string;
     placeholder: string

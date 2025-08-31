@@ -1,4 +1,3 @@
-import React from 'react'
 import LabelInput from './ui/LabelInput'
 import DateInput from './ui/DateInput'
 

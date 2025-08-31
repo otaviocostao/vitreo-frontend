@@ -1,4 +1,3 @@
-import React from 'react';
 import StyledInput from './ui/StyledInput';
 import MedidaInput from './ui/MedidaInput';
 

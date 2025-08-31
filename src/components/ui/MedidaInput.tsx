@@ -1,4 +1,3 @@
-import React from 'react'
 import StyledInput from './StyledInput';
 
 const MedidaInput = ({ label }: { label: string }) => {
