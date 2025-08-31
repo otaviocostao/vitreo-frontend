@@ -10,9 +10,9 @@ import TextBoxInput from "../components/TextBoxInput";
 function NovaVenda() {
 
   return (
-    <div className="w-full h-screen overflow-hidden" >
+    <div className="w-full flex flex-col flex-1 h-screen overflow-x-hidden" >
         <Header />
-        <div className="w-full flex h-full">
+        <div className="w-full flex flex-1">
           <Sidebar />
           <div className="flex flex-1 flex-col w-fit box-border">
             <HeaderTitlePage page_name="Nova venda"/>
