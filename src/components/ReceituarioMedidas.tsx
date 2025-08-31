@@ -6,7 +6,7 @@ const ReceituarioMedidas = () => {
     return (
         <div className="flex w-2/3 divide-x divide-gray-200 border-b border-gray-200">
             {/* Receita */}
-            <div className="w-1/2 p-4">
+            <div className="w-2/3 p-4">
                 <h2 className="text-lg font-semibold text-gray-800 pb-2 mb-4 border-b border-gray-200">
                     Receita
                 </h2>
@@ -14,25 +14,25 @@ const ReceituarioMedidas = () => {
                 <div className="grid grid-cols-4 items-center gap-x-5 gap-y-3">
                     
                 <div /> 
-                        <span className="font-semibold text-gray-600 text-sm text-center">
+                        <span className="font-normal text-gray-700 text-sm text-center">
                             Esférico
                         </span>
-                        <span className="font-semibold text-gray-600 text-sm text-center">
+                        <span className="font-normal text-gray-700 text-sm text-center">
                             Cilíndrico
                         </span>
-                        <span className="font-semibold text-gray-600 text-sm text-center">
+                        <span className="font-normal text-gray-700 text-sm text-center">
                             Eixo
                         </span>
 
-                    <label className="font-semibold text-gray-600 text-sm">OD:</label>
+                    <label className="font-normal text-gray-700 text-sm">OD:</label>
                     <StyledInput />
                     <StyledInput />
                     <StyledInput />
-                    <label className="font-semibold text-gray-600 text-sm">OE:</label>
+                    <label className="font-normal text-gray-700 text-sm">OE:</label>
                     <StyledInput />
                     <StyledInput />
                     <StyledInput />
-                    <label className="font-semibold text-gray-600 text-sm">AD:</label>
+                    <label className="font-normal text-gray-700 text-sm">AD:</label>
                     <StyledInput />
                 </div>
             </div>
