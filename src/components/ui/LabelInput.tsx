@@ -6,7 +6,7 @@ interface LabelInputProps {
 const LabelInput = (props: LabelInputProps) => {
   return (
     <div className="flex items-center justify-between gap-2">
-        <label className="font-semibold text-gray-600 text-sm">{props.label}</label>
+        <label className="font-normal text-gray-700 text-sm">{props.label}</label>
 
         <input
             type="text"
