@@ -55,11 +55,15 @@ function NovaVenda() {
                     />
                     </div>
                 </div>
-                {/* Receituario e medidas */}
-                <div className="flex flex-col w-2/3 border-b border-gray-200 gap-1" >
-                    <ReceituarioMedidas />
-                    <ReceituarioInfoArea />
-                    <TextBoxInput label="Observações:" placeholder="Observações sobre o pedido..."/>
+                <div className="flex w-full border-b border-gray-200 gap-1 divide-x-1 divide-gray-200">
+                    {/* Receituario e medidas */}
+                    <div className="flex flex-col w-2/3  gap-1" >
+                        <ReceituarioMedidas />
+                        <ReceituarioInfoArea />
+                    </div>
+                    <div>
+                        
+                    </div>
                 </div>
             </div>
           </div>          
