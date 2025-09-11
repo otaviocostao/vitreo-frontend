@@ -4,7 +4,7 @@ import MedidaInput from './ui/MedidaInput';
 const ReceituarioMedidas = () => {
 
     return (
-        <div className="flex w-2/3 divide-x divide-gray-200 border-b border-gray-200">
+        <div className="flex w-2/3 divide-x divide-gray-200">
             {/* Receita */}
             <div className="w-2/3 p-4">
                 <h2 className="text-lg font-semibold text-gray-800 pb-2 mb-4 border-b border-gray-200">
