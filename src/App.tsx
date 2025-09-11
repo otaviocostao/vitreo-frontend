@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import NovaVenda from './pages/NovaVenda'
 import NovoCliente from './pages/NovoCliente'
 import SharedLayout from './components/SharedLayout'
+import ClientsPage from './pages/ClientsPage'
 
 function App() {
 
@@ -18,6 +19,10 @@ function App() {
           <Route
                 path="/vendas/nova"
                 element={<NovaVenda />}
+              />
+          <Route
+                path="/clientes"
+                element={<ClientsPage />}
               />
           <Route
                 path="/clientes/novo"
