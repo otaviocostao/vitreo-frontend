@@ -30,8 +30,8 @@ const ClientsPage = () => {
     <div className='flex flex-col w-full box-border'>
         <HeaderTitlePage page_name='Clientes' />
 
-        <div className="w-full flex flex-1 flex-col p-4 box-border">
-            <div className="mb-6 p-4 border-b-1 border-gray-200">
+        <div className="w-full flex flex-1 flex-col px-4 box-border">
+            <div className="mb-6 px-2 pb-4 border-b-1 border-gray-200">
                 <div className="flex justify-between items-center ">
                 <h2 className="text-lg font-semibold text-gray-800">Buscar cliente</h2>
                 </div>
