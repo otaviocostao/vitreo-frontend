@@ -25,7 +25,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ label, id, options, className
       <select
         id={id}
         className={`
-          block w-full px-3 py-2 bg-white border rounded-md shadow-sm 
+          block w-full px-3 py-2 bg-white border rounded-md  
           sm:text-sm
           focus:outline-none focus:ring-1
           transition duration-150 ease-in-out
