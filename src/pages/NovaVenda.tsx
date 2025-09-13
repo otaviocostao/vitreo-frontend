@@ -11,12 +11,12 @@ import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 function NovaVenda() {
 
   return (
-    <div className="flex flex-col w-fit box-border">
+    <div className=" flex flex-col w-fit box-border">
         <HeaderTitlePage page_name="Nova venda"/>
-        <div className="w-full flex flex-1 flex-col p-4 box-border">
+        <div className="w-full flex flex-1 flex-col px-4 box-border">
                 
             {/* Div para Cliente e ordem de servico */}
-            <div className="flex divide-x divide-gray-200 border-y border-gray-200 bg-white">
+            <div className="flex divide-x divide-gray-200 border-y border-gray-200">
                 <InfoSection title="Cliente" className="w-2/3">
                     <div className="flex items-end gap-2">
                         <InputField
