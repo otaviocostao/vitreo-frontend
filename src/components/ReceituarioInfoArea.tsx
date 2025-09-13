@@ -3,7 +3,7 @@ import InputField from './ui/InputField';
 
 function ReceituarioInfoArea() {
   return (
-    <div className="bg-white p-4 border-t border-gray-200">
+    <div className=" p-4 border-t border-gray-200">
       <h3 className="text-md font-semibold text-gray-700 mb-4">Informações Adicionais da Venda</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
