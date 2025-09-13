@@ -3,7 +3,6 @@ import FormSection from '../components/FormSection';
 import InputField from '../components/ui/InputField';
 import SelectField from '../components/ui/SelectField';
 import TextareaField from '../components/ui/TextareaField';
-import Button from '../components/ui/Button';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 
@@ -27,7 +26,7 @@ const RegisterClientPage = () => {
   };
 
   return (
-    <div className="flex flex-1 flex-col w-fit box-border">
+    <div className="flex flex-1 flex-col w-full box-border">
       <HeaderTitlePage page_name="Novo cliente"/>
       <div className="w-full flex flex-1 flex-col p-4 box-border">
           <form onSubmit={handleSubmit}>
