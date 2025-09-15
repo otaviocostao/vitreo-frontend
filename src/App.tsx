@@ -6,6 +6,7 @@ import NovoCliente from './pages/NovoCliente'
 import SharedLayout from './components/SharedLayout'
 import ClientsPage from './pages/ClientsPage'
 import SalesPage from './pages/SalesPage'
+import StockPage from './pages/StockPage'
 
 function App() {
 
@@ -32,6 +33,10 @@ function App() {
           <Route
                 path="/clientes/novo"
                 element={<NovoCliente />}
+              />
+          <Route
+                path="/produtos"
+                element={<StockPage />}
               />
         </Route>
       </Routes>
