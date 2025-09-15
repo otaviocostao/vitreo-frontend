@@ -7,7 +7,7 @@ interface Option {
 
 interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
-  id: string;
+  id?: string;
   options: Option[]; 
   error?: string;
 }
