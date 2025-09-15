@@ -35,7 +35,7 @@ const Sidebar = () => {
       />
       <SidebarButton 
         page_name='Estoque' 
-        to='/estoque' 
+        to='/produtos' 
         icon={<Boxes size={iconSize} />} 
         end
       />
