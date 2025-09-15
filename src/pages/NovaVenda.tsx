@@ -7,8 +7,25 @@ import Button from "../components/ui/Button";
 import InfoSection from "../components/InfoSection";
 import InputField from "../components/ui/InputField";
 import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
+import { useState } from "react";
+import type { ClientFormData } from "../components/AddClientModal";
+import AddClientModal from "../components/AddClientModal";
 
 function NovaVenda() {
+
+    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+
+    const handleClientSubmit = async (data: ClientFormData) => {
+        console.log("Recebido do modal, enviando para a API:", data);
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const newClient = { id: Date.now(), ...data };
+        console.log('Novo cliente criado!', newClient);
+        alert(`Cliente "${newClient.nomeCompleto}" cadastrado com sucesso!`);
+        
+        return newClient;
+    };
 
   return (
     <div className=" flex flex-col w-fit box-border">
@@ -26,7 +43,7 @@ function NovaVenda() {
                             className="flex-1" 
                             labelClassName="sr-only" 
                         />
-                        <Button variant="primary">
+                        <Button variant="primary" onClick={() => setIsClientModalOpen(true)}>
                             <PlusCircle size={18} />
                             <span>Cadastrar</span>
                         </Button>
@@ -57,6 +74,11 @@ function NovaVenda() {
             </div>
                 <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Finalizar Venda' />
             </div>
+            <AddClientModal
+                isOpen={isClientModalOpen}
+                onClose={() => setIsClientModalOpen(false)}
+                onSubmit={handleClientSubmit}
+            />
         </div>          
 
   )
