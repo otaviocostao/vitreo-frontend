@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import ClientsTable, { type Client } from '../components/ClientsTable';
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
+import { NavLink } from 'react-router-dom';
 
 const mockClients: Client[] = Array.from({ length: 13    }, (_, i) => ({
   id: i + 1,
@@ -51,10 +52,12 @@ const ClientsPage = () => {
                     </div>
 
                     <div className="flex items-center justify-end gap-4">
-                        <Button variant="primary">
-                            <Plus size={18} />
-                            <span>Novo cliente</span>
-                        </Button>
+                        <NavLink to={"/clientes/novo"}>
+                            <Button variant="primary">
+                                <Plus size={18} />
+                                <span>Novo cliente</span>
+                            </Button>
+                        </NavLink>
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
