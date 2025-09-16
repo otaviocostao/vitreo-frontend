@@ -6,6 +6,7 @@ import TotalRevenueChart from '../components/dashboard/TotalRevenueChart';
 import Button from '../components/ui/Button'; 
 import LastSalesCard, { type Sale } from '../components/dashboard/LastSalesCard';
 import HeaderTitlePage from '../components/HeaderTitlePage';
+import DateInput from '../components/ui/DateInput';
 
 const lastSalesData: Sale[] = [
   { id: 123, client: 'Ana Maria Braga', price: 1080.00, timeAgo: '2 min atrás' },
@@ -20,12 +21,12 @@ const Home = () => {
         <div className='flex justify-between '>
           <HeaderTitlePage page_name='Dashboard' />
           <div className="flex items-center gap-2 p-4">
-              <Button variant="secondary">
-                  <span>21 Out - 21 Nov</span>
-              </Button>
+              <DateInput label={''}/>
+              <span>-</span>
+              <DateInput label={''}/>
               <Button variant="primary">
                   <Upload size={16} />
-                  <span>Exportar CSV</span>
+                  <span>Exportar</span>
               </Button>
           </div>
         </div>
