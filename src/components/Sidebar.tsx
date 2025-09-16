@@ -1,5 +1,5 @@
 
-import { Boxes, LayoutDashboard, PlusCircle, ShoppingCart, Users } from 'lucide-react'
+import { Boxes, Building2, LayoutDashboard, PlusCircle, ShoppingCart, Users } from 'lucide-react'
 import SidebarButton from './ui/SidebarButton'
 
 const Sidebar = () => {
@@ -37,6 +37,12 @@ const Sidebar = () => {
         page_name='Estoque' 
         to='/produtos' 
         icon={<Boxes size={iconSize} />} 
+        end
+      />
+      <SidebarButton 
+        page_name='Fornecedores' 
+        to='/fornecedores' 
+        icon={<Building2 size={iconSize} />} 
         end
       />
       </div>
