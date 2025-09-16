@@ -68,7 +68,7 @@ const RegisterClientPage = () => {
               </div>
             </FormSection>
 
-            <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Cadastrar' />
+            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2='Cadastrar' />
           </form>
       </div>
     </div>

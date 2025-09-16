@@ -72,7 +72,7 @@ function NovaVenda() {
                     <VendaPagamento />
                 </div>
             </div>
-                <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Finalizar Venda' />
+                <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/" textButton2='Finalizar Venda' />
             </div>
             <AddClientModal
                 isOpen={isClientModalOpen}
