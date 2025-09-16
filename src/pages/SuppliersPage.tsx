@@ -18,7 +18,6 @@ const mockSuppliers: Supplier[] = Array.from({ length: 13    }, (_, i) => ({
   street: 'Avenida Eduardo Froes da Mota, 4050',
   city: 'Feira de Santana',
   state: 'Bahia',
-  phone: '(75) - 9.9221-9211',
 }));
 
 const SuppliersPage = () => {

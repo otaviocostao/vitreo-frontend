@@ -9,7 +9,6 @@ export interface Supplier {
   street: string;
   city: string;
   state: string;
-  phone: string;
 }
 
 interface SuppliersTableProps {
@@ -17,7 +16,7 @@ interface SuppliersTableProps {
 }
 
 const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
-  const tableHeaders = ['#', 'CNPJ', 'Razão Social', 'N. Fantasia', 'Logradouro', 'Cidade', 'Estado', 'Telefone'];
+  const tableHeaders = ['#', 'CNPJ', 'Razão Social', 'N. Fantasia', 'Logradouro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
   const handleRowClick = ( supplierId: number) => {
@@ -51,7 +50,6 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.street}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.phone}</td>
                 </tr>
             ))}
             </tbody>
