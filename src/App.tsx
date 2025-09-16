@@ -7,6 +7,8 @@ import SharedLayout from './components/SharedLayout'
 import ClientsPage from './pages/ClientsPage'
 import SalesPage from './pages/SalesPage'
 import StockPage from './pages/StockPage'
+import SuppliersPage from './pages/SuppliersPage'
+import AddSupplierPage from './pages/AddSupplierPage'
 
 function App() {
 
@@ -37,6 +39,14 @@ function App() {
           <Route
                 path="/produtos"
                 element={<StockPage />}
+              />
+          <Route
+                path="/fornecedores"
+                element={<SuppliersPage />}
+              />
+          <Route
+                path="/fornecedores/novo"
+                element={<AddSupplierPage />}
               />
         </Route>
       </Routes>
