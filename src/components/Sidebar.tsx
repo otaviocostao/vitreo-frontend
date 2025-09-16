@@ -1,5 +1,5 @@
 
-import { Boxes, Building2, LayoutDashboard, PlusCircle, ShoppingCart, Users } from 'lucide-react'
+import { Boxes, Building2, LayoutDashboard, LogOut, PlusCircle, Settings, ShoppingCart, Users } from 'lucide-react'
 import SidebarButton from './ui/SidebarButton'
 
 const Sidebar = () => {
@@ -45,6 +45,20 @@ const Sidebar = () => {
         icon={<Building2 size={iconSize} />} 
         end
       />
+      </div>
+      <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>  
+        <SidebarButton 
+          page_name='Ajustes' 
+          to='/ajustes' 
+          icon={<Settings size={iconSize} />} 
+          end
+        />
+        <SidebarButton 
+          page_name='Sair' 
+          to='/logout' 
+          icon={<LogOut size={iconSize} />} 
+          end
+        />
       </div>
     </div>
   )
