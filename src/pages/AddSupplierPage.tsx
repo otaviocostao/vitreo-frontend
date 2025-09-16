@@ -76,19 +76,19 @@ const AddSupplierPage = () => {
       <div className="w-full bg-white p-6 rounded-lg shadow-sm">
         <form onSubmit={handleSubmit}>
             <FormSection title="Dados da Empresa">
-              <InputField label="Razão Social *" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} className="md:col-span-8" required />
-              <InputField label="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-6" placeholder="00.000.000/0000-00" required />
-              <InputField label="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} className="md:col-span-6" />
+              <InputField label="Razão Social *" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} className="md:col-span-7" required />
+              <InputField label="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} className="md:col-span-5" />
+              <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-3" placeholder="00.000.000/0000-00" required />
+              <InputField label="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} className="md:col-span-3" />
             </FormSection>
 
             <FormSection title="Endereço">
-              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-4" placeholder="00000-000" />
               <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-8" />
-              <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-3" />
-              <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-5" />
+              <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-1" />
               <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
+              <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
               <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
             </FormSection>
 
@@ -109,7 +109,7 @@ const AddSupplierPage = () => {
                 </div>
             </FormSection>
             
-            <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Cadastrar' />
+            <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Cadastrar' cancelButtonPath='/fornecedores' />
         </form>
       </div>
     </div>
