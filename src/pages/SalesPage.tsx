@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SalesTable, { type Sale } from '../components/SalesTable';
+import { NavLink } from 'react-router-dom';
 
 const mockSales: Sale[] = [
   { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
@@ -66,10 +67,12 @@ const SalesPage = () => {
                     </div>
 
                     <div className="flex items-center justify-end gap-4">
-                        <Button variant="primary">
-                            <Plus size={18} />
-                            <span>Novo cliente</span>
-                        </Button>
+                        <NavLink to={"/vendas/nova"} >
+                            <Button variant="primary">
+                                <Plus size={18} />
+                                <span>Nova venda</span>
+                            </Button>
+                        </NavLink>
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
