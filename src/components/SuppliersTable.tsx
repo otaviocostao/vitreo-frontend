@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export interface Supplier {
   id: number;
@@ -7,6 +7,8 @@ export interface Supplier {
   razao_social: string;
   nome_fantasia: string;
   street: string;
+  number: string;
+  district: string;
   city: string;
   state: string;
 }
@@ -16,7 +18,7 @@ interface SuppliersTableProps {
 }
 
 const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
-  const tableHeaders = ['#', 'CNPJ', 'Razão Social', 'N. Fantasia', 'Logradouro', 'Cidade', 'Estado'];
+  const tableHeaders = ['#', 'CNPJ', 'Razão Social', 'N. Fantasia', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
   const handleRowClick = ( supplierId: number) => {
@@ -48,6 +50,8 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.razao_social}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.nome_fantasia}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.street}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.number}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.district}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
                 </tr>

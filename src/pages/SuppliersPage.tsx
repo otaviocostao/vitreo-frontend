@@ -16,6 +16,8 @@ const mockSuppliers: Supplier[] = Array.from({ length: 13    }, (_, i) => ({
   razao_social: "Tecnolens Laboratorio Óptico LTDA",
   nome_fantasia: 'Tecnolens',
   street: 'Avenida Eduardo Froes da Mota, 4050',
+  number: '4050',
+  district: 'São João',
   city: 'Feira de Santana',
   state: 'Bahia',
 }));

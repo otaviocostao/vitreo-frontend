@@ -4,7 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 export interface Client {
   id: number;
   name: string;
-  address: string;
+  street: string;
+  city: string;
+  district: string;
+  number: string;
+  state: string;
   birthDate: string;
   phone: string;
 }
@@ -14,7 +18,7 @@ interface ClientsTableProps {
 }
 
 const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
-  const tableHeaders = ['#', 'Cliente', 'Endereço', 'D/N', 'Telefone', ' '];
+  const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
   const handleRowClick = ( clienteId: number) => {
@@ -43,14 +47,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
                 <tr key={client.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(client.id)}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.address}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.birthDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.phone}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link to={`/clients/${client.id}`} className="text-blue-600 hover:text-blue-800">
-                    Ver mais
-                    </Link>
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.street}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.number}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.district}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.city}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.state}</td>
                 </tr>
             ))}
             </tbody>

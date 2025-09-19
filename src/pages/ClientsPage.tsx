@@ -12,9 +12,13 @@ import { NavLink } from 'react-router-dom';
 const mockClients: Client[] = Array.from({ length: 13    }, (_, i) => ({
   id: i + 1,
   name: 'Maria José Gonçalves dos Santos',
-  address: 'Rua José Pinheiro, 73, Centro, Araci-Ba',
   birthDate: '20/02/1974',
   phone: '(75) - 9.9121-9211',
+  street: 'Rua José Pinheiro',
+  district: 'Centro',
+  number: '75',
+  city: 'Araci',
+  state: 'Bahia'
 }));
 
 const ClientsPage = () => {
