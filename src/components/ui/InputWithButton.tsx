@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface InputWithButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   id: string;
   buttonIcon: React.ReactNode;
   onButtonClick: () => void;
