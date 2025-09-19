@@ -3,13 +3,13 @@ import HeaderTitlePage from "../components/HeaderTitlePage";
 import ReceituarioMedidas from "../components/ReceituarioMedidas";
 import ReceituarioInfoArea from "../components/ReceituarioInfoArea";
 import VendaPagamento from "../components/VendaPagamento";
-import Button from "../components/ui/Button";
 import InfoSection from "../components/InfoSection";
 import InputField from "../components/ui/InputField";
 import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 import { useState } from "react";
 import type { ClientFormData } from "../components/AddClientModal";
 import AddClientModal from "../components/AddClientModal";
+import InputWithButton from "../components/ui/InputWithButton";
 
 function NovaVenda() {
 
@@ -35,19 +35,13 @@ function NovaVenda() {
             {/* Div para Cliente e ordem de servico */}
             <div className="flex divide-x divide-gray-200 border-y border-gray-200">
                 <InfoSection title="Cliente" className="w-2/3">
-                    <div className="flex items-end gap-2">
-                        <InputField
-                            id="client-search"
-                            type="text"
-                            placeholder="Buscar por nome ou CPF..."
-                            className="flex-1" 
-                            labelClassName="sr-only" 
+                    <InputWithButton
+                        id="client-search"
+                        name="client-search"
+                        placeholder="Buscar por nome ou CPF..."
+                        onButtonClick={() => setIsClientModalOpen(true)}
+                        buttonIcon={<PlusCircle size={20} />}
                         />
-                        <Button variant="primary" onClick={() => setIsClientModalOpen(true)}>
-                            <PlusCircle size={18} />
-                            <span>Cadastrar</span>
-                        </Button>
-                    </div>
                 </InfoSection>
 
                 <InfoSection title="Ordem de serviço" className="w-1/3">
