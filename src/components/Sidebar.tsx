@@ -31,19 +31,19 @@ const Sidebar = () => {
         page_name='Clientes' 
         to='/clientes' 
         icon={<Users size={iconSize} />}
-        end 
+        
       />
       <SidebarButton 
         page_name='Estoque' 
         to='/produtos' 
         icon={<Boxes size={iconSize} />} 
-        end
+        
       />
       <SidebarButton 
         page_name='Fornecedores' 
         to='/fornecedores' 
         icon={<Building2 size={iconSize} />} 
-        end
+        
       />
       </div>
       <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>  

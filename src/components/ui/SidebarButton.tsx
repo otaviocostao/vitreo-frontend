@@ -15,7 +15,7 @@ const SidebarButton = (props: SidebarButtonProps) => {
             to={props.to} 
             end={props.end}
             className={({ isActive }) => 
-                `flex items-center gap-3 p-2 text-sm text-start w-full rounded-md transition-colors duration-150 ${
+                `flex items-center gap-3 p-2 text-sm text-start w-full rounded-md transition-colors duration-300 ${
                     isActive 
                     ? 'bg-blue-100 text-blue-600 font-semibold' 
                     : 'text-gray-600 font-medium hover:bg-gray-100'
