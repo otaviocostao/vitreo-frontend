@@ -41,15 +41,13 @@ const RegisterClientPage = () => {
             </FormSection>
 
             <FormSection title="Endereço">
-              <InputField label="Logradouro" id="logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} placeholder="Endereço do cliente..." className="md:col-span-5" />
-              <InputField label="Número" id="numero" name="numero" value={formData.numero} onChange={handleChange} placeholder="Número..." className="md:col-span-2" />
-              <InputField label="Bairro" id="bairro" name="bairro" value={formData.bairro} onChange={handleChange} placeholder="Bairro..." className="md:col-span-5" />
-              
-              <InputField label="Complemento" id="complemento" name="complemento" value={formData.complemento} onChange={handleChange} placeholder="Complemento..." className="md:col-span-12" />
-              
-              <InputField label="Cidade" id="cidade" name="cidade" value={formData.cidade} onChange={handleChange} placeholder="Cidade do cliente..." className="md:col-span-5" />
-              <InputField label="Estado" id="estado" name="estado" value={formData.estado} onChange={handleChange} placeholder="Estado..." className="md:col-span-4" />
-              <InputField label="CEP" id="cep" name="cep" value={formData.cep} onChange={handleChange} placeholder="00000-000" className="md:col-span-3" />
+              <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-8" />
+              <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-1" />
+              <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
+              <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
             </FormSection>
 
             <FormSection title="Informações de contato">

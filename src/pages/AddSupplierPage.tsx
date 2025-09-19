@@ -85,8 +85,8 @@ const AddSupplierPage = () => {
             <FormSection title="Endereço">
               <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-8" />
               <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-1" />
-              <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
               <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
               <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-4" />
               <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
               <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
