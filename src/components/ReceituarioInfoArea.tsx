@@ -1,7 +1,31 @@
 import TextareaField from './ui/TextareaField';
 import InputField from './ui/InputField';
+import { PlusCircle } from 'lucide-react';
+import { useState } from 'react';
+import AddProductModal, { type NewProductFormData } from './AddProductModal';
+import InputWithButton from './ui/InputWithButton';
 
 function ReceituarioInfoArea() {
+
+  const[isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [saleData, setSaleData] = useState({ ref_armacao: '' });
+
+  const handleOpenAddModal = () => setIsAddModalOpen(true);
+
+  const handleCloseAddModal = () => setIsAddModalOpen(false);
+
+  const handleProductCreated = (newProduct: NewProductFormData) => {
+    console.log('Produto criado no modal:', newProduct);
+    setSaleData(prev => ({ ...prev, ref_armacao: newProduct.referencia || newProduct.nome }));
+  };
+
+  const handleProductSubmit = async (data: NewProductFormData) => {
+    console.log("Enviando para a API:", data);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    handleProductCreated(data);
+  };
+
+
   return (
     <div className=" p-4 border-t border-gray-200">
       <h3 className="text-md font-semibold text-gray-700 mb-4">Informações Adicionais da Venda</h3>
@@ -29,11 +53,15 @@ function ReceituarioInfoArea() {
           placeholder="Busque a marca da armação..."
         />
 
-        <InputField
+        <InputWithButton
+          label="Referência da armação:"
           id="ref_armacao"
           name="ref_armacao"
-          label="Referência da armação:"
-          placeholder="Busque a referência da armação..."
+          placeholder="Busque ou cadastre a referência..."
+          value={saleData.ref_armacao}
+          onChange={(e) => setSaleData(prev => ({ ...prev, ref_armacao: e.target.value }))}
+          onButtonClick={handleOpenAddModal}
+          buttonIcon={<PlusCircle size={20} />}
         />
 
         <div className="md:col-span-2 mt-2">
@@ -68,6 +96,9 @@ function ReceituarioInfoArea() {
           />
         </div>
       </div>
+      <AddProductModal isOpen={isAddModalOpen} onClose={handleCloseAddModal} onSubmit={function (data: NewProductFormData): Promise<void> {
+              throw new Error('Function not implemented.');
+          } } suppliers={[]} brands={[]} />
     </div>
   );
 }
