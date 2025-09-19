@@ -8,7 +8,7 @@ import InputWithButton from './ui/InputWithButton';
 function ReceituarioInfoArea() {
 
   const[isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [saleData, setSaleData] = useState({ ref_armacao: '' });
+  const [saleData, setSaleData] = useState({ ref_armacao: '', lentes: '' });
 
   const handleOpenAddModal = () => setIsAddModalOpen(true);
 
@@ -39,11 +39,15 @@ function ReceituarioInfoArea() {
           placeholder="Dr. Nome Sobrenome"
         />
         
-        <InputField
+        <InputWithButton
+          label="Lentes:"
           id="lentes"
           name="lentes"
-          label="Lentes:"
-          placeholder="Busque o modelo das lentes..."
+          placeholder="Busque ou cadastre as lentes..."
+          value={saleData.lentes}
+          onChange={(e) => setSaleData(prev => ({ ...prev, lentes: e.target.value }))}
+          onButtonClick={handleOpenAddModal}
+          buttonIcon={<PlusCircle size={20} />}
         />
 
         <InputField
