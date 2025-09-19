@@ -20,7 +20,7 @@ const TextareaField: React.FC<TextareaFieldProps> = ({ label, id, className, err
         id={id}
         rows={4}
         className={`
-          block w-full px-3 py-2 bg-white border rounded-md shadow-sm 
+          block w-full px-3 py-2 bg-white border rounded-md 
           placeholder-gray-400 sm:text-sm
           focus:outline-none focus:ring-1
           transition duration-150 ease-in-out
