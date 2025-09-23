@@ -9,6 +9,7 @@ import SalesPage from './pages/SalesPage'
 import StockPage from './pages/StockPage'
 import SuppliersPage from './pages/SuppliersPage'
 import AddSupplierPage from './pages/AddSupplierPage'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
 
@@ -47,6 +48,10 @@ function App() {
           <Route
                 path="/fornecedores/novo"
                 element={<AddSupplierPage />}
+              />
+          <Route
+                path="/ajustes"
+                element={<SettingsPage />}
               />
         </Route>
       </Routes>
