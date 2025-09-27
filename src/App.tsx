@@ -50,6 +50,10 @@ function App() {
                 element={<AddSupplierPage />}
               />
           <Route
+                path="/fornecedores/:id"
+                element={<AddSupplierPage />}
+              />
+          <Route
                 path="/ajustes"
                 element={<SettingsPage />}
               />
