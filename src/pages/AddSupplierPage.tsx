@@ -4,6 +4,8 @@ import FormSection from '../components/FormSection';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import AssociatedBrandsManager from '../components/AssociatedBrandsManager';
+import { useNavigate, useParams } from 'react-router-dom';
+
 
 interface SupplierFormData {
   razaoSocial: string;
@@ -35,9 +37,34 @@ const initialFormData: SupplierFormData = {
   dataCadastro: new Date().toISOString().split('T')[0],
 };
 
+const fetchSupplierById = async (id: string): Promise<SupplierFormData> => {
+    console.log(`Buscando dados do fornecedor com ID: ${id}`);
+    await new Promise(res => setTimeout(res, 1000));
+    return {
+        razaoSocial: 'Luxottica Group S.p.A. (Dados do BD)',
+        nomeFantasia: 'Luxottica',
+        cnpj: '12.345.678/0001-99',
+        inscricaoEstadual: '987654321',
+        telefone: '(11) 98765-4321',
+        email: 'contato@luxottica.com',
+        cep: '04543-011', logradouro: 'Av. Brigadeiro Faria Lima', numero: '4440',
+        bairro: 'Itaim Bibi', cidade: 'São Paulo', estado: 'SP', complemento: 'Andar 8',
+        marcasTrabalhadas: ['uuid-brand-1', 'uuid-brand-2'],
+        dataCadastro: '2023-01-15',
+    };
+};
+
 const AddSupplierPage = () => {
+
+  const { supplierId } = useParams<{ supplierId: string }>();
+
+  const navigate = useNavigate();
+
+  const isEditMode = !!supplierId;
+
   const [formData, setFormData] = useState<SupplierFormData>(initialFormData);
   const [allBrands, setAllBrands] = useState<Marca[]>([]); 
+  const [isFetching, setIsFetching] = useState(isEditMode);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -52,26 +79,55 @@ const AddSupplierPage = () => {
       setAllBrands(mockBrands);
     };
     fetchBrands();
-  }, []);
+
+    if (isEditMode && supplierId) {
+      setIsFetching(true);
+      fetchSupplierById(supplierId)
+        .then(data => {
+          setFormData(data);
+        })
+        .catch(error => console.error("Falha ao buscar fornecedor", error))
+        .finally(() => setIsFetching(false));
+    }
+  }, [supplierId, isEditMode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do Fornecedor para Enviar:', formData);
-    alert('Fornecedor cadastrado com sucesso! (Verifique o console)');
+    setIsLoading(true);
+
+    try {
+      if (isEditMode) {
+        console.log(`ATUALIZANDO fornecedor ${supplierId}:`, formData);
+        alert('Fornecedor atualizado com sucesso!');
+      } else {
+        console.log('CRIANDO novo fornecedor:', formData);
+        alert('Fornecedor cadastrado com sucesso!');
+      }
+      navigate('/fornecedores');
+    } catch (error) {
+      console.error("Erro ao salvar fornecedor:", error);
+      alert('Ocorreu um erro ao salvar.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBrandChange = (selectedIds: string[]) => {
     setFormData(prev => ({ ...prev, marcasTrabalhadas: selectedIds }));
   };
 
+  if (isFetching) {
+    return <div className="p-6">Carregando dados do fornecedor...</div>;
+  }
+
   return (
     <div className="w-full">
-      <HeaderTitlePage page_name="Novo Fornecedor"/>
+      <HeaderTitlePage page_name={isEditMode ? 'Editar Fornecedor' : 'Novo Fornecedor'}/>
       
       <div className="w-full bg-white p-6 rounded-lg shadow-sm">
         <form onSubmit={handleSubmit}>
@@ -117,3 +173,7 @@ const AddSupplierPage = () => {
 };
 
 export default AddSupplierPage;
+
+function setIsLoading(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
