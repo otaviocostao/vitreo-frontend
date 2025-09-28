@@ -1,27 +1,18 @@
 import React from 'react';
 import {useNavigate } from 'react-router-dom';
+import type { ClienteResponse } from '../types/cliente';
 
-export interface Client {
-  id: number;
-  name: string;
-  street: string;
-  city: string;
-  district: string;
-  number: string;
-  state: string;
-  birthDate: string;
-  phone: string;
-}
+
 
 interface ClientsTableProps {
-  clients: Client[];
+  clients: ClienteResponse[];
 }
 
 const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
   const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
-  const handleRowClick = ( clienteId: number) => {
+  const handleRowClick = ( clienteId: string) => {
     navigate(`/clientes/${clienteId}`);
   };
 
@@ -43,17 +34,17 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
             </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-            {clients.map((client) => (
+            {clients.map((client, i) => (
                 <tr key={client.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(client.id)}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{client.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.birthDate}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.phone}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.street}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.number}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.district}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.city}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.state}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.nomeCompleto}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.dataNascimento}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.telefone}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.logradouro}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.numero}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.bairro}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.cidade}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.estado}</td>
                 </tr>
             ))}
             </tbody>
