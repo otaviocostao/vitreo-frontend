@@ -1,35 +1,60 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
 import Button from '../components/ui/Button';
 
-import ClientsTable, { type Client } from '../components/ClientsTable';
+import ClientsTable from '../components/ClientsTable';
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import { NavLink } from 'react-router-dom';
+import type { Page } from '../types/pagination';
+import type { ClienteResponse } from '../types/cliente';
+import { getClientes } from '../services/clienteService';
 
-const mockClients: Client[] = Array.from({ length: 13    }, (_, i) => ({
-  id: i + 1,
-  name: 'Maria José Gonçalves dos Santos',
-  birthDate: '20/02/1974',
-  phone: '(75) - 9.9121-9211',
-  street: 'Rua José Pinheiro',
-  district: 'Centro',
-  number: '75',
-  city: 'Araci',
-  state: 'Bahia'
-}));
+const CLIENTS_PER_PAGE = 20;
 
 const ClientsPage = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+
+    const [clients, setClients] = useState<ClienteResponse[]>([]);
+  const [pageInfo, setPageInfo] = useState<Page<ClienteResponse> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 5
 
+  const fetchClients = useCallback(async (page: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getClientes(page, CLIENTS_PER_PAGE);
+      setClients(data.content);
+      setPageInfo(data);
+      setCurrentPage(page);
+    } catch (err) {
+      setError('Falha ao carregar os clientes.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClients(currentPage);
+  }, [fetchClients, currentPage]);
+
+
   const handlePageChange = (page: number) => {
-    console.log(`Buscando dados para a página ${page}...`);
     setCurrentPage(page);
   };
+
+  if (isLoading) {
+    return <div>Carregando clientes...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -62,11 +87,13 @@ const ClientsPage = () => {
                                 <span>Novo cliente</span>
                             </Button>
                         </NavLink>
+                        {pageInfo && (
                         <Pagination
                             currentPage={currentPage}
-                            totalPages={totalPages}
+                            totalPages={pageInfo.totalPages}
                             onPageChange={handlePageChange}
                         />
+                    )}
                     </div>
                 </div>
             </div>
