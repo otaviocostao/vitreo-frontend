@@ -5,13 +5,21 @@ import SelectField from '../components/ui/SelectField';
 import TextareaField from '../components/ui/TextareaField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
+import type { ClientePayload } from '../types/cliente';
+import { createCliente } from '../services/clienteService';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterClientPage = () => {
+  const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
-    nomeCompleto: '', cpf: '', rg: '', genero: '', nascimento: '', naturalidade: '',
+    nome: '', sobrenome: '', cpf: '', rg: '', genero: '', nascimento: '', naturalidade: '',
     logradouro: '', numero: '', bairro: '', complemento: '', cidade: '', estado: '', cep: '',
     telefone: '', telSecundario: '', email: '',
-    observacoes: '', dataCadastro: '', ultimaCompra: '',
+    observacoes: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -19,24 +27,55 @@ const RegisterClientPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do formulário:', formData);
-    alert('Cliente cadastrado com sucesso! (Verifique o console)');
+    setIsLoading(true);
+    setError(null);
+
+    const clientePayload: ClientePayload = {
+      nome: formData.nome,
+      sobrenome: formData.sobrenome,
+      cpf: formData.cpf,
+      dataNascimento: formData.nascimento,
+      email: formData.email,
+      telefone: formData.telefone,
+      endereco: {
+        logradouro: formData.logradouro,
+        numero: formData.numero,
+        bairro: formData.bairro,
+        complemento: formData.complemento,
+        cidade: formData.cidade,
+        estado: formData.estado,
+        cep: formData.cep,
+      },
+    };
+
+    try {
+      await createCliente(clientePayload);
+      alert('Cliente cadastrado com sucesso!');
+      navigate('/clientes');
+    } catch (err) {
+      setError('Falha ao cadastrar o cliente. Verifique os dados e tente novamente.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-1 flex-col w-full box-border">
       <HeaderTitlePage page_name="Novo cliente"/>
       <div className="w-full flex flex-1 flex-col p-4 box-border">
+        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
           <form onSubmit={handleSubmit}>
             <FormSection title="Dados pessoais">
-              <InputField label="Nome completo" id="nomeCompleto" name="nomeCompleto" value={formData.nomeCompleto} onChange={handleChange} placeholder="Digite o nome completo do cliente..." className="md:col-span-6" />
-              <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-3" />
-              <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-0" className="md:col-span-3" />
+              <InputField label="Nome" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" />
+              <InputField label="Sobrenome" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" />
+              <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" />
+              <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-0" className="md:col-span-2" />
 
-              <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }, { value: 'O', label: 'Outro' }]} className="md:col-span-4" />
-              <InputField label="Nascimento" id="nascimento" name="nascimento" type="date" value={formData.nascimento} onChange={handleChange} placeholder="dd/mm/aaaa" className="md:col-span-4" />
+              <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }, { value: 'O', label: 'Outro' }]} className="md:col-span-2" />
+              <InputField label="Nascimento" id="nascimento" name="nascimento" type="date" value={formData.nascimento} onChange={handleChange} placeholder="dd/mm/aaaa" className="md:col-span-2" />
               <InputField label="Naturalidade" id="naturalidade" name="naturalidade" value={formData.naturalidade} onChange={handleChange} placeholder="Naturalidade do cliente..." className="md:col-span-4" />
             </FormSection>
 
@@ -61,12 +100,12 @@ const RegisterClientPage = () => {
               
 
               <div className="md:col-span-4 flex flex-col gap-5">
-                <InputField label="D. Cadastro" id="dataCadastro" name="dataCadastro" type="date" value={formData.dataCadastro} onChange={handleChange} placeholder="dd/mm/aaaa" />
+                {/* <InputField label="D. Cadastro" id="dataCadastro" name="dataCadastro" type="date" value={formData.dataCadastro} onChange={handleChange} placeholder="dd/mm/aaaa" /> */}
                 {/* <Button variant='secondary' className='w-35'>Última compra</Button> */}
               </div>
             </FormSection>
 
-            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2='Cadastrar' />
+            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isLoading ? 'Cadastrando...' : 'Cadastrar'} />
           </form>
       </div>
     </div>
