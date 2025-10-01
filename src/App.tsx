@@ -10,6 +10,7 @@ import StockPage from './pages/StockPage'
 import SuppliersPage from './pages/SuppliersPage'
 import AddSupplierPage from './pages/AddSupplierPage'
 import SettingsPage from './pages/SettingsPage'
+import RegisterProductPage from './pages/RegisterProductPage'
 
 function App() {
 
@@ -40,6 +41,10 @@ function App() {
           <Route
                 path="/produtos"
                 element={<StockPage />}
+              />
+          <Route
+                path="/produtos/novo"
+                element={<RegisterProductPage />}
               />
           <Route
                 path="/fornecedores"
