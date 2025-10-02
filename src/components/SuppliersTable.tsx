@@ -47,7 +47,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
 
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
-                  Nenhum produto encontrado.
+                  Nenhum fornecedor encontrado.
                 </td>
               </tr>
             ) : (
