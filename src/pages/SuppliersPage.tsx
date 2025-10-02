@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
@@ -7,30 +7,46 @@ import Button from '../components/ui/Button';
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import { NavLink } from 'react-router-dom';
-import type { Supplier } from '../components/SuppliersTable';
 import SuppliersTable from '../components/SuppliersTable';
+import type { FornecedorResponse } from '../types/fornecedor';
+import type { Page } from '../types/pagination';
+import { getFornecedores } from '../services/fornecedorService';
+import ErrorPopup from '../components/ErrorPopup';
 
-const mockSuppliers: Supplier[] = Array.from({ length: 13    }, (_, i) => ({
-  id: i + 1,
-  cnpj: "32.638.033/0001-58",
-  razao_social: "Tecnolens Laboratorio Óptico LTDA",
-  nome_fantasia: 'Tecnolens',
-  street: 'Avenida Eduardo Froes da Mota, 4050',
-  number: '4050',
-  district: 'São João',
-  city: 'Feira de Santana',
-  state: 'Bahia',
-}));
+const PRODUCTS_PER_PAGE = 20;
 
 const SuppliersPage = () => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+  const [fornecedores, setFornecedores] = useState<FornecedorResponse[]>([]);
+  const [pageInfo, setPageInfo] = useState<Page<FornecedorResponse> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5
+  const totalPages = pageInfo ? pageInfo.totalPages : 1;
 
-  const handlePageChange = (page: number) => {
-    console.log(`Buscando dados para a página ${page}...`);
-    setCurrentPage(page);
-  };
+  const fetchFornecedores = useCallback(async(page:number) => {
+      setIsLoading(true);
+      setError(null);
+  
+      try{
+          const data = await getFornecedores(page, PRODUCTS_PER_PAGE);
+          setFornecedores(data.content);
+          setPageInfo(data);
+          setCurrentPage(page);
+      }catch (err) {
+          setError('Falha ao carregar fornecedores')
+          console.error(err);
+      }finally{
+          setIsLoading(false);
+      }
+    }, []);
+  
+    useEffect(() => {
+      fetchFornecedores(currentPage)
+    }, [fetchFornecedores, currentPage])
+  
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+    };
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -71,8 +87,14 @@ const SuppliersPage = () => {
                     </div>
                 </div>
             </div>
-        <SuppliersTable suppliers={suppliers} />
+        <SuppliersTable fornecedores={fornecedores} isLoading={isLoading} />
         </div>
+        {error && (
+        <ErrorPopup
+          message={error}
+          onClose={() => setError(null)} 
+        />
+      )}
     </div>
   );
 };
