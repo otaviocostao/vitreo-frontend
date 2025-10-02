@@ -1,26 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-
-export interface Product {
-  id: number;
-  description: string;
-  brand: string;
-  supplier: string;
-  purchaseDate: string;
-  quantity: number;
-  cost: number;
-  margin: number;
-  value: number;
-}
+import type { ProdutoResponse } from '../types/produto';
 
 interface ProductsTableProps {
-  product: Product[];
+  product: ProdutoResponse[];
 }
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ product }) => {
-  const tableHeaders = ['#', 'Descrição', 'Marca', 'Fornecedor', 'D. Compra', 'Quantidade', 'Custo', 'Margem %', 'Valor'];
+  const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor'];
   const navigate = useNavigate();
 
-  const handleRowClick = (productId: number) => {
+  const handleRowClick = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 
@@ -42,22 +31,22 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {product.map((product) => (
+            {product.map((product, i) => (
               <tr 
                 key={product.id} 
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => handleRowClick(product.id)}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.brand}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.supplier}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.purchaseDate}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantity}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.cost}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margin}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nome}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nomeMarca}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantidadeEstoque}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.value)}
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.custo) || ''}
+                  </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margemLucroPercentual}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.valorVenda)}
                 </td>
               </tr>
             ))}
