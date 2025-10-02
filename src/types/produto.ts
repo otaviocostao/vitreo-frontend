@@ -22,6 +22,7 @@ export interface ProdutoPayload {
 }
 
 export interface ProdutoResponse {
+  id: string;
   tipoProduto: TipoProduto;
   fornecedorId: string;
   marcaId: string;
@@ -31,8 +32,10 @@ export interface ProdutoResponse {
   custo: number;
   margemLucroPercentual: number;
   quantidadeEstoque: number;
+  valorVenda: number;
   ativo: boolean;
 
+  nomeMarca: string;
   cor: string;
   material: string;
   tamanho: string;
