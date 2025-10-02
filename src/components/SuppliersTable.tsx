@@ -39,7 +39,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
                 <td colSpan={tableHeaders.length} className="text-center p-8">
                   <LoadingSpinner 
                     size="h-8 w-8"
-                    text="Carregando produtos..." 
+                    text="Carregando fornecedores..." 
                   />
                 </td>
               </tr> 
