@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
@@ -6,50 +6,54 @@ import Button from '../components/ui/Button';
 
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
-import ProductsTable, { type Product } from '../components/ProductsTable';
-import AddProductModal, { type NewProductFormData } from '../components/AddProductModal';
+import ProductsTable from '../components/ProductsTable';
+import type { ProdutoResponse } from '../types/produto';
+import { getProducts } from '../services/productService';
+import type { Page } from '../types/pagination';
+import { NavLink } from 'react-router-dom';
 
-const mockProduct: Product[] = Array.from({ length: 13    }, (_, i) => ({
-  id: 1,
-  description: "Lente Kodak Precise UHD",
-  brand: "Essilor",
-  supplier: "Tecnolens",
-  purchaseDate: "22/08/2025",
-  quantity: 100,
-  cost: 107,
-  margin: 150,
-  value: 270,
-}));
+const PRODUCTS_PER_PAGE = 20;
 
 const StockPage = () => {
-  const [products, setProducts] = useState<Product[]>(mockProduct);
+  const [products, setProducts] = useState<ProdutoResponse[]>([]);
+  const [pageInfo, setPageInfo] = useState<Page<ProdutoResponse> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5
+  const totalPages = pageInfo ? pageInfo.totalPages : 1;
 
-  const[isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const fetchProdutos = useCallback(async(page:number) => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleOpenAddModal = () => setIsAddModalOpen(true);
+    try{
+        const data = await getProducts(page, PRODUCTS_PER_PAGE);
+        setProducts(data.content);
+        setPageInfo(data);
+        setCurrentPage(page);
+    }catch (err) {
+        setError('Falha ao carregar os produtos')
+        console.error(err);
+    }finally{
+        setIsLoading(false);
+    }
+  }, []);
 
-  const handleCloseAddModal = () => setIsAddModalOpen(false);
-
-
+  useEffect(() => {
+    fetchProdutos(currentPage)
+  }, [fetchProdutos, currentPage])
 
   const handlePageChange = (page: number) => {
-    console.log(`Buscando dados para a página ${page}...`);
     setCurrentPage(page);
   };
 
-   const suppliersData = [{id: 'uuid-supplier-1', name: 'Essilor'}, {id: 'uuid-supplier-2', name: 'Luxottica'}];
-    const brandsData = [{id: 'uuid-brand-1', name: 'Ray-Ban'}, {id: 'uuid-brand-2', name: 'Oakley'}];
+  if (isLoading) {
+    return <div>Carregando clientes...</div>;
+  }
 
-    const handleProductSubmit = async (data: NewProductFormData) => {
-        console.log("Enviando para a API:", data);
-        // Lógica para enviar os dados para o seu back-end
-        // Ex: await api.post('/produtos', data);
-        // Se a API retornar um erro, o 'catch' no modal vai pegar.
-        // Simulando um delay de rede:
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
-    };
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -76,23 +80,24 @@ const StockPage = () => {
                     </div>
 
                     <div className="flex items-center justify-end gap-4">
-                        <Button onClick={handleOpenAddModal} variant="primary">
-                            <Plus size={18} />
-                            <span>Novo produto</span>
-                        </Button>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                        />
+                        <NavLink to={"/produtos/novo"}>
+                            <Button variant="primary">
+                                <Plus size={18} />
+                                <span>Novo produto</span>
+                            </Button>
+                        </NavLink>
+                        {pageInfo && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={handlePageChange}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
         <ProductsTable product={products} />
         </div>
-        <AddProductModal isOpen={isAddModalOpen} onClose={handleCloseAddModal} onSubmit={function (data: NewProductFormData): Promise<void> {
-              throw new Error('Function not implemented.');
-          } } suppliers={[]} brands={[]} />
     </div>
   );
 };
