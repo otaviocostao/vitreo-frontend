@@ -11,6 +11,7 @@ import { NavLink } from 'react-router-dom';
 import type { Page } from '../types/pagination';
 import type { ClienteResponse } from '../types/cliente';
 import { getClientes } from '../services/clienteService';
+import ErrorPopup from '../components/ErrorPopup';
 
 const CLIENTS_PER_PAGE = 20;
 
@@ -31,7 +32,7 @@ const ClientsPage = () => {
       setPageInfo(data);
       setCurrentPage(page);
     } catch (err) {
-      setError('Falha ao carregar os clientes.');
+      setError('Falha ao carregar clientes.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -46,14 +47,6 @@ const ClientsPage = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  if (isLoading) {
-    return <div>Carregando clientes...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -96,8 +89,14 @@ const ClientsPage = () => {
                     </div>
                 </div>
             </div>
-        <ClientsTable clients={clients} />
+        <ClientsTable clients={clients} isLoading={isLoading} />
         </div>
+        {error && (
+        <ErrorPopup
+          message={error}
+          onClose={() => setError(null)} 
+        />
+      )}
     </div>
   );
 };
