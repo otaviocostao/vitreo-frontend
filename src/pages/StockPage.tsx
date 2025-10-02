@@ -11,6 +11,7 @@ import type { ProdutoResponse } from '../types/produto';
 import { getProducts } from '../services/productService';
 import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
+import ErrorPopup from '../components/ErrorPopup';
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -32,7 +33,7 @@ const StockPage = () => {
         setPageInfo(data);
         setCurrentPage(page);
     }catch (err) {
-        setError('Falha ao carregar os produtos')
+        setError('Falha ao carregar produtos')
         console.error(err);
     }finally{
         setIsLoading(false);
@@ -47,13 +48,6 @@ const StockPage = () => {
     setCurrentPage(page);
   };
 
-  if (isLoading) {
-    return <div>Carregando clientes...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -96,8 +90,14 @@ const StockPage = () => {
                     </div>
                 </div>
             </div>
-        <ProductsTable product={products} />
+        <ProductsTable product={products} isLoading={isLoading} />
         </div>
+        {error && (
+        <ErrorPopup
+          message={error}
+          onClose={() => setError(null)} 
+        />
+      )}
     </div>
   );
 };
