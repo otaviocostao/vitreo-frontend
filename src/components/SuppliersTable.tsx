@@ -1,28 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-export interface Supplier {
-  id: number;
-  cnpj: string;
-  razao_social: string;
-  nome_fantasia: string;
-  street: string;
-  number: string;
-  district: string;
-  city: string;
-  state: string;
-}
+import type { FornecedorResponse } from '../types/fornecedor';
+import LoadingSpinner from './LoadingSpinner';
 
 interface SuppliersTableProps {
-  suppliers: Supplier[];
+  fornecedores: FornecedorResponse[];
+  isLoading: boolean;
 }
 
-const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
-  const tableHeaders = ['#', 'CNPJ', 'Razão Social', 'N. Fantasia', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
+const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading }) => {
+  const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
-  const handleRowClick = ( supplierId: number) => {
-    navigate(`/fornecedores/${supplierId}`);
+  const handleRowClick = ( fornecedorId: string) => {
+    navigate(`/fornecedores/${fornecedorId}`);
   };
 
   return (
@@ -43,19 +34,37 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers }) => {
             </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-            {suppliers.map((supplier) => (
-                <tr key={supplier.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(supplier.id)}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{supplier.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.cnpj}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.razao_social}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.nome_fantasia}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.street}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.number}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.district}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
-                </tr>
-            ))}
+            {isLoading ? (
+              <tr>
+                <td colSpan={tableHeaders.length} className="text-center p-8">
+                  <LoadingSpinner 
+                    size="h-8 w-8"
+                    text="Carregando produtos..." 
+                  />
+                </td>
+              </tr> 
+            ) : fornecedores.length === 0 ? (
+
+              <tr>
+                <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
+                  Nenhum produto encontrado.
+                </td>
+              </tr>
+            ) : (
+              fornecedores.map((fornecedor, i) => (
+                  <tr key={fornecedor.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(fornecedor.id)}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.razaoSocial}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.nomeFantasia}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.cnpj}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.logradouro}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.numero}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.bairro}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.cidade}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.estado}</td>
+                  </tr>
+              )))
+            }
             </tbody>
         </table>
         </div>
