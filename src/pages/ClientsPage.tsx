@@ -21,7 +21,6 @@ const ClientsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5
 
   const fetchClients = useCallback(async (page: number) => {
     setIsLoading(true);
