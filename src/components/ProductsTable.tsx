@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import type { ProdutoResponse } from '../types/produto';
+import LoadingSpinner from './LoadingSpinner';
 
 interface ProductsTableProps {
   product: ProdutoResponse[];
+  isLoading: boolean;
 }
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ product }) => {
+const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading }) => {
   const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor'];
   const navigate = useNavigate();
 
@@ -31,25 +33,43 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {product.map((product, i) => (
-              <tr 
-                key={product.id} 
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleRowClick(product.id)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nome}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nomeMarca}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantidadeEstoque}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.custo) || ''}
-                  </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margemLucroPercentual}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.valorVenda)}
+            {isLoading ? (
+              <tr>
+                <td colSpan={tableHeaders.length} className="text-center p-8">
+                  <LoadingSpinner 
+                    size="h-8 w-8"
+                    text="Carregando produtos..." 
+                  />
+                </td>
+              </tr> 
+            ) : product.length === 0 ? (
+
+              <tr>
+                <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
+                  Nenhum produto encontrado.
                 </td>
               </tr>
-            ))}
+            ) : (
+              product.map((product, i) => (
+                <tr 
+                  key={product.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(product.id)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i + 1}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nome}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nomeMarca}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantidadeEstoque}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.custo) || ''}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margemLucroPercentual}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.valorVenda)}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
