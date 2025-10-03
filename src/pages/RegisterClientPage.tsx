@@ -8,6 +8,7 @@ import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import type { ClientePayload } from '../types/cliente';
 import { createCliente } from '../services/clienteService';
 import { useNavigate } from 'react-router-dom';
+import ErrorPopup from '../components/ErrorPopup';
 
 const RegisterClientPage = () => {
   const navigate = useNavigate();
@@ -52,7 +53,6 @@ const RegisterClientPage = () => {
 
     try {
       await createCliente(clientePayload);
-      alert('Cliente cadastrado com sucesso!');
       navigate('/clientes');
     } catch (err) {
       setError('Falha ao cadastrar o cliente. Verifique os dados e tente novamente.');
@@ -66,7 +66,6 @@ const RegisterClientPage = () => {
     <div className="flex flex-1 flex-col w-full box-border">
       <HeaderTitlePage page_name="Novo cliente"/>
       <div className="w-full flex flex-1 flex-col p-4 box-border">
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">{error}</div>}
           <form onSubmit={handleSubmit}>
             <FormSection title="Dados pessoais">
               <InputField label="Nome" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" />
@@ -108,6 +107,9 @@ const RegisterClientPage = () => {
             <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isLoading ? 'Cadastrando...' : 'Cadastrar'} />
           </form>
       </div>
+      {error && (
+        <ErrorPopup message={error} onClose={() => setError(null)} />
+      )}
     </div>
   );
 };

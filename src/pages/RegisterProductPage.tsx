@@ -9,6 +9,7 @@ import type { FornecedorOption, MarcaOption, ProdutoPayload, TipoProduto } from 
 import { getFornecedoresOptions } from '../services/fornecedorService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduto } from '../services/productService';
+import ErrorPopup from '../components/ErrorPopup';
 
 const initialFormData = {
   tipoProduto: 'ARMACAO' as TipoProduto,
@@ -86,7 +87,6 @@ const RegisterProductPage = () => {
 
     try {
       await createProduto(productPayload);
-      alert('Produto cadastrado com sucesso!');
       navigate('/produtos');
     } catch (err) {
       setError('Falha ao cadastrar o produto. Verifique os dados e tente novamente.');
@@ -105,9 +105,8 @@ const RegisterProductPage = () => {
     <div className="w-full">
       <HeaderTitlePage page_name="Novo Produto"/>
       
-      <div className="w-full bg-white p-6 rounded-lg shadow-sm">
+      <div className="w-full bg-white p-6">
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
 
           <FormSection title="Informações Gerais">
             <SelectField label="Tipo do Produto *" name="tipoProduto" value={formData.tipoProduto} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
@@ -143,6 +142,9 @@ const RegisterProductPage = () => {
             <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isLoading ? 'Cadastrando...' : 'Cadastrar'} />
         </form>
       </div>
+      {error && (
+        <ErrorPopup message={error} onClose={() => setError(null)} />
+      )}
     </div>
   );
 };
