@@ -1,4 +1,5 @@
 import type { EnderecoPayload, EnderecoResponse } from "./endereco";
+import type { MarcaResponse } from "./marca";
 
 export interface FornecedorPayload {
   razaoSocial: string;
@@ -19,4 +20,5 @@ export interface FornecedorResponse {
   telefone: string;
   email: string;
   endereco: EnderecoResponse;
+  marcasTrabalhadas: MarcaResponse[];
 }
