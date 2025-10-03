@@ -1,3 +1,4 @@
+import type { MarcaPayload, MarcaResponse } from '../types/marca';
 import type { Page } from '../types/pagination';
 import type { MarcaOption } from '../types/produto';
 import api from './api';
@@ -13,3 +14,13 @@ export const getMarcasOptions = async (): Promise<MarcaOption[]> => {
     throw error;
   }
 }
+
+export const createMarca = async (data: MarcaPayload): Promise<MarcaResponse> => {
+  try {
+    const response = await api.post<MarcaResponse>('/marcas', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao criar marca:", error);
+    throw error;
+  }
+};
