@@ -17,11 +17,12 @@ const CLIENTS_PER_PAGE = 20;
 
 const ClientsPage = () => {
 
-    const [clients, setClients] = useState<ClienteResponse[]>([]);
+  const [clients, setClients] = useState<ClienteResponse[]>([]);
   const [pageInfo, setPageInfo] = useState<Page<ClienteResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = pageInfo ? pageInfo.totalPages : 1;
 
   const fetchClients = useCallback(async (page: number) => {
     setIsLoading(true);
@@ -79,13 +80,11 @@ const ClientsPage = () => {
                                 <span>Novo cliente</span>
                             </Button>
                         </NavLink>
-                        {pageInfo && (
                         <Pagination
                             currentPage={currentPage}
-                            totalPages={pageInfo.totalPages}
+                            totalPages={totalPages}
                             onPageChange={handlePageChange}
                         />
-                    )}
                     </div>
                 </div>
             </div>

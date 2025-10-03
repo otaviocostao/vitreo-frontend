@@ -80,13 +80,12 @@ const StockPage = () => {
                                 <span>Novo produto</span>
                             </Button>
                         </NavLink>
-                        {pageInfo && (
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={handlePageChange}
-                            />
-                        )}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
+
                     </div>
                 </div>
             </div>
