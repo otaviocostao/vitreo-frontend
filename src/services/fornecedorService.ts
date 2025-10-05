@@ -61,3 +61,22 @@ export const updateFornecedor = async (id: string, data: FornecedorPayload): Pro
     throw error;
   }
 };
+
+export const associateMarca = async (fornecedorId: string, marcaId: string): Promise<void> => {
+  try {
+    await api.post(`/fornecedores/${fornecedorId}/marcas/${marcaId}`);
+  } catch (error) {
+    console.error(`Erro ao associar marca ${marcaId} ao fornecedor ${fornecedorId}:`, error);
+    throw error;
+  }
+};
+
+export const dissociateMarca = async (fornecedorId: string, marcaId: string): Promise<void> => {
+  try {
+    await api.delete(`/fornecedores/${fornecedorId}/marcas/${marcaId}`);
+    await api.delete(`/marcas/${marcaId}`);
+  } catch (error) {
+    console.error(`Erro ao desassociar marca ${marcaId} do fornecedor ${fornecedorId}:`, error);
+    throw error;
+  }
+};
