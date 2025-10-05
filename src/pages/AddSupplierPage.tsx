@@ -5,7 +5,12 @@ import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import AssociatedBrandsManager from '../components/AssociatedBrandsManager';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import ErrorPopup from '../components/ErrorPopup';
+import type { FornecedorPayload, FornecedorResponse } from '../types/fornecedor';
+import { associateMarca, createFornecedor, dissociateMarca, getFornecedorById, updateFornecedor } from '../services/fornecedorService';
+import type { MarcaResponse } from '../types/marca';
+import { getMarcasOptions } from '../services/marcaService';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 interface SupplierFormData {
   razaoSocial: string;
@@ -14,81 +19,76 @@ interface SupplierFormData {
   inscricaoEstadual: string;
   telefone: string;
   email: string;
-  cep: string;
   logradouro: string;
   numero: string;
   bairro: string;
+  complemento: string;
   cidade: string;
   estado: string;
-  complemento: string;
- marcasTrabalhadas: string[];
-    dataCadastro: string;
+  cep: string;
+  marcasTrabalhadas: MarcaResponse[];
 }
 
-interface Marca {
-  id: string;
-  nome: string;
-}
-
-const initialFormData: SupplierFormData = {
+const initialFormData = {
   razaoSocial: '', nomeFantasia: '', cnpj: '', inscricaoEstadual: '', telefone: '', email: '',
   cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '', complemento: '',
   marcasTrabalhadas: [],
-  dataCadastro: new Date().toISOString().split('T')[0],
-};
-
-const fetchSupplierById = async (id: string): Promise<SupplierFormData> => {
-    console.log(`Buscando dados do fornecedor com ID: ${id}`);
-    await new Promise(res => setTimeout(res, 1000));
-    return {
-        razaoSocial: 'Luxottica Group S.p.A. (Dados do BD)',
-        nomeFantasia: 'Luxottica',
-        cnpj: '12.345.678/0001-99',
-        inscricaoEstadual: '987654321',
-        telefone: '(11) 98765-4321',
-        email: 'contato@luxottica.com',
-        cep: '04543-011', logradouro: 'Av. Brigadeiro Faria Lima', numero: '4440',
-        bairro: 'Itaim Bibi', cidade: 'São Paulo', estado: 'SP', complemento: 'Andar 8',
-        marcasTrabalhadas: ['uuid-brand-1', 'uuid-brand-2'],
-        dataCadastro: '2023-01-15',
-    };
 };
 
 const AddSupplierPage = () => {
-
-  const { supplierId } = useParams<{ supplierId: string }>();
-
+  const { id: supplierId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const isEditMode = !!supplierId;
 
   const [formData, setFormData] = useState<SupplierFormData>(initialFormData);
-  const [allBrands, setAllBrands] = useState<Marca[]>([]); 
-  const [isFetching, setIsFetching] = useState(isEditMode);
+  const [initialBrands, setInitialBrands] = useState<MarcaResponse[]>([]);
+  const [allBrands, setAllBrands] = useState<MarcaResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(isEditMode); 
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      const mockBrands: Marca[] = [
-        { id: 'uuid-brand-1', nome: 'Ray-Ban' },
-        { id: 'uuid-brand-2', nome: 'Oakley' },
-        { id: 'uuid-brand-3', nome: 'Prada' },
-        { id: 'uuid-brand-4', nome: 'Vogue' },
-        { id: 'uuid-brand-5', nome: 'Essilor' },
-        { id: 'uuid-brand-6', nome: 'Hoya' },
-      ];
-      setAllBrands(mockBrands);
-    };
-    fetchBrands();
+    const loadInitialData = async () => {
+      if (isEditMode) setIsFetching(true);
+      setError(null);
 
-    if (isEditMode && supplierId) {
-      setIsFetching(true);
-      fetchSupplierById(supplierId)
-        .then(data => {
-          setFormData(data);
-        })
-        .catch(error => console.error("Falha ao buscar fornecedor", error))
-        .finally(() => setIsFetching(false));
-    }
+      try {
+        const brandsPromise = getMarcasOptions();
+
+        if (isEditMode && supplierId) {
+          const supplierPromise = getFornecedorById(supplierId);
+
+          const [supplierData, brandsData] = await Promise.all([supplierPromise, brandsPromise]);
+          
+          const flattenedData: SupplierFormData = {
+            razaoSocial: supplierData.razaoSocial,
+            nomeFantasia: supplierData.nomeFantasia,
+            cnpj: supplierData.cnpj,
+            inscricaoEstadual: supplierData.inscricaoEstadual,
+            telefone: supplierData.telefone,
+            email: supplierData.email,
+            ...supplierData.endereco,
+            complemento: supplierData.endereco.complemento || '',
+            marcasTrabalhadas: supplierData.marcasTrabalhadas,
+          };
+
+          setFormData(flattenedData);
+          setInitialBrands(supplierData.marcasTrabalhadas);
+          setAllBrands(brandsData);
+
+        } else {
+          const brandsData = await brandsPromise;
+          setAllBrands(brandsData);
+        }
+      } catch (err) {
+        setError("Falha ao carregar os dados. Verifique a conexão e tente novamente.");
+        console.error(err);
+      } finally {
+        if (isEditMode) setIsFetching(false);
+      }
+    };
+    
+    loadInitialData();
   }, [supplierId, isEditMode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,33 +96,76 @@ const AddSupplierPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleBrandChange = (updatedBrands: MarcaResponse[]) => {
+    setFormData(prev => ({ ...prev, marcasTrabalhadas: updatedBrands }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+
+    const cleanedCnpj = formData.cnpj.replace(/[^\d]/g, '');
+
+
+    const fornecedorPayload: FornecedorPayload = {
+      razaoSocial: formData.razaoSocial,
+      nomeFantasia: formData.nomeFantasia,
+      cnpj: cleanedCnpj,
+      inscricaoEstadual: formData.inscricaoEstadual,
+      telefone: formData.telefone,
+      email: formData.email,
+      endereco: {
+        logradouro: formData.logradouro,
+        numero: formData.numero,
+        bairro: formData.bairro,
+        complemento: formData.complemento,
+        cidade: formData.cidade,
+        estado: formData.estado,
+        cep: formData.cep,
+      },
+    };
 
     try {
-      if (isEditMode) {
-        console.log(`ATUALIZANDO fornecedor ${supplierId}:`, formData);
-        alert('Fornecedor atualizado com sucesso!');
+      let savedFornecedor: FornecedorResponse;
+
+      if (isEditMode && supplierId) {
+        savedFornecedor = await updateFornecedor(supplierId, fornecedorPayload);
       } else {
-        console.log('CRIANDO novo fornecedor:', formData);
-        alert('Fornecedor cadastrado com sucesso!');
+        savedFornecedor = await createFornecedor(fornecedorPayload);
       }
+
+      await syncMarcas(savedFornecedor.id);
+
       navigate('/fornecedores');
-    } catch (error) {
-      console.error("Erro ao salvar fornecedor:", error);
-      alert('Ocorreu um erro ao salvar.');
+
+    } catch (err) {
+      setError(`Falha ao salvar o fornecedor. Verifique os dados e tente novamente.`);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleBrandChange = (selectedIds: string[]) => {
-    setFormData(prev => ({ ...prev, marcasTrabalhadas: selectedIds }));
+  const syncMarcas = async (fornecedorId: string) => {
+    const initialBrandIds = new Set(initialBrands.map(b => b.id));
+    const currentBrandIds = new Set(formData.marcasTrabalhadas.map(b => b.id));
+
+    const marcasToAdd = formData.marcasTrabalhadas.filter(b => !initialBrandIds.has(b.id));
+    const marcasToRemove = initialBrands.filter(b => !currentBrandIds.has(b.id));
+
+    const associationPromises = marcasToAdd.map(marca => 
+      associateMarca(fornecedorId, marca.id)
+    );
+    const dissociationPromises = marcasToRemove.map(marca => 
+      dissociateMarca(fornecedorId, marca.id)
+    );
+
+    await Promise.all([...associationPromises, ...dissociationPromises]);
   };
 
   if (isFetching) {
-    return <div className="p-6">Carregando dados do fornecedor...</div>;
+    return <LoadingSpinner text='Carregando dados do fornecedor...'/>
   }
 
   return (
@@ -160,20 +203,16 @@ const AddSupplierPage = () => {
                         onChange={handleBrandChange}
                     />
                 </div>
-                <div className="md:col-span-4">
-                    <InputField label="Data do Cadastro" name="dataCadastro" type="date" value={formData.dataCadastro} onChange={handleChange} readOnly />
-                </div>
             </FormSection>
             
-            <SaveCancelButtonsArea textButton1='Cancelar' textButton2='Cadastrar' cancelButtonPath='/fornecedores' />
+            <SaveCancelButtonsArea textButton1='Cancelar' textButton2={isEditMode ? 'Salvar' : 'Cadastrar'}  cancelButtonPath='/fornecedores' />
         </form>
       </div>
+      {error && (
+        <ErrorPopup message={error} onClose={() => setError(null)} />
+      )}
     </div>
   );
 };
 
 export default AddSupplierPage;
-
-function setIsLoading(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
