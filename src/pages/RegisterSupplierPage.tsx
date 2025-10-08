@@ -35,7 +35,7 @@ const initialFormData = {
   marcasTrabalhadas: [],
 };
 
-const AddSupplierPage = () => {
+const RegisterSupplierPage = () => {
   const { id: supplierId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!supplierId;
@@ -215,4 +215,4 @@ const AddSupplierPage = () => {
   );
 };
 
-export default AddSupplierPage;
+export default RegisterSupplierPage;

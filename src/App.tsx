@@ -8,9 +8,9 @@ import ClientsPage from './pages/ClientsPage'
 import SalesPage from './pages/SalesPage'
 import StockPage from './pages/StockPage'
 import SuppliersPage from './pages/SuppliersPage'
-import AddSupplierPage from './pages/AddSupplierPage'
 import SettingsPage from './pages/SettingsPage'
 import RegisterProductPage from './pages/RegisterProductPage'
+import RegisterSupplierPage from './pages/RegisterSupplierPage'
 
 function App() {
 
@@ -52,11 +52,11 @@ function App() {
               />
           <Route
                 path="/fornecedores/novo"
-                element={<AddSupplierPage />}
+                element={<RegisterSupplierPage />}
               />
           <Route
                 path="/fornecedores/:id"
-                element={<AddSupplierPage />}
+                element={<RegisterSupplierPage />}
               />
           <Route
                 path="/ajustes"
