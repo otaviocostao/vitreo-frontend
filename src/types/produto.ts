@@ -8,6 +8,7 @@ export interface ProdutoPayload {
   referencia?: string;
   codigoBarras?: string;
   custo?: number;
+  valorVenda: number;
   margemLucroPercentual?: number;
   quantidadeEstoque: number;
   ativo?: boolean;
@@ -16,7 +17,7 @@ export interface ProdutoPayload {
   material?: string;
   tamanho?: string;
 
-  indiceRefracao?: number;
+  materialLente: string;
   tratamento?: string;
   tipoLente?: string;
 }
@@ -24,15 +25,15 @@ export interface ProdutoPayload {
 export interface ProdutoResponse {
   id: string;
   tipoProduto: TipoProduto;
-  fornecedorId: string;
-  marcaId: string;
+  fornecedor: FornecedorOption;
+  marca: MarcaOption;
   nome: string;
   referencia: string;
   codigoBarras: string;
   custo: number;
+  valorVenda: number;
   margemLucroPercentual: number;
   quantidadeEstoque: number;
-  valorVenda: number;
   ativo: boolean;
 
   nomeMarca: string;
@@ -40,7 +41,7 @@ export interface ProdutoResponse {
   material: string;
   tamanho: string;
 
-  indiceRefracao: number;
+  materialLente: string;
   tratamento: string;
   tipoLente: string;
 }
