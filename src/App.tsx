@@ -47,6 +47,10 @@ function App() {
                 element={<RegisterProductPage />}
               />
           <Route
+                path="/produtos/:id"
+                element={<RegisterProductPage />}
+              />
+          <Route
                 path="/fornecedores"
                 element={<SuppliersPage />}
               />
