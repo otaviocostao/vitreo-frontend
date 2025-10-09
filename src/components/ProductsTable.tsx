@@ -12,7 +12,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading }) => 
   const navigate = useNavigate();
 
   const handleRowClick = (productId: string) => {
-    navigate(`/product/${productId}`);
+    navigate(`/produtos/${productId}`);
   };
 
   return (
@@ -58,7 +58,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading }) => 
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nome}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nomeMarca}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.marca.nome}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantidadeEstoque}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.custo) || ''}
