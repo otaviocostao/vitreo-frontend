@@ -18,6 +18,20 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading }) => {
     navigate(`/clientes/${clienteId}`);
   };
 
+  const formatarData = (data: string | null | undefined): string => {
+        if (!data) {
+            return '';
+        }
+        
+        const dateObj = new Date(`${data}T00:00:00`);
+
+        if (isNaN(dateObj.getTime())) {
+            return 'Data inválida';
+        }
+
+        return new Intl.DateTimeFormat('pt-BR').format(dateObj);
+    };
+
   return (
     <div className="bg-white border-1 border-gray-200 rounded-lg overflow-x-auto">
       <div className="max-h-[60vh] overflow-y-auto">
@@ -56,13 +70,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading }) => {
                     <tr key={client.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(client.id)}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.nomeCompleto}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.dataNascimento}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.telefone}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.logradouro}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.numero}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.bairro}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.cidade}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco.estado}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarData(client.dataNascimento)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.telefone || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.logradouro || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.numero || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.bairro || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.cidade || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.estado || ''}</td>
                     </tr>
                 ))
               )}
