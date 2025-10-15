@@ -20,9 +20,9 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
-      nome: '', sobrenome: '', cpf: '', rg: '', genero: '', nascimento: '', naturalidade: '',
+      nome: '', sobrenome: '', cpf: '', rg: '', genero: '', dataNascimento: '', naturalidade: '',
       logradouro: '', numero: '', bairro: '', complemento: '', cidade: '', estado: '', cep: '',
-      telefone: '', telSecundario: '', email: '',
+      telefone: '', telefoneSecundario: '', email: '',
       observacoes: '',
     });
 
@@ -48,23 +48,30 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
       setError(null);
 
       const cleanedCpf = formData.cpf.replace(/[^\d]/g, '');
-  
-      const clientePayload: ClientePayload = {
+      const cleanedRg = formData.rg.replace(/[^\d]/g, '');
+      const cleanedTelefone = formData.telefone.replace(/[^\d]/g, '');
+      
+        const clientePayload: ClientePayload = {
         nome: formData.nome,
         sobrenome: formData.sobrenome,
-        cpf: formData.cpf,
-        dataNascimento: formData.nascimento,
-        email: formData.email,
-        telefone: formData.telefone,
+        cpf: cleanedCpf || undefined,
+        rg: cleanedRg || undefined,
+        dataNascimento: formData.dataNascimento || undefined,
+        genero: formData.genero || undefined,
+        naturalidade: formData.naturalidade || undefined,
+        email: formData.email || undefined,
+        telefone: cleanedTelefone || undefined,
+        telefoneSecundario: formData.telefoneSecundario || undefined,
         endereco: {
-          logradouro: formData.logradouro,
-          numero: formData.numero,
-          bairro: formData.bairro,
-          complemento: formData.complemento,
-          cidade: formData.cidade,
-          estado: formData.estado,
-          cep: formData.cep,
+          logradouro: formData.logradouro || undefined,
+          numero: formData.numero || undefined,
+          bairro: formData.bairro || undefined,
+          complemento: formData.complemento || undefined,
+          cidade: formData.cidade || undefined,
+          estado: formData.estado || undefined,
+          cep: formData.cep || undefined,
         },
+        observacoes: formData.observacoes || undefined
       };
   
       try {
@@ -84,7 +91,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl text-gray-800"
       >
-        <h2 className="text-2xl font-bold mb-4 text-blue-600">Novo Cliente</h2>
+        <h2 className="text-2xl font-bold mb-4 text-blue-600">Cadastrar novo cliente</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
@@ -93,38 +100,37 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
                 <InputField label="Sobrenome *" name="sobrenome" value={formData.sobrenome} onChange={handleChange} className="md:col-span-12 lg:col-span-6" required />
                 <InputField label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} className="md:col-span-6 lg:col-span-3" />
                 <InputField label="RG" name="rg" value={formData.rg} onChange={handleChange} className="md:col-span-6 lg:col-span-3" />
-                <SelectField label="Gênero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }, { value: 'O', label: 'Outro' }]} className="md:col-span-4" />
-                <InputField label="Nascimento" name="nascimento" type="date" value={formData.nascimento} onChange={handleChange} className="md:col-span-4" />
+                <SelectField label="Gênero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-4" />
+                <InputField label="Nascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} className="md:col-span-3" />
                 <InputField label="Naturalidade" name="naturalidade" value={formData.naturalidade} onChange={handleChange} className="md:col-span-4" />
             </FormSection>
 
             <FormSection title="Endereço">
-                <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-4" />
                 <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-8" />
                 <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-3" />
-                <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-5" />
-                <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
+                <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-3" />
+                <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-3" />
                 <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
+                <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" />
                 <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
             </FormSection>
 
             <FormSection title="Informações de contato">
                 <InputField label="Telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} className="md:col-span-4"/>
-                <InputField label="Tel. secundário" name="telSecundario" type="tel" value={formData.telSecundario} onChange={handleChange} className="md:col-span-4" />
+                <InputField label="Tel. secundário" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} className="md:col-span-4" />
                 <InputField label="E-mail (opcional)" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-4" />
             </FormSection>
 
             <FormSection title="Informações adicionais">
-                <TextareaField label="Observações" name="observacoes" value={formData.observacoes} onChange={handleChange} className="md:col-span-8" id={''} />
+                <TextareaField label="Observações" name="observacoes" value={formData.observacoes} onChange={handleChange} className="md:col-span-11" id={''} />
             </FormSection>
           </div>
-          {/* Botões de Ação */}
           <div className="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-gray-200">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
                 Cancelar
             </Button>
             <Button type="submit" variant="primary" disabled={isLoading}>
-                {isLoading ? 'Salvando...' : 'Salvar'}
+                {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </div>
         </form>
