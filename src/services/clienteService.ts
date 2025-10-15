@@ -27,3 +27,23 @@ export const getClientes = async (page: number, size: number): Promise<Page<Clie
     throw error;
   }
 };
+
+export const getClienteById = async (id: string): Promise<ClienteResponse> => {
+  try {
+    const response = await api.get<ClienteResponse>(`/clientes/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao buscar cliente com ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updateCliente = async (id: string, data: ClientePayload): Promise<ClienteResponse> => {
+  try {
+    const response = await api.put<ClienteResponse>(`/clientes/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao atualizar cliente com ID ${id}:`, error);
+    throw error;
+  }
+};
