@@ -10,7 +10,7 @@ export interface ProdutoPayload {
   custo?: number;
   valorVenda: number;
   margemLucroPercentual?: number;
-  quantidadeEstoque: number;
+  quantidadeEstoque?: number;
   ativo?: boolean;
 
   cor?: string;
