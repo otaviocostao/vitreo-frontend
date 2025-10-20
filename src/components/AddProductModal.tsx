@@ -3,74 +3,65 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
+import type { FornecedorOption, MarcaOption, ProdutoPayload, TipoProduto } from '../types/produto';
+import { createProduct } from '../services/productService';
+import { getFornecedoresOptions } from '../services/fornecedorService';
+import { getMarcasOptions } from '../services/marcaService';
 
 type ProductType = 'LENTE' | 'ARMACAO';
-
-export interface NewProductFormData {
-  tipoProduto: ProductType;
-  fornecedorId: string;
-  marcaId: string;
-  nome: string;
-  referencia: string;
-  codigoBarras: string;
-  custo: number | '';
-  margemLucroPercentual: number | '';
-  quantidadeEstoque: number | '';
-  ativo: boolean;
-  cor: string;
-  materialArmacao: string;
-  tamanho: string;
-  materialLente: string;
-  tratamento: string;
-  tipoLente: string;
-}
 
 interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: NewProductFormData) => Promise<void>;
-  suppliers: { id: string; name: string }[]; 
-  brands: { id: string; name: string }[];
 }
 
-const initialFormData: NewProductFormData = {
-  tipoProduto: 'ARMACAO',
-  fornecedorId: '', marcaId: '', nome: '', referencia: '', codigoBarras: '',
-  custo: '', margemLucroPercentual: '', quantidadeEstoque: '', ativo: true,
-  cor: '', materialArmacao: '', tamanho: '',
-  materialLente: '', tratamento: '', tipoLente: '',
-};
-
-const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSubmit, suppliers, brands }) => {
-    const [formData, setFormData] = useState<NewProductFormData>(initialFormData);
+const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) => {
+    const [formData, setFormData] = useState({
+      tipoProduto: 'ARMACAO' as TipoProduto,
+      fornecedorId: '', marcaId: '', nome: '', referencia: '', codigoBarras: '',
+      custo: '', valorVenda: '', margemLucroPercentual: '', quantidadeEstoque: '', ativo: true,
+      cor: '', material: '', tamanho: '',
+      materialLente: '', tratamento: '', tipoLente: '',
+    });
+    
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const [fornecedores, setFornecedores] = useState<FornecedorOption[]>([]);
+    const [marcas, setMarcas] = useState<MarcaOption[]>([]);
+    
+    
     useEffect(() => {
-      if (isOpen) {
-        setFormData(initialFormData);
+      const loadPageData = async () => {
         setError(null);
+        
+        try{
+          const [fornecedoresData, marcasData] = await Promise.all([
+            getFornecedoresOptions(),
+            getMarcasOptions(),
+          ]);
+          setFormData(formData);
+          setFornecedores(fornecedoresData);
+          setMarcas(marcasData);
+        }catch (err) {
+        setError("Falha ao carregar os dados. Verifique a conexão e tente novamente.");
+        console.error(err);
+        }
       }
-    }, [isOpen]);
+      loadPageData();
+    }, []);
 
     if (!isOpen) return null;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const { name, value, type } = e.target;
-      const isCheckbox = type === 'checkbox';
-      // @ts-ignore
-      const isChecked = e.target.checked;
-
-      setFormData(prev => ({
-        ...prev,
-        [name]: isCheckbox ? isChecked : value,
-      }));
-    };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = e.target;
+        const checked = (e.target as HTMLInputElement).checked;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+      };
 
     const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newType = e.target.value as ProductType;
       setFormData({
-        ...initialFormData, 
+        ...formData, 
         tipoProduto: newType,
         fornecedorId: formData.fornecedorId,
         marcaId: formData.marcaId,
@@ -82,19 +73,41 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
       e.preventDefault();
       setIsLoading(true);
       setError(null);
+      
+      const productPayload: ProdutoPayload = {
+        tipoProduto: formData.tipoProduto,
+        fornecedorId: formData.fornecedorId,
+        marcaId: formData.marcaId || undefined,
+        nome: formData.nome,
+        referencia: formData.referencia,
+        codigoBarras: formData.codigoBarras,
+        custo: formData.custo ? parseFloat(formData.custo.replace(',', '.')) : 0,
+        valorVenda: formData.valorVenda ? parseFloat(formData.valorVenda.replace(',', '.')) : 0,
+        margemLucroPercentual: formData.margemLucroPercentual ? parseFloat(formData.margemLucroPercentual.replace(',', '.')) : 0,
+        quantidadeEstoque: formData.quantidadeEstoque ? parseInt(formData.quantidadeEstoque, 10) : 0,
+        ativo: formData.ativo,
+        cor: formData.cor,
+        material: formData.material,
+        tamanho: formData.tamanho,
+        materialLente: formData.materialLente,
+        tratamento: formData.tratamento,
+        tipoLente: formData.tipoLente,
+      };
+  
       try {
-        await onSubmit(formData);
+        await createProduct(productPayload);
         onClose();
-      } catch (err: any) {
-        setError(err.message || 'Ocorreu um erro ao salvar o produto.');
+      } catch (err) {
+        setError('Falha ao cadastrar o produto. Verifique os dados e tente novamente.');
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
 
     const productTypeOptions = [{ value: 'ARMACAO', label: 'Armação' }, { value: 'LENTE', label: 'Lente' }];
-    const supplierOptions = suppliers.map(s => ({ value: s.id, label: s.name }));
-    const brandOptions = brands.map(b => ({ value: b.id, label: b.name }));
+    const supplierOptions = fornecedores.map(f => ({ value: f.id, label: f.razaoSocial }));
+    const brandOptions = marcas.map(m => ({ value: m.id, label: m.nome }));
 
   return (
     <div onClick={onClose} className="fixed inset-0 p-4 bg-black/60 flex justify-center items-center z-50 backdrop-blur-sm">
@@ -118,7 +131,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <InputField label="Custo (R$)" name="custo" type="number" value={formData.custo} onChange={handleChange} placeholder="0.00" />
-                        <InputField label="Margem de Lucro (%)" name="margemLucroPercentual" type="number" value={formData.margemLucroPercentual} onChange={handleChange} placeholder="100" />
+                        <InputField label="Valor de venda (R$)" name="valorVenda" type="number" value={formData.valorVenda} onChange={handleChange} placeholder="0.00" />
                         <InputField label="Estoque Inicial *" name="quantidadeEstoque" type="number" value={formData.quantidadeEstoque} onChange={handleChange} placeholder="0" />
                     </div>
 
@@ -127,7 +140,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                             <h3 className="font-semibold text-gray-600">Detalhes da Armação</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <InputField label="Cor" name="cor" value={formData.cor} onChange={handleChange} placeholder="Preto, Dourado..." />
-                                <InputField label="Material" name="materialArmacao" value={formData.materialArmacao} onChange={handleChange} placeholder="Acetato, Metal..." />
+                                <InputField label="Material" name="material" value={formData.material} onChange={handleChange} placeholder="Acetato, Metal..." />
                                 <InputField label="Tamanho" name="tamanho" value={formData.tamanho} onChange={handleChange} placeholder="58-14-140" />
                             </div>
                         </div>
