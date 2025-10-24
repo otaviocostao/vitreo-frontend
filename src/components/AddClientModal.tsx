@@ -5,16 +5,17 @@ import TextareaField from './ui/TextareaField';
 import Button from './ui/Button';
 import SelectField from './ui/SelectField';
 import { createCliente } from '../services/clienteService';
-import type { ClientePayload } from '../types/cliente';
+import type { ClientePayload, ClienteResponse } from '../types/cliente';
 import ErrorPopup from './ErrorPopup';
 
 
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void; 
+  onSubmit: (cliente: ClienteResponse) => void;
 }
 
-const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
+const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubmit }) => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,30 +53,31 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose }) => {
       const cleanedTelefone = formData.telefone.replace(/[^\d]/g, '');
       
         const clientePayload: ClientePayload = {
-        nome: formData.nome,
-        sobrenome: formData.sobrenome,
-        cpf: cleanedCpf || undefined,
-        rg: cleanedRg || undefined,
-        dataNascimento: formData.dataNascimento || undefined,
-        genero: formData.genero || undefined,
-        naturalidade: formData.naturalidade || undefined,
-        email: formData.email || undefined,
-        telefone: cleanedTelefone || undefined,
-        telefoneSecundario: formData.telefoneSecundario || undefined,
-        endereco: {
-          logradouro: formData.logradouro || undefined,
-          numero: formData.numero || undefined,
-          bairro: formData.bairro || undefined,
-          complemento: formData.complemento || undefined,
-          cidade: formData.cidade || undefined,
-          estado: formData.estado || undefined,
-          cep: formData.cep || undefined,
-        },
-        observacoes: formData.observacoes || undefined
-      };
+          nome: formData.nome,
+          sobrenome: formData.sobrenome,
+          cpf: cleanedCpf || undefined,
+          rg: cleanedRg || undefined,
+          dataNascimento: formData.dataNascimento || undefined,
+          genero: formData.genero || undefined,
+          naturalidade: formData.naturalidade || undefined,
+          email: formData.email || undefined,
+          telefone: cleanedTelefone || undefined,
+          telefoneSecundario: formData.telefoneSecundario || undefined,
+          endereco: {
+            logradouro: formData.logradouro || undefined,
+            numero: formData.numero || undefined,
+            bairro: formData.bairro || undefined,
+            complemento: formData.complemento || undefined,
+            cidade: formData.cidade || undefined,
+            estado: formData.estado || undefined,
+            cep: formData.cep || undefined,
+          },
+          observacoes: formData.observacoes || undefined
+        };
   
       try {
-        await createCliente(clientePayload);
+        const novoCliente = await createCliente(clientePayload);
+        onSubmit(novoCliente)
         onClose();
       } catch (err) {
         setError('Falha ao cadastrar o cliente. Verifique os dados e tente novamente.');
