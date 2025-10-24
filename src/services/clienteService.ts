@@ -2,9 +2,16 @@ import type { ClientePayload, ClienteResponse } from '../types/cliente';
 import type { Page } from '../types/pagination';
 import api from './api';
 
+export interface ClienteFiltros {
+  nome?: string;
+  cpf?: string;
+  page?: number;
+  size?: number;
+}
+
 export const createCliente = async (clienteData: ClientePayload) => {
   try {
-    const response = await api.post('/clientes', clienteData);
+    const response = await api.post<ClienteResponse>('/clientes', clienteData);
     return response.data;
   } catch (error) {
     console.error("Erro ao criar cliente:", error);
@@ -12,13 +19,14 @@ export const createCliente = async (clienteData: ClientePayload) => {
   }
 };
 
-export const getClientes = async (page: number, size: number): Promise<Page<ClienteResponse>> => {
+export const getClientes = async (filtros: ClienteFiltros = {}): Promise<Page<ClienteResponse>> => {
   try {
     const response = await api.get<Page<ClienteResponse>>('/clientes', {
       params: {
-        page: page - 1,
-        size: size,
-        sort: 'nomeCompleto,asc'
+        page: filtros.page || 0,
+        size: filtros.size || 20,
+        nome: filtros.nome,
+        cpf: filtros.cpf,
       }
     });
     return response.data;
