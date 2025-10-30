@@ -3,25 +3,39 @@ import api from './api';
 
 import type { ProdutoPayload, ProdutoResponse } from '../types/produto';
 
+export interface ProdutoFiltros {
+  nome?: string;
+  tipo?: 'ARMACAO' | 'LENTE' | 'ACESSORIO';
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
 export const createProduct = async (data: ProdutoPayload) => {
   try {
-    const response = await api.post('/produtos', data);
-    return response.data;
+    const response = await api.post<ProdutoResponse>('/produtos', data);
+  
+    const produtoDaApi = response.data;
+    produtoDaApi.tipoProduto = data.tipoProduto;
+    
+    return produtoDaApi;
   } catch (error) {
     console.error("Erro ao criar produto:", error);
     throw error;
   }
 };
 
-export const getProducts = async (page: number, size: number): Promise<Page<ProdutoResponse>> => {
+export const getProducts = async (filtros: ProdutoFiltros = {}): Promise<Page<ProdutoResponse>> => {
+  const params = {
+    page: filtros.page || 0,
+    size: filtros.size || 10,
+    sort: filtros.sort || 'nome,asc',
+    nome: filtros.nome,
+    tipo: filtros.tipo,
+  };
+
   try {
-    const response = await api.get<Page<ProdutoResponse>>('/produtos', {
-      params: {
-        page: page - 1,
-        size: size,
-        sort: 'nome,asc'
-      }
-    });
+    const response = await api.get<Page<ProdutoResponse>>('/produtos', { params });
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
