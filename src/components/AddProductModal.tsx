@@ -3,21 +3,24 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
-import type { FornecedorOption, MarcaOption, ProdutoPayload, TipoProduto } from '../types/produto';
+import type { FornecedorOption, MarcaOption, ProdutoPayload, ProdutoResponse } from '../types/produto';
 import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/fornecedorService';
 import { getMarcasOptions } from '../services/marcaService';
+import ErrorPopup from './ErrorPopup';
 
 type ProductType = 'LENTE' | 'ARMACAO';
 
 interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSubmit: (produto: ProdutoResponse) => void;
+  initialType: ProductType;
 }
 
-const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) => {
+const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSubmit, initialType }) => {
     const [formData, setFormData] = useState({
-      tipoProduto: 'ARMACAO' as TipoProduto,
+      tipoProduto: initialType,
       fornecedorId: '', marcaId: '', nome: '', referencia: '', codigoBarras: '',
       custo: '', valorVenda: '', margemLucroPercentual: '', quantidadeEstoque: '', ativo: true,
       cor: '', material: '', tamanho: '',
@@ -95,7 +98,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) =>
       };
   
       try {
-        await createProduct(productPayload);
+        const novoProduto = await createProduct(productPayload);
+        onSubmit(novoProduto)
         onClose();
       } catch (err) {
         setError('Falha ao cadastrar o produto. Verifique os dados e tente novamente.');
@@ -118,7 +122,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) =>
             
             <form onSubmit={handleSubmit}>
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
-                    <SelectField label="Tipo do Produto" name="tipoProduto" value={formData.tipoProduto} onChange={handleTypeChange} options={productTypeOptions} />
+                    <SelectField label="Tipo do Produto" name="tipoProduto" value={formData.tipoProduto} onChange={handleTypeChange} options={productTypeOptions} disabled />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <SelectField label="Fornecedor *" name="fornecedorId" value={formData.fornecedorId} onChange={handleChange} options={supplierOptions} />
@@ -158,7 +162,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) =>
                     )}
                 </div>
 
-                {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
 
                 <div className="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-gray-200">
                     <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
@@ -170,6 +173,9 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose }) =>
                 </div>
             </form>
         </div>
+        {error && (
+        <ErrorPopup message={error} onClose={() => setError(null)} />
+      )}
     </div>
   )
 }
