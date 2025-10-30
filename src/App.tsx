@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home'
-import NovaVenda from './pages/NovaVenda'
 import SharedLayout from './components/SharedLayout'
 import ClientsPage from './pages/ClientsPage'
 import SalesPage from './pages/SalesPage'
@@ -11,6 +10,7 @@ import SettingsPage from './pages/SettingsPage'
 import RegisterProductPage from './pages/RegisterProductPage'
 import RegisterSupplierPage from './pages/RegisterSupplierPage'
 import RegisterClientPage from './pages/RegisterClientPage'
+import RegisterSellPage from './pages/RegisterSellPage'
 
 function App() {
 
@@ -28,7 +28,7 @@ function App() {
               />
           <Route
                 path="/vendas/nova"
-                element={<NovaVenda />}
+                element={<RegisterSellPage />}
               />
           <Route
                 path="/clientes"
