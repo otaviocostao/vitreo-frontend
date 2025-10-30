@@ -23,9 +23,9 @@ const InputField: React.FC<InputFieldProps> = ({ label, id, className, error, ..
         id={id}
 
         className={`
-          block w-full px-3 py-2 bg-white border rounded-md  
+          block w-full px-3 py-2 bg-white border rounded-sm 
           placeholder-gray-400 sm:text-sm
-          focus:outline-none focus:ring-1 
+          focus:outline-none focus:ring-0.5 
           transition duration-150 ease-in-out
           ${errorClasses}
         `}
