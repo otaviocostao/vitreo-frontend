@@ -14,10 +14,10 @@ export interface ReceituarioPayload {
   centroOpticoOe?: number;
   anguloMaior?: number;
   ponteAro?: number;
-  anguloVertical: number;
+  anguloVertical?: number;
   nomeMedico?: string;
   crmMedico?: string;
-  dataReceita: string;
+  dataReceita?: string;
 }
 
 export interface ReceituarioResponse {
