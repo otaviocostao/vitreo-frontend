@@ -1,28 +1,70 @@
 import TextareaField from './ui/TextareaField';
 import InputField from './ui/InputField';
-import { PlusCircle } from 'lucide-react';
-import { useState } from 'react';
-import AddProductModal, { type NewProductFormData } from './AddProductModal';
-import InputWithButton from './ui/InputWithButton';
+import type { ReceituarioPayload } from '../types/receituario';
+import type { ItemPedidoPayload, PagamentoPayload } from '../types/pedido';
+import type { ProdutoResponse } from '../types/produto';
+import type { ClienteResponse } from '../types/cliente';
+import ProductSearch from './ProductSearch';
 
-function ReceituarioInfoArea() {
+interface VendaFormData {
+    cliente: ClienteResponse | null;
+    receituario: ReceituarioPayload;
+    itens: ItemPedidoPayload[];
+    pagamentos: PagamentoPayload[];
+    ordemServico: string;
+    dataPedido: string;
+    dataPrevisaoEntrega: string;
+    dataEntrega: string;
+    desconto: string;
+}
 
-  const[isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [saleData, setSaleData] = useState({ ref_armacao: '', lentes: '' });
+interface ReceituarioInfoAreaProps {
+  receituarioData: Partial<ReceituarioPayload>;
+  pedidoData: Partial<VendaFormData>;
+  itens: ItemPedidoPayload[];
+  onReceituarioChange: (data: Partial<ReceituarioPayload>) => void;
+  onPedidoChange: (data: Partial<VendaFormData>) => void;
+  produtosDisponiveis: ProdutoResponse[]; 
+  onArmacaoSelect: (produto: ProdutoResponse | null) => void;
+  onLenteSelect: (produto: ProdutoResponse | null) => void;
+  onOpenProductModal: (tipo: 'ARMACAO' | 'LENTE') => void;
+}
 
-  const handleOpenAddModal = () => setIsAddModalOpen(true);
+const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
+    receituarioData,
+    pedidoData,
+    itens,
+    onReceituarioChange,
+    onPedidoChange,
+    produtosDisponiveis,
+    onArmacaoSelect,
+    onLenteSelect,
+    onOpenProductModal
+  }) => {
 
-  const handleCloseAddModal = () => setIsAddModalOpen(false);
+  const armacaoItem = itens.find(item => 
+    produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
+  );
 
-  const handleProductCreated = (newProduct: NewProductFormData) => {
-    console.log('Produto criado no modal:', newProduct);
-    setSaleData(prev => ({ ...prev, ref_armacao: newProduct.referencia || newProduct.nome }));
-  };
+  const armacaoSelecionada = armacaoItem 
+    ? produtosDisponiveis.find(p => p.id === armacaoItem.produtoId) 
+    : null;
 
-  const handleProductSubmit = async (data: NewProductFormData) => {
-    console.log("Enviando para a API:", data);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    handleProductCreated(data);
+  const nomeMarcaArmacao = armacaoSelecionada ? armacaoSelecionada.marca.nome : '';
+  
+  const lentesItens = itens.find(item => 
+    produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
+  );
+
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'nomeMedico' || name === 'crmMedico' || name === 'dataReceita') {
+      onReceituarioChange({ [name]: value });
+    } else {
+      onPedidoChange({ [name]: value });
+    }
   };
 
 
@@ -33,60 +75,67 @@ function ReceituarioInfoArea() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
 
         <InputField
-          id="medico"
-          name="medico"
+          id="nomeMedico"
+          name="nomeMedico"
           label="Médico:"
-          placeholder="Dr. Nome Sobrenome"
+          placeholder="Dr. "
+          value={receituarioData.nomeMedico || ''}
+          onChange={handleChange}
         />
         
-        <InputWithButton
-          label="Lentes:"
-          id="lentes"
-          name="lentes"
-          placeholder="Busque ou cadastre as lentes..."
-          value={saleData.lentes}
-          onChange={(e) => setSaleData(prev => ({ ...prev, lentes: e.target.value }))}
-          onButtonClick={handleOpenAddModal}
-          buttonIcon={<PlusCircle size={20} />}
-        />
+
+      <ProductSearch
+        label="Lentes"
+        tipo="LENTE"
+        selectedProductId={lentesItens?.produtoId}
+        produtosDisponiveis={produtosDisponiveis}
+        onProductSelect={onLenteSelect}
+        onOpenProductModal={() => onOpenProductModal('LENTE')}
+      />
 
         <InputField
           id="marca_armacao"
           name="marca_armacao"
+          value={nomeMarcaArmacao}
           label="Marca da armação:"
-          placeholder="Busque a marca da armação..."
+          placeholder="Marca da armação..."
+          readOnly
         />
 
-        <InputWithButton
-          label="Referência da armação:"
-          id="ref_armacao"
-          name="ref_armacao"
-          placeholder="Busque ou cadastre a referência..."
-          value={saleData.ref_armacao}
-          onChange={(e) => setSaleData(prev => ({ ...prev, ref_armacao: e.target.value }))}
-          onButtonClick={handleOpenAddModal}
-          buttonIcon={<PlusCircle size={20} />}
+        <ProductSearch
+          label="Armação"
+          tipo="ARMACAO"
+          selectedProductId={armacaoItem?.produtoId}
+          produtosDisponiveis={produtosDisponiveis}
+          onProductSelect={onArmacaoSelect}
+          onOpenProductModal={() => onOpenProductModal('ARMACAO')}
         />
-
+      
         <div className="md:col-span-2 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
             <InputField
-              id="data_pedido"
-              name="data_pedido"
-              label="Data do pedido"
+              id="dataReceita"
+              name="dataReceita"
+              label="Data da Receita"
               type="date"
+              value={(receituarioData as any).dataReceita || ''}
+              onChange={handleChange}
             />
             <InputField
-              id="previsao_entrega"
-              name="previsao_entrega"
-              label="Previsão de entrega"
+              id="dataPrevisaoEntrega"
+              name="dataPrevisaoEntrega"
+              label="Previsão de Entrega"
               type="date"
+              value={(pedidoData as any).dataPrevisaoEntrega || ''}
+              onChange={handleChange}
             />
             <InputField
               id="data_entrega"
               name="data_entrega"
-              label="Data de entrega"
+              label="Data de Entrega"
               type="date"
+              value={(pedidoData as any).dataEntrega || ''}
+              readOnly  
             />
           </div>
         </div>
@@ -97,12 +146,11 @@ function ReceituarioInfoArea() {
             name="observacoes"
             label="Observações:"
             placeholder="Observações sobre o pedido..."
+            value={(pedidoData as any).observacoes || ''}
+            onChange={handleChange}
           />
         </div>
       </div>
-      <AddProductModal isOpen={isAddModalOpen} onClose={handleCloseAddModal} onSubmit={function (data: NewProductFormData): Promise<void> {
-              throw new Error('Function not implemented.');
-          } } suppliers={[]} brands={[]} />
     </div>
   );
 }
