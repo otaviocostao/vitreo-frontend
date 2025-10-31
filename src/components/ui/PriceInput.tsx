@@ -15,7 +15,7 @@ const PriceInput: React.FC<PriceInputProps> = ({ label, id, containerClassName, 
       <input
         id={id}
         className={cn(
-          'block w-28 px-3 py-1.5 bg-white border border-gray-300 rounded-md',
+          'block w-28 px-3 py-1.5 bg-white border border-gray-300 rounded-sm',
           'placeholder-gray-400 text-sm',
           'focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500',
           'transition duration-150 ease-in-out'
