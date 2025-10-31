@@ -27,13 +27,14 @@ interface VendaFormData {
     dataPedido: string;
     dataPrevisaoEntrega: string;
     dataEntrega: string;
-    dataReceita: string;
-    desconto: string;
+    desconto: number;
+    valorLentes: number;
+    valorArmacao: number;
 }
 
 const initialFormData = {
     cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '', dataReceita: '',
-    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: ''
+    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0
 }
 
 function RegisterSellPage() {
@@ -57,6 +58,14 @@ function RegisterSellPage() {
     const handlePagamentosChange = (novosPagamentos: PagamentoPayload[]) => {
         setVenda(prev => ({ ...prev, pagamentos: novosPagamentos }));
     };
+
+    const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
+        const nomeDaPropriedade = campo === 'desconto'
+        ? 'desconto'
+        : `valor${campo.charAt(0).toUpperCase() + campo.slice(1)}`;
+
+        setVenda(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
+    };
     
     const handleClienteSelect = (cliente: ClienteResponse | null) => {
         setVenda(prev => ({ ...prev, cliente }));
@@ -70,7 +79,6 @@ function RegisterSellPage() {
     };
 
     const handleProductSubmit = (novoProduto: ProdutoResponse) => {
-        console.log("1. PRODUTO CRIADO RECEBIDO DO MODAL:", novoProduto);
 
 
         if (!novoProduto || !novoProduto.id || !novoProduto.tipoProduto) {
@@ -81,18 +89,14 @@ function RegisterSellPage() {
 
         setProdutosDisponiveis(prev => {
             const novaLista = [novoProduto, ...prev];
-            console.log("2. ATUALIZANDO 'produtosDisponiveis'. Nova lista contém o produto?", novaLista.some(p => p.id === novoProduto.id));
             return novaLista;
         });
 
-
         if (novoProduto.tipoProduto === 'LENTE') {
-            console.log("3. CHAMANDO handleLenteSelect");
             handleLenteSelect(novoProduto);
         }
 
         if (novoProduto.tipoProduto === 'ARMACAO') {
-            console.log("3. CHAMANDO handleArmacaoSelect");
             handleArmacaoSelect(novoProduto);
         }
 
@@ -119,7 +123,7 @@ function RegisterSellPage() {
         const pedidoPayload: PedidoPayload = {
             clienteId: venda.cliente.id,
             receituario: Object.keys(venda.receituario).length > 0 ? 
-                {
+            {
                 ...venda.receituario,
                 esfericoOd: parseCurrency(venda.receituario.esfericoOd),
                 cilindricoOd: parseCurrency(venda.receituario.cilindricoOd),
@@ -143,15 +147,18 @@ function RegisterSellPage() {
                 quantidade: item.quantidade,
             })),
             pagamentos: venda.pagamentos.map(p => ({
-                ...p,
-                valorPago: parseCurrency(p.valorPago) || 0,
+                formaPagamento: p.formaPagamento,
+                valorPago: p.valorPago,
+                numeroParcelas: p.numeroParcelas,
             })),
             desconto: parseCurrency(venda.desconto),
+            valorLentes: parseCurrency(venda.valorLentes),
+            valorArmacao: parseCurrency(venda.valorArmacao),
             dataPrevisaoEntrega: venda.dataPrevisaoEntrega || undefined,
             ordemServico: venda.ordemServico ? parseInt(venda.ordemServico) : undefined,
         };
 
-        console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
+        // console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
 
         try {
             await createPedido(pedidoPayload);
@@ -188,48 +195,50 @@ function RegisterSellPage() {
 
 
     const handleArmacaoSelect = (produto: ProdutoResponse | null) => {
-        const armacaoAtualId = venda.itens.find(item => 
-            produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
-        )?.produtoId;
+        setVenda(prev => {
+            const armacaoAtualId = prev.itens.find(item => 
+                produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
+            )?.produtoId;
 
-        const outrosItens = armacaoAtualId 
-            ? venda.itens.filter(item => item.produtoId !== armacaoAtualId) 
-            : venda.itens;
+            const outrosItens = armacaoAtualId 
+                ? prev.itens.filter(item => item.produtoId !== armacaoAtualId) 
+                : prev.itens;
+            
+            let novosItens = outrosItens;
+            if (produto) {
+                novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
+            }
 
-        if (produto) {
-            setVenda(prev => ({ 
-                ...prev, 
-                itens: [...outrosItens, { produtoId: produto.id, quantidade: 1 }] 
-            }));
-        } else {
-            setVenda(prev => ({ ...prev, itens: outrosItens }));
-        }
+            return {
+                ...prev,
+                itens: novosItens,
+                valorArmacao: produto ? produto.valorVenda : 0
+            }
+        });
     };
 
 
      const handleLenteSelect = (produto: ProdutoResponse | null) => {
-        const lenteAtualId = venda.itens.find(item => 
-            produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
-        )?.produtoId;
+         setVenda(prev => {
+            const lenteAtualId = prev.itens.find(item => 
+                produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
+            )?.produtoId;
 
-        const outrosItens = lenteAtualId 
-            ? venda.itens.filter(item => item.produtoId !== lenteAtualId) 
-            : venda.itens;
-        if (produto) {
-            setVenda(prev => ({ 
-                ...prev, 
-                itens: [...outrosItens, { produtoId: produto.id, quantidade: 1 }] 
-            }));
-        } else {
-            setVenda(prev => ({ ...prev, itens: outrosItens }));
-        }
-    };
+            const outrosItens = lenteAtualId 
+                ? prev.itens.filter(item => item.produtoId !== lenteAtualId) 
+                : prev.itens;
+            
+            let novosItens = outrosItens;
+            if (produto) {
+                novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
+            }
 
-    const handleRemoveItem = (produtoId: string) => {
-        setVenda(prev => ({ 
-            ...prev, 
-            itens: prev.itens.filter(item => item.produtoId !== produtoId) 
-        }));
+            return {
+                ...prev,
+                itens: novosItens,
+                valorLentes: produto ? produto.valorVenda : 0
+            }
+        });
     };
 
     const handleOpenProductModal = (tipo: 'ARMACAO' | 'LENTE') => {
@@ -245,8 +254,6 @@ function RegisterSellPage() {
         <HeaderTitlePage page_name="Nova venda"/>
         <div className="w-full flex flex-1 flex-col px-4 box-border">
             <form onSubmit={handleSubmit}>
-
-                {/* Div para Cliente e ordem de servico */}
                 <div className="flex divide-x divide-gray-200 border-y border-gray-200">
                     <InfoSection title="Cliente" className="w-2/3">
                         <ClienteSearch
@@ -260,19 +267,18 @@ function RegisterSellPage() {
                         <div className="flex items-end"> 
                             <InputField
                                 id="os-number"
-                                type="text"
+                                type="number"
                                 name="ordemServico"
                                 placeholder="O.S"
                                 className="w-24"
                                 labelClassName="sr-only"
                                 value={venda.ordemServico}
                                 onChange={handleFormChange}
-                                />
+                            />
                         </div>
                     </InfoSection>
                 </div>
                 <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
-                    {/* Receituario e medidas */}
                     <div className="flex flex-col w-2/3 " >
                         <ReceituarioMedidas  data={venda.receituario} onChange={handleReceituarioChange} />
                         <ReceituarioInfoArea 
@@ -287,7 +293,15 @@ function RegisterSellPage() {
                                 onOpenProductModal={handleOpenProductModal}/>
                     </div>
                     <div className="flex flex-col w-1/3">
-                        <VendaPagamento />
+                        <VendaPagamento 
+                            valorLentes={venda.valorLentes}
+                        valorArmacao={venda.valorArmacao}
+                        desconto={venda.desconto}
+                        pagamentos={venda.pagamentos}
+                        onValorChange={handleValorChange}
+                        onPagamentosChange={handlePagamentosChange}
+                        onError={setError} 
+                        />
                     </div>
                 </div>
                     <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/" textButton2='Finalizar Venda' />
