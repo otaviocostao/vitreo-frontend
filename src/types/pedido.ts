@@ -6,11 +6,13 @@ export interface ItemPedidoPayload {
 }
 
 export interface PagamentoPayload {
-  pedidoId: string;
-  formaPagamento: 'DINHEIRO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'PIX' | 'PRAZO' | 'TRANSFERENCIA_BANCARIA';
+  id: number,
+  formaPagamento: 'DINHEIRO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'PIX' | 'PRAZO' | 'PENDENTE';
   valorPago: number;
-  numeroParcelas?: number;
+  numeroParcelas: number;
 }
+
+export type PagamentoCreatePayload = Omit<PagamentoPayload, 'id'>;
 
 export interface PedidoPayload {
   clienteId: string;
@@ -20,6 +22,8 @@ export interface PedidoPayload {
   dataPedido?: string;
   dataPrevisaoEntrega?: string;
   dataEntrega?: string;
+  valorLentes?: number;
+  valorArmacao?: number;
   desconto?: number;
-  pagamentos?: PagamentoPayload[];
+  pagamentos?: PagamentoCreatePayload[];
 }
