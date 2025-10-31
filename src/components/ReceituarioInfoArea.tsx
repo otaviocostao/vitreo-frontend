@@ -15,7 +15,9 @@ interface VendaFormData {
     dataPedido: string;
     dataPrevisaoEntrega: string;
     dataEntrega: string;
-    desconto: string;
+    desconto: number;
+    valorLentes: number;
+    valorArmacao: number;
 }
 
 interface ReceituarioInfoAreaProps {
