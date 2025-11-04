@@ -32,3 +32,8 @@ export interface ClienteResponse {
   endereco: EnderecoResponse;
   observacoes: string;
 }
+
+export interface ClienteSimplificadoDTO {
+  id: string;
+  nomeCompleto: string;
+}
