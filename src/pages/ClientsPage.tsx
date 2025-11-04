@@ -13,8 +13,6 @@ import type { ClienteResponse } from '../types/cliente';
 import { getClientes } from '../services/clienteService';
 import ErrorPopup from '../components/ErrorPopup';
 
-const CLIENTS_PER_PAGE = 20;
-
 const ClientsPage = () => {
 
   const [clients, setClients] = useState<ClienteResponse[]>([]);
@@ -23,12 +21,14 @@ const ClientsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
+  const pageSize = 20;
 
   const fetchClients = useCallback(async (page: number) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getClientes(page, CLIENTS_PER_PAGE);
+      const pageIndex = page - 1; 
+      const data = await getClientes({page: pageIndex, size: pageSize});
       setClients(data.content);
       setPageInfo(data);
       setCurrentPage(page);
