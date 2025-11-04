@@ -1,7 +1,15 @@
+import type { ClienteSimplificadoDTO } from "./cliente";
 import type { ReceituarioPayload } from "./receituario";
 
 export interface ItemPedidoPayload {
   produtoId: string;
+  quantidade: number;
+}
+
+export interface ItemPedidoResponse {
+  produtoId: string;
+  nomeProduto: string;
+  tipoProduto: 'LENTE' | 'ARMACAO';
   quantidade: number;
 }
 
@@ -27,3 +35,23 @@ export interface PedidoPayload {
   desconto?: number;
   pagamentos?: PagamentoCreatePayload[];
 }
+
+export interface PedidoResponse {
+  id: string;
+  cliente: ClienteSimplificadoDTO;
+  receituario: ReceituarioPayload;
+  status: StatusPedido;
+  ordemServico: number;
+  itens: ItemPedidoResponse[];
+  dataPedido: string;
+  dataPrevisaoEntrega: string;
+  dataEntrega: string;
+  valorLentes: number;
+  valorArmacao: number;
+  valorTotal: number;
+  valorFinal: number;
+  desconto: number;
+  pagamentos: PagamentoCreatePayload[];
+}
+
+export type StatusPedido = 'ORCAMENTO' | 'SOLICITADO' | 'EM_PRODUCAO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO';
