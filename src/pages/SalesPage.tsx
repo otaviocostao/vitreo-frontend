@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
@@ -6,41 +6,46 @@ import Button from '../components/ui/Button';
 
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
-import SalesTable, { type Sale } from '../components/SalesTable';
+import SalesTable from '../components/SalesTable';
 import { NavLink } from 'react-router-dom';
-
-const mockSales: Sale[] = [
-  { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
-  { id: 2, os: 102, name: 'Maria Oliveira', saleDate: '02/08/2023', deliveryDate: '12/08/2023', lens: 'Zeiss', frame: 'Oakley', value: 980.50, status: 'Em Produção' },
-  { id: 3, os: 103, name: 'Carlos Pereira', saleDate: '03/08/2023', deliveryDate: '15/08/2023', lens: 'Hoya', frame: 'Prada', value: 2100.00, status: 'Solicitado' },
-  { id: 4, os: 104, name: 'Ana Costa', saleDate: '04/08/2023', deliveryDate: '14/08/2023', lens: 'Essilor', frame: 'Vogue', value: 750.00, status: 'Cancelado' },
-  { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
-  { id: 2, os: 102, name: 'Maria Oliveira', saleDate: '02/08/2023', deliveryDate: '12/08/2023', lens: 'Zeiss', frame: 'Oakley', value: 980.50, status: 'Em Produção' },
-  { id: 3, os: 103, name: 'Carlos Pereira', saleDate: '03/08/2023', deliveryDate: '15/08/2023', lens: 'Hoya', frame: 'Prada', value: 2100.00, status: 'Solicitado' },
-  { id: 4, os: 104, name: 'Ana Costa', saleDate: '04/08/2023', deliveryDate: '14/08/2023', lens: 'Essilor', frame: 'Vogue', value: 750.00, status: 'Cancelado' },
-  { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
-  { id: 2, os: 102, name: 'Maria Oliveira', saleDate: '02/08/2023', deliveryDate: '12/08/2023', lens: 'Zeiss', frame: 'Oakley', value: 980.50, status: 'Em Produção' },
-  { id: 3, os: 103, name: 'Carlos Pereira', saleDate: '03/08/2023', deliveryDate: '15/08/2023', lens: 'Hoya', frame: 'Prada', value: 2100.00, status: 'Solicitado' },
-  { id: 4, os: 104, name: 'Ana Costa', saleDate: '04/08/2023', deliveryDate: '14/08/2023', lens: 'Essilor', frame: 'Vogue', value: 750.00, status: 'Cancelado' },
-  { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
-  { id: 2, os: 102, name: 'Maria Oliveira', saleDate: '02/08/2023', deliveryDate: '12/08/2023', lens: 'Zeiss', frame: 'Oakley', value: 980.50, status: 'Em Produção' },
-  { id: 3, os: 103, name: 'Carlos Pereira', saleDate: '03/08/2023', deliveryDate: '15/08/2023', lens: 'Hoya', frame: 'Prada', value: 2100.00, status: 'Solicitado' },
-  { id: 4, os: 104, name: 'Ana Costa', saleDate: '04/08/2023', deliveryDate: '14/08/2023', lens: 'Essilor', frame: 'Vogue', value: 750.00, status: 'Cancelado' },
-  { id: 1, os: 101, name: 'João da Silva', saleDate: '01/08/2023', deliveryDate: '10/08/2023', lens: 'Varilux', frame: 'Ray-Ban', value: 1250.00, status: 'Entregue' },
-  { id: 2, os: 102, name: 'Maria Oliveira', saleDate: '02/08/2023', deliveryDate: '12/08/2023', lens: 'Zeiss', frame: 'Oakley', value: 980.50, status: 'Em Produção' },
-  { id: 3, os: 103, name: 'Carlos Pereira', saleDate: '03/08/2023', deliveryDate: '15/08/2023', lens: 'Hoya', frame: 'Prada', value: 2100.00, status: 'Solicitado' },
-  { id: 4, os: 104, name: 'Ana Costa', saleDate: '04/08/2023', deliveryDate: '14/08/2023', lens: 'Essilor', frame: 'Vogue', value: 750.00, status: 'Cancelado' },
-];
+import type { PedidoResponse } from '../types/pedido';
+import type { Page } from '../types/pagination';
+import { getPedidos } from '../services/pedidoService';
+import ErrorPopup from '../components/ErrorPopup';
 
 const SalesPage = () => {
-  const [sales, setSales] = useState<Sale[]>(mockSales);
+  const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
+  const [pageInfo, setPageInfo] = useState<Page<PedidoResponse> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5
+  const totalPages = pageInfo ? pageInfo.totalPages : 1;
+  const pageSize = 20;
 
-  const handlePageChange = (page: number) => {
-    console.log(`Buscando dados para a página ${page}...`);
-    setCurrentPage(page);
-  };
+  const fetchPedidos = useCallback(async (page: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const pageIndex = page - 1; 
+      const data = await getPedidos({page: pageIndex, size: pageSize});
+      setPedidos(data.content);
+      setPageInfo(data);
+      setCurrentPage(page);
+    } catch (err) {
+      setError('Falha ao carregar pedidos.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+    
+    useEffect(() => {
+        fetchPedidos(currentPage);
+    }, [fetchPedidos, currentPage]);
+        
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -81,8 +86,14 @@ const SalesPage = () => {
                     </div>
                 </div>
             </div>
-        <SalesTable sales={sales} />
+        <SalesTable pedidos={pedidos} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} />
         </div>
+        {error && (
+        <ErrorPopup
+          message={error}
+          onClose={() => setError(null)} 
+        />
+      )}
     </div>
   );
 };
