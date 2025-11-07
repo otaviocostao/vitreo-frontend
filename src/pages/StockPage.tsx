@@ -13,7 +13,6 @@ import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 
-const PRODUCTS_PER_PAGE = 20;
 
 const StockPage = () => {
   const [products, setProducts] = useState<ProdutoResponse[]>([]);
@@ -22,13 +21,15 @@ const StockPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
+  const pageSize = 20;
 
   const fetchProdutos = useCallback(async(page:number) => {
     setIsLoading(true);
     setError(null);
 
     try{
-        const data = await getProducts(page, PRODUCTS_PER_PAGE);
+        const pageIndex = page - 1; 
+        const data = await getProducts({page: pageIndex, size: pageSize});
         setProducts(data.content);
         setPageInfo(data);
         setCurrentPage(page);
@@ -89,7 +90,7 @@ const StockPage = () => {
                     </div>
                 </div>
             </div>
-        <ProductsTable product={products} isLoading={isLoading} />
+        <ProductsTable product={products} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize}/>
         </div>
         {error && (
         <ErrorPopup
