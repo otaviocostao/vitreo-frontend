@@ -13,7 +13,6 @@ import type { Page } from '../types/pagination';
 import { getFornecedores } from '../services/fornecedorService';
 import ErrorPopup from '../components/ErrorPopup';
 
-const PRODUCTS_PER_PAGE = 20;
 
 const SuppliersPage = () => {
   const [fornecedores, setFornecedores] = useState<FornecedorResponse[]>([]);
@@ -22,13 +21,15 @@ const SuppliersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
+  const pageSize = 20;
 
   const fetchFornecedores = useCallback(async(page:number) => {
       setIsLoading(true);
       setError(null);
   
       try{
-          const data = await getFornecedores(page, PRODUCTS_PER_PAGE);
+        const pageIndex = page - 1; 
+          const data = await getFornecedores(pageIndex, pageSize);
           setFornecedores(data.content);
           setPageInfo(data);
           setCurrentPage(page);
@@ -87,7 +88,7 @@ const SuppliersPage = () => {
                     </div>
                 </div>
             </div>
-        <SuppliersTable fornecedores={fornecedores} isLoading={isLoading} />
+        <SuppliersTable fornecedores={fornecedores} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize}/>
         </div>
         {error && (
         <ErrorPopup

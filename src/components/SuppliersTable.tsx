@@ -6,9 +6,11 @@ import LoadingSpinner from './LoadingSpinner';
 interface SuppliersTableProps {
   fornecedores: FornecedorResponse[];
   isLoading: boolean;
+  currentPage: number;
+  pageSize: number;
 }
 
-const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading }) => {
+const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading, currentPage, pageSize }) => {
   const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
     
   const navigate = useNavigate();
@@ -51,7 +53,9 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
                 </td>
               </tr>
             ) : (
-              fornecedores.map((fornecedor, i) => (
+              fornecedores.map((fornecedor, i) => {
+                const rowNumber = (currentPage - 1) * pageSize + i + 1;
+                return(
                   <tr key={fornecedor.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(fornecedor.id)}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.razaoSocial}</td>
@@ -63,7 +67,8 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.cidade}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.estado}</td>
                   </tr>
-              )))
+                )}
+              ))
             }
             </tbody>
         </table>
