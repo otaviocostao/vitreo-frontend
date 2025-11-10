@@ -8,10 +8,11 @@ import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import ProductsTable from '../components/ProductsTable';
 import type { ProdutoResponse } from '../types/produto';
-import { getProducts } from '../services/productService';
+import { deleteProductById, getProducts } from '../services/productService';
 import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
+import PopupModal from '../components/ui/ModalPopup';
 
 
 const StockPage = () => {
@@ -22,6 +23,9 @@ const StockPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
   const pageSize = 20;
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const fetchProdutos = useCallback(async(page:number) => {
     setIsLoading(true);
@@ -47,6 +51,30 @@ const StockPage = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleOpenDeleteModal = (productId: string) => {
+    setProductToDelete(productId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setProductToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) return;
+
+    try {
+      await deleteProductById(productToDelete);
+      handleCloseDeleteModal();
+      fetchProdutos(currentPage); 
+    } catch (err) {
+      setError('Falha ao deletar o produto.');
+      console.error(err);
+      handleCloseDeleteModal();
+    }
   };
 
 
@@ -90,8 +118,21 @@ const StockPage = () => {
                     </div>
                 </div>
             </div>
-        <ProductsTable product={products} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize}/>
+        <ProductsTable 
+          product={products} 
+          isLoading={isLoading} 
+          currentPage={currentPage} 
+          pageSize={pageSize}
+          onDeleteClick={handleOpenDeleteModal} 
+          />
         </div>
+        <PopupModal 
+            isOpen={isDeleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onConfirm={handleConfirmDelete}
+            title="Confirmar Exclusão"
+            message="Tem certeza que deseja deletar este produto? Esta ação não pode ser desfeita."
+        />
         {error && (
         <ErrorPopup
           message={error}

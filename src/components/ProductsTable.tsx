@@ -1,16 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import type { ProdutoResponse } from '../types/produto';
 import LoadingSpinner from './LoadingSpinner';
+import Button from './ui/Button';
+import { Trash2 } from 'lucide-react';
 
 interface ProductsTableProps {
   product: ProdutoResponse[];
   isLoading: boolean;
   currentPage: number;
   pageSize: number;
+  onDeleteClick: (productId: string) => void;
 }
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, currentPage, pageSize }) => {
-  const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor'];
+const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, currentPage, pageSize, onDeleteClick }) => {
+  const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor', ''];
   const navigate = useNavigate();
 
   const handleRowClick = (productId: string) => {
@@ -70,6 +73,17 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, curre
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margemLucroPercentual}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.valorVenda)}
+                    </td>
+                    <td>
+                      <Button 
+                        variant="smallDelete" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteClick(product.id); 
+                        }}
+                        >
+                        <Trash2 className="w-4 h-4 text-gray-700" />
+                      </Button>
                     </td>
                   </tr>
                 );
