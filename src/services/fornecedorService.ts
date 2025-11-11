@@ -80,3 +80,13 @@ export const dissociateMarca = async (fornecedorId: string, marcaId: string): Pr
     throw error;
   }
 };
+
+export const deleteFornecedorById = async (id: string): Promise<void> => {
+  try {
+    console.log("deletando fornecedor com id", id)
+    await api.delete(`/fornecedores/${id}`);
+  } catch (error) {
+    console.error(`Erro ao deletar fornecedor com ID ${id}:`, error);
+    throw error;
+  }
+};
