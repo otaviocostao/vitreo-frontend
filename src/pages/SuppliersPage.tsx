@@ -10,8 +10,9 @@ import { NavLink } from 'react-router-dom';
 import SuppliersTable from '../components/SuppliersTable';
 import type { FornecedorResponse } from '../types/fornecedor';
 import type { Page } from '../types/pagination';
-import { getFornecedores } from '../services/fornecedorService';
+import { deleteFornecedorById, getFornecedores } from '../services/fornecedorService';
 import ErrorPopup from '../components/ErrorPopup';
+import PopupModal from '../components/ui/ModalPopup';
 
 
 const SuppliersPage = () => {
@@ -22,6 +23,11 @@ const SuppliersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
   const pageSize = 20;
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
+  const [nomefornecedorToDelete, setNomeFornecedorToDelete] = useState<string | null>(null);
+
 
   const fetchFornecedores = useCallback(async(page:number) => {
       setIsLoading(true);
@@ -47,6 +53,32 @@ const SuppliersPage = () => {
   
     const handlePageChange = (page: number) => {
       setCurrentPage(page);
+    };
+
+  const handleOpenDeleteModal = (productId: string, nomeFornecedor: string) => {
+    setFornecedorToDelete(productId);
+    setNomeFornecedorToDelete(nomeFornecedor);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setFornecedorToDelete(null);
+    setNomeFornecedorToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+      if (!fornecedorToDelete) return;
+  
+      try {
+        await deleteFornecedorById(fornecedorToDelete);
+        handleCloseDeleteModal();
+        fetchFornecedores(currentPage); 
+      } catch (err) {
+        setError('Falha ao deletar o fornecedor.');
+        console.error(err);
+        handleCloseDeleteModal();
+      }
     };
 
   return (
@@ -88,8 +120,16 @@ const SuppliersPage = () => {
                     </div>
                 </div>
             </div>
-        <SuppliersTable fornecedores={fornecedores} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize}/>
+        <SuppliersTable fornecedores={fornecedores} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} onDeleteClick={handleOpenDeleteModal}/>
         </div>
+        <PopupModal 
+            isOpen={isDeleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onConfirm={handleConfirmDelete}
+            title="Confirmar Exclusão"
+            message="Tem certeza que deseja deletar o fornecedor "
+            itemName={nomefornecedorToDelete}
+        />
         {error && (
         <ErrorPopup
           message={error}
