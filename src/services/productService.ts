@@ -65,7 +65,6 @@ export const updateProduct = async (id: string, data: ProdutoPayload): Promise<P
 
 export const deleteProductById = async (id: string): Promise<void> => {
   try {
-    console.log("deletando produto com id", id)
     await api.delete(`/produtos/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar produto com ID ${id}:`, error);
