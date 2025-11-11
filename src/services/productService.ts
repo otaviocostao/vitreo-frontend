@@ -4,7 +4,7 @@ import api from './api';
 import type { ProdutoPayload, ProdutoResponse } from '../types/produto';
 
 export interface ProdutoFiltros {
-  nome?: string;
+  query?: string;
   tipo?: 'ARMACAO' | 'LENTE' | 'ACESSORIO';
   page?: number;
   size?: number;
@@ -26,13 +26,18 @@ export const createProduct = async (data: ProdutoPayload) => {
 };
 
 export const getProducts = async (filtros: ProdutoFiltros = {}): Promise<Page<ProdutoResponse>> => {
-  const params = {
-    page: filtros.page || 0,
-    size: filtros.size || 10,
-    sort: filtros.sort || 'nome,asc',
-    nome: filtros.nome,
-    tipo: filtros.tipo,
+  const params: Record<string, any> = {
+    page: filtros.page ?? 0,
+    size: filtros.size ?? 10,
+    sort: filtros.sort ?? 'nome,asc',
   };
+
+  if (filtros.query) {
+    params.query = filtros.query;
+  }
+  if (filtros.tipo) {
+    params.tipo = filtros.tipo;
+  }
 
   try {
     const response = await api.get<Page<ProdutoResponse>>('/produtos', { params });
