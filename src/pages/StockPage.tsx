@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
 import Button from '../components/ui/Button';
@@ -13,6 +13,7 @@ import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
+import { useDebounce } from '../hooks/useDebounce';
 
 
 const StockPage = () => {
@@ -28,27 +29,34 @@ const StockPage = () => {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [productNameToDelete, setProductNameToDelete] = useState<string | null>(null);
 
-  const fetchProdutos = useCallback(async(page:number) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const fetchProdutos = useCallback(async(page:number, query: string) => {
     setIsLoading(true);
     setError(null);
 
     try{
         const pageIndex = page - 1; 
-        const data = await getProducts({page: pageIndex, size: pageSize});
+        const data = await getProducts({page: pageIndex, size: pageSize, query: query});
         setProducts(data.content);
         setPageInfo(data);
-        setCurrentPage(page);
     }catch (err) {
         setError('Falha ao carregar produtos')
         console.error(err);
     }finally{
         setIsLoading(false);
     }
-  }, []);
+  }, [pageSize]);
 
   useEffect(() => {
-    fetchProdutos(currentPage)
-  }, [fetchProdutos, currentPage])
+    fetchProdutos(currentPage, debouncedSearchTerm);
+  }, [debouncedSearchTerm, currentPage, fetchProdutos]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -72,7 +80,7 @@ const StockPage = () => {
     try {
       await deleteProductById(productToDelete);
       handleCloseDeleteModal();
-      fetchProdutos(currentPage); 
+      fetchProdutos(currentPage, debouncedSearchTerm); 
     } catch (err) {
       setError('Falha ao deletar o produto.');
       console.error(err);
@@ -99,10 +107,9 @@ const StockPage = () => {
                             name="search"
                             placeholder="Buscar produto pela referência ou descrição..."
                             className="pr-10"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
-                        </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-4">
