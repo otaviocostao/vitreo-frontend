@@ -9,7 +9,7 @@ interface ProductsTableProps {
   isLoading: boolean;
   currentPage: number;
   pageSize: number;
-  onDeleteClick: (productId: string) => void;
+  onDeleteClick: (productId: string, productName: string) => void;
 }
 
 const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, currentPage, pageSize, onDeleteClick }) => {
@@ -79,7 +79,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, curre
                         variant="smallDelete" 
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteClick(product.id); 
+                          onDeleteClick(product.id, product.nome); 
                         }}
                         >
                         <Trash2 className="w-4 h-4 text-gray-700" />
