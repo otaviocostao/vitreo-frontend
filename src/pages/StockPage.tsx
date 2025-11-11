@@ -26,6 +26,7 @@ const StockPage = () => {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [productNameToDelete, setProductNameToDelete] = useState<string | null>(null);
 
   const fetchProdutos = useCallback(async(page:number) => {
     setIsLoading(true);
@@ -53,13 +54,15 @@ const StockPage = () => {
     setCurrentPage(page);
   };
 
-  const handleOpenDeleteModal = (productId: string) => {
+  const handleOpenDeleteModal = (productId: string, productName: string) => {
     setProductToDelete(productId);
+    setProductNameToDelete(productName);
     setIsDeleteModalOpen(true);
   };
 
   const handleCloseDeleteModal = () => {
     setProductToDelete(null);
+    setProductNameToDelete(null);
     setIsDeleteModalOpen(false);
   };
 
@@ -131,7 +134,8 @@ const StockPage = () => {
             onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}
             title="Confirmar Exclusão"
-            message="Tem certeza que deseja deletar este produto? Esta ação não pode ser desfeita."
+            message="Tem certeza que deseja deletar o produto "
+            itemName={productNameToDelete}
         />
         {error && (
         <ErrorPopup
