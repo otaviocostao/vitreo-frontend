@@ -78,7 +78,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
                           onDeleteClick(fornecedor.id, fornecedor.nomeFantasia); 
                         }}
                         >
-                        <Trash2 className="w-4 h-4 text-gray-700" />
+                        <Trash2 className="w-4 h-4" />
                     </Button>
                   </td>
                   </tr>

@@ -82,7 +82,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, curre
                           onDeleteClick(product.id, product.nome); 
                         }}
                         >
-                        <Trash2 className="w-4 h-4 text-gray-700" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
                   </tr>
