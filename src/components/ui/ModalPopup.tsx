@@ -26,7 +26,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
   return (
     <div className="fixed inset-0 p-4 bg-black/60 flex justify-center items-center z-50 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 relative"
+        className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
