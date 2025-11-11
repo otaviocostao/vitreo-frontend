@@ -2,16 +2,21 @@ import React from 'react';
 import {useNavigate } from 'react-router-dom';
 import type { ClienteResponse } from '../types/cliente';
 import LoadingSpinner from './LoadingSpinner';
+import Button from './ui/Button';
+import { Trash2 } from 'lucide-react';
 
 
 
 interface ClientsTableProps {
   clients: ClienteResponse[];
   isLoading: boolean;
+  currentPage: number;
+  pageSize: number;
+  onDeleteClick: (productId: string, fornecedorNome: string) => void;
 }
 
-const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading }) => {
-  const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado'];
+const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading, currentPage, pageSize, onDeleteClick }) => {
+  const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
     
   const navigate = useNavigate();
   const handleRowClick = ( clienteId: string) => {
@@ -66,9 +71,12 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading }) => {
                   </td>
                 </tr>
               ) : (
-                clients.map((client, i) => (
+                clients.map((client, i) => {
+                  const rowNumber = (currentPage - 1) * pageSize + i + 1;
+
+                  return(
                     <tr key={client.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(client.id)}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{i+1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.nomeCompleto}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarData(client.dataNascimento)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.telefone || ''}</td>
@@ -77,9 +85,23 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients, isLoading }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.bairro || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.cidade || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{client.endereco?.estado || ''}</td>
-                    </tr>
-                ))
-              )}
+                    <td>
+                      <Button 
+                        variant="smallDelete"
+                        onClick={
+                          (e) => {
+                            e.stopPropagation();
+                            onDeleteClick(client.id, client.nomeCompleto)
+                          }
+                        }
+                      >
+                        <Trash2 className="w-4 h-4 " />
+                      </Button>
+                    </td>
+                  </tr>
+                )}
+              ))
+            }
             </tbody>
         </table>
         </div>

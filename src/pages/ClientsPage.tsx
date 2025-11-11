@@ -10,8 +10,9 @@ import HeaderTitlePage from '../components/HeaderTitlePage';
 import { NavLink } from 'react-router-dom';
 import type { Page } from '../types/pagination';
 import type { ClienteResponse } from '../types/cliente';
-import { getClientes } from '../services/clienteService';
+import { deleteClienteById, getClientes } from '../services/clienteService';
 import ErrorPopup from '../components/ErrorPopup';
+import PopupModal from '../components/ui/ModalPopup';
 
 const ClientsPage = () => {
 
@@ -22,6 +23,10 @@ const ClientsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
   const pageSize = 20;
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clienteToDelete, setClienteToDelete] = useState<string | null>(null);
+  const [nomeClienteToDelete, setNomeClienteToDelete] = useState<string | null>(null);
 
   const fetchClients = useCallback(async (page: number) => {
     setIsLoading(true);
@@ -48,6 +53,33 @@ const ClientsPage = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  const handleOpenDeleteModal = (clienteId: string, nomeCliente: string) => {
+      setClienteToDelete(clienteId);
+      setNomeClienteToDelete(nomeCliente);
+      setIsDeleteModalOpen(true);
+    };
+  
+    const handleCloseDeleteModal = () => {
+      setClienteToDelete(null);
+      setNomeClienteToDelete(null);
+      setIsDeleteModalOpen(false);
+    };
+  
+    const handleConfirmDelete = async () => {
+        if (!clienteToDelete) return;
+    
+        try {
+          await deleteClienteById(clienteToDelete);
+          handleCloseDeleteModal();
+          fetchClients(currentPage); 
+        } catch (err) {
+          setError('Falha ao deletar o cliente.');
+          console.error(err);
+          handleCloseDeleteModal();
+        }
+      };
+
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -88,8 +120,16 @@ const ClientsPage = () => {
                     </div>
                 </div>
             </div>
-        <ClientsTable clients={clients} isLoading={isLoading} />
+        <ClientsTable clients={clients} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} onDeleteClick={handleOpenDeleteModal}/>
         </div>
+        <PopupModal 
+            isOpen={isDeleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onConfirm={handleConfirmDelete}
+            title="Confirmar Exclusão"
+            message="Tem certeza que deseja deletar o(a) cliente "
+            itemName={nomeClienteToDelete}
+        />
         {error && (
         <ErrorPopup
           message={error}
