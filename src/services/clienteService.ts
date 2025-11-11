@@ -55,3 +55,12 @@ export const updateCliente = async (id: string, data: ClientePayload): Promise<C
     throw error;
   }
 };
+
+export const deleteClienteById = async (id: string): Promise<void> => {
+  try {
+    await api.delete(`/clientes/${id}`);
+  } catch (error) {
+    console.error(`Erro ao deletar o cliente com ID ${id}:`, error);
+    throw error;
+  }
+};
