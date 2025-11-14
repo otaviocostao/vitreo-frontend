@@ -29,10 +29,11 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
     const debounceTimeout = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await getClientes({ nome: searchTerm, size: 10 });
+        const data = await getClientes({ query: searchTerm, size: 10 });
         const clientOptions = data.content.map(cliente => ({
           value: cliente.id,
           label: `${cliente.nomeCompleto} - ${cliente.cpf}`,
+          fullClient: cliente
         }));
         setOptions(clientOptions);
       } catch (error) {
@@ -47,8 +48,7 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
 
   const handleSelectChange = async (selectedOption: any) => {
     if (selectedOption) {
-      const fullClientData = (await getClientes({ nome: selectedOption.label.split(' - ')[0], size: 1 })).content[0];
-      onClienteSelect(fullClientData);
+      onClienteSelect(selectedOption.fullClient);
     } else {
       onClienteSelect(null);
     }
