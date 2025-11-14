@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
 import Button from '../components/ui/Button';
@@ -13,6 +13,7 @@ import type { ClienteResponse } from '../types/cliente';
 import { deleteClienteById, getClientes } from '../services/clienteService';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
+import { useDebounce } from '../hooks/useDebounce';
 
 const ClientsPage = () => {
 
@@ -28,12 +29,15 @@ const ClientsPage = () => {
   const [clienteToDelete, setClienteToDelete] = useState<string | null>(null);
   const [nomeClienteToDelete, setNomeClienteToDelete] = useState<string | null>(null);
 
-  const fetchClients = useCallback(async (page: number) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const fetchClients = useCallback(async (page: number, query: string) => {
     setIsLoading(true);
     setError(null);
     try {
       const pageIndex = page - 1; 
-      const data = await getClientes({page: pageIndex, size: pageSize});
+      const data = await getClientes({page: pageIndex, size: pageSize, query: query});
       setClients(data.content);
       setPageInfo(data);
       setCurrentPage(page);
@@ -46,9 +50,13 @@ const ClientsPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchClients(currentPage);
-  }, [fetchClients, currentPage]);
+    fetchClients(currentPage, debouncedSearchTerm);
+  }, [debouncedSearchTerm, currentPage, fetchClients]);
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -72,7 +80,7 @@ const ClientsPage = () => {
         try {
           await deleteClienteById(clienteToDelete);
           handleCloseDeleteModal();
-          fetchClients(currentPage); 
+          fetchClients(currentPage, debouncedSearchTerm); 
         } catch (err) {
           setError('Falha ao deletar o cliente.');
           console.error(err);
@@ -89,22 +97,19 @@ const ClientsPage = () => {
             <div className="mb-6 px-2 pb-4 border-b-1 border-gray-200">
                 <div className="flex justify-between items-center ">
                 <h2 className="text-lg font-semibold text-gray-800">Buscar cliente</h2>
-                </div>
+              </div>
             
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            
                     <div className="relative w-full md:max-w-md">
                         <InputField
                             id="client-search"
                             name="search"
                             placeholder="Buscar pelo nome ou CPF do cliente..."
                             className="pr-10"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
-                        </div>
                     </div>
-
                     <div className="flex items-center justify-end gap-4">
                         <NavLink to={"/clientes/novo"}>
                             <Button variant="primary">
