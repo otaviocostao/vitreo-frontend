@@ -36,7 +36,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     const debounceTimeout = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await getProducts({ nome: searchTerm, tipo: tipo, size: 20 });
+        const data = await getProducts({ query: searchTerm, tipo: tipo, size: 20 });
         const productOptions = data.content.map(p => ({
           value: p.id,
           label: `${p.nome}`,

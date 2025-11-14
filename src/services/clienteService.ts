@@ -3,8 +3,7 @@ import type { Page } from '../types/pagination';
 import api from './api';
 
 export interface ClienteFiltros {
-  nome?: string;
-  cpf?: string;
+  query?: string;
   page?: number;
   size?: number;
 }
@@ -20,15 +19,17 @@ export const createCliente = async (clienteData: ClientePayload) => {
 };
 
 export const getClientes = async (filtros: ClienteFiltros = {}): Promise<Page<ClienteResponse>> => {
+  const params: Record<string, any> = {
+    page: filtros.page ?? 0,
+    size: filtros.size ?? 10,
+  };
+
+  if (filtros.query) {
+    params.query = filtros.query;
+  }
+  
   try {
-    const response = await api.get<Page<ClienteResponse>>('/clientes', {
-      params: {
-        page: filtros.page || 0,
-        size: filtros.size || 20,
-        nome: filtros.nome,
-        cpf: filtros.cpf,
-      }
-    });
+    const response = await api.get<Page<ClienteResponse>>('/clientes', { params });
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar clientes:", error);
