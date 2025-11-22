@@ -13,6 +13,7 @@ import type { Page } from '../types/pagination';
 import { deleteFornecedorById, getFornecedores } from '../services/fornecedorService';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
+import { useDebounce } from '../hooks/useDebounce';
 
 
 const SuppliersPage = () => {
@@ -28,17 +29,18 @@ const SuppliersPage = () => {
   const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
   const [nomefornecedorToDelete, setNomeFornecedorToDelete] = useState<string | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const fetchFornecedores = useCallback(async(page:number) => {
+  const fetchFornecedores = useCallback(async(page:number, query: string) => {
       setIsLoading(true);
       setError(null);
   
       try{
         const pageIndex = page - 1; 
-          const data = await getFornecedores(pageIndex, pageSize);
+          const data = await getFornecedores({page: pageIndex, size: pageSize, query: query});
           setFornecedores(data.content);
           setPageInfo(data);
-          setCurrentPage(page);
       }catch (err) {
           setError('Falha ao carregar fornecedores')
           console.error(err);
@@ -48,9 +50,14 @@ const SuppliersPage = () => {
     }, []);
   
     useEffect(() => {
-      fetchFornecedores(currentPage)
-    }, [fetchFornecedores, currentPage])
+      fetchFornecedores(currentPage, debouncedSearchTerm)
+    }, [debouncedSearchTerm, fetchFornecedores, currentPage])
   
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(event.target.value);
+      setCurrentPage(1);
+    };
+    
     const handlePageChange = (page: number) => {
       setCurrentPage(page);
     };
@@ -73,7 +80,7 @@ const SuppliersPage = () => {
       try {
         await deleteFornecedorById(fornecedorToDelete);
         handleCloseDeleteModal();
-        fetchFornecedores(currentPage); 
+        fetchFornecedores(currentPage, debouncedSearchTerm); 
       } catch (err) {
         setError('Falha ao deletar o fornecedor.');
         console.error(err);
@@ -99,10 +106,9 @@ const SuppliersPage = () => {
                             name="search"
                             placeholder="Buscar pela Razão Social, Nome Fantasia ou CNPJ do fornecedor..."
                             className="pr-10"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
-                        </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-4">

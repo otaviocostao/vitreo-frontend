@@ -4,6 +4,12 @@ import type { FornecedorOption } from '../types/produto';
 
 import api from './api';
 
+export interface FornecedorFiltros {
+  query?: string;
+  page?: number;
+  size?: number;
+}
+
 export const createFornecedor = async (fornecedorData: FornecedorPayload) => {
   try {
     const response = await api.post('/fornecedores', fornecedorData);
@@ -14,15 +20,18 @@ export const createFornecedor = async (fornecedorData: FornecedorPayload) => {
   }
 };
 
-export const getFornecedores = async (page: number, size: number): Promise<Page< FornecedorResponse>> => {
+export const getFornecedores = async (filtros: FornecedorFiltros = {}): Promise<Page< FornecedorResponse>> => {
+  const params: Record<string, any> = {
+    page: filtros.page ?? 0,
+    size: filtros.size ?? 20,
+  };
+
+  if (filtros.query) {
+    params.query = filtros.query;
+  }
+  
   try {
-    const response = await api.get<Page<FornecedorResponse>>('/fornecedores', {
-      params: {
-        page: page - 1,
-        size: size,
-        sort: 'razaoSocial,asc'
-      }
-    });
+    const response = await api.get<Page<FornecedorResponse>>('/fornecedores', {params});
     return response.data;
   } catch (error) {
     console.error("Erro ao buscar fornecedores:", error);
