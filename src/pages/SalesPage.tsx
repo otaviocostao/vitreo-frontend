@@ -12,6 +12,7 @@ import type { PedidoResponse } from '../types/pedido';
 import type { Page } from '../types/pagination';
 import { getPedidos } from '../services/pedidoService';
 import ErrorPopup from '../components/ErrorPopup';
+import { useDebounce } from '../hooks/useDebounce';
 
 const SalesPage = () => {
   const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
@@ -22,12 +23,16 @@ const SalesPage = () => {
   const totalPages = pageInfo ? pageInfo.totalPages : 1;
   const pageSize = 20;
 
-  const fetchPedidos = useCallback(async (page: number) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  
+
+  const fetchPedidos = useCallback(async (page: number, query: string) => {
     setIsLoading(true);
     setError(null);
     try {
       const pageIndex = page - 1; 
-      const data = await getPedidos({page: pageIndex, size: pageSize});
+      const data = await getPedidos({page: pageIndex, size: pageSize, query: query});
       setPedidos(data.content);
       setPageInfo(data);
       setCurrentPage(page);
@@ -40,12 +45,17 @@ const SalesPage = () => {
   }, []);
     
     useEffect(() => {
-        fetchPedidos(currentPage);
-    }, [fetchPedidos, currentPage]);
+        fetchPedidos(currentPage, debouncedSearchTerm);
+    }, [debouncedSearchTerm, fetchPedidos, currentPage]);
         
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -65,10 +75,9 @@ const SalesPage = () => {
                             name="search"
                             placeholder="Buscar pela O.S, nome ou CPF do cliente..."
                             className="pr-10"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
                         />
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                            <Search className="h-5 w-5 text-gray-400" />
-                        </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-4">

@@ -3,6 +3,7 @@ import type { PedidoPayload, PedidoResponse } from '../types/pedido';
 import api from './api';
 
 export interface PedidoFiltros {
+  query?: string;
   page?: number;
   size?: number;
 }
@@ -13,13 +14,17 @@ export const createPedido = async (data: PedidoPayload) => {
 }
 
 export const getPedidos = async (filtros: PedidoFiltros = {}): Promise<Page<PedidoResponse>> => {
+  const params: Record<string, any> = {
+    page: filtros.page ?? 0,
+    size: filtros.size ?? 20,
+  }
+
+  if (filtros.query) {
+    params.query = filtros.query;
+  }
+
   try {
-    const response = await api.get<Page<PedidoResponse>>('/pedidos', {
-      params: {
-        page: filtros.page || 0,
-        size: filtros.size || 20,
-      }
-    });
+    const response = await api.get<Page<PedidoResponse>>('/pedidos', {params});
     return response.data;
   } catch (error) {
     console.error(`Erro ao buscar pedidos:`, error);
