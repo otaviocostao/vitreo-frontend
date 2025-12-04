@@ -31,6 +31,10 @@ function App() {
                 element={<RegisterSellPage />}
               />
           <Route
+                path="/vendas/:id"
+                element={<RegisterSellPage />}
+              />
+          <Route
                 path="/clientes"
                 element={<ClientsPage />}
               />
