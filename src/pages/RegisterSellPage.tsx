@@ -8,15 +8,16 @@ import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 import { useEffect, useState } from "react";
 import AddClientModal from "../components/AddClientModal";
 import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload } from "../types/pedido";
-import { createPedido } from "../services/pedidoService";
+import { createPedido, getPedidoById } from "../services/pedidoService";
 import type { ReceituarioPayload } from "../types/receituario";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { ClienteResponse } from "../types/cliente";
 import type { ProdutoResponse } from "../types/produto";
 import { getProducts } from "../services/productService";
 import ClienteSearch from "../components/ClienteSearch";
 import ErrorPopup from "../components/ErrorPopup";
 import AddProductModal from "../components/AddProductModal";
+import { getClienteById } from "../services/clienteService";
 
 interface VendaFormData {
     cliente: ClienteResponse | null;
@@ -33,30 +34,95 @@ interface VendaFormData {
 }
 
 const initialFormData = {
-    cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '', dataReceita: '',
+    cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '',
     dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0
 }
 
 function RegisterSellPage() {
+    const { id: pedidoId } = useParams<{ id: string }>();
+    const isEditMode = !!pedidoId;
+    const [produtosDisponiveis, setProdutosDisponiveis] = useState<ProdutoResponse[]>([]);
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [productModalType, setProductModalType] = useState<'ARMACAO' | 'LENTE' | null>(null);
     const navigate = useNavigate();
+    const [isFetching, setIsFetching] = useState(isEditMode);
 
-    const [venda, setVenda] = useState<VendaFormData>(initialFormData);
+    const [formData, setFormData] = useState<VendaFormData>(initialFormData);    
     
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
+    
+      useEffect(() => {
+        const loadPageData = async () => {
+            if (!isEditMode || !pedidoId || produtosDisponiveis.length === 0) {
+                if (!isEditMode) setFormData(initialFormData);
+                return;
+            }
+
+            setIsFetching(true);
+            setError(null);
+            try {
+                const pedidoData = await getPedidoById(pedidoId);
+                console.log(pedidoData);
+
+                let clienteCompleto: ClienteResponse | null = null;
+                if (pedidoData.cliente && pedidoData.cliente.id) {
+                    clienteCompleto = await getClienteById(pedidoData.cliente.id);
+                }
+
+                const itensDoFormulario = pedidoData.itens.map(itemAPI => {
+                    const produtoCorrespondente = produtosDisponiveis.find(
+                        p => p.nome === itemAPI.nomeProduto && p.tipoProduto === itemAPI.tipoProduto
+                    );
+
+                    return {
+                        produtoId: produtoCorrespondente ? produtoCorrespondente.id : '', 
+                        quantidade: itemAPI.quantidade
+                    };
+                }).filter(item => item.produtoId);
+
+                const dadosDoFormulario: VendaFormData = {
+                    cliente: clienteCompleto,
+                    receituario: pedidoData.receituario ?? {},
+                    itens: itensDoFormulario,
+                    pagamentos: pedidoData.pagamentos ?? [],
+                    ordemServico: pedidoData.ordemServico?.toString() ?? '',
+                    dataPedido: pedidoData.dataPedido ?? '',
+                    dataPrevisaoEntrega: pedidoData.dataPrevisaoEntrega ?? '',
+                    dataEntrega: pedidoData.dataEntrega ?? '',
+                    valorLentes: pedidoData.valorLentes ?? 0,
+                    valorArmacao: pedidoData.valorArmacao ?? 0,
+                    desconto: pedidoData.desconto ?? 0,
+                };
+
+                setFormData(dadosDoFormulario);
+
+            } catch (err) {
+                setError("Falha ao carregar os dados do pedido.");
+                console.error(err);
+            } finally {
+                setIsFetching(false);
+            }
+        };
+        loadPageData();
+    }, [pedidoId, isEditMode, produtosDisponiveis]);
+
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setVenda(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
     
     const handleReceituarioChange = (data: Partial<ReceituarioPayload>) => {
-        setVenda(prev => ({ ...prev, receituario: { ...prev.receituario, ...data }}));
+        setFormData(prev => ({ ...prev, receituario: { ...prev.receituario, ...data }}));
     };
     
     const handlePagamentosChange = (novosPagamentos: PagamentoPayload[]) => {
-        setVenda(prev => ({ ...prev, pagamentos: novosPagamentos }));
+        setFormData(prev => ({ ...prev, pagamentos: novosPagamentos }));
     };
 
     const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
@@ -64,11 +130,11 @@ function RegisterSellPage() {
         ? 'desconto'
         : `valor${campo.charAt(0).toUpperCase() + campo.slice(1)}`;
 
-        setVenda(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
+        setFormData(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
     };
     
     const handleClienteSelect = (cliente: ClienteResponse | null) => {
-        setVenda(prev => ({ ...prev, cliente }));
+        setFormData(prev => ({ ...prev, cliente }));
     };
 
     const handleClientSubmit = (novoCliente: ClienteResponse) => {
@@ -109,7 +175,7 @@ function RegisterSellPage() {
         setIsLoading(true);
         setError(null);
 
-        if (!venda.cliente) {
+        if (!formData.cliente) {
             setError("Por favor, selecione um cliente.");
             setIsLoading(false);
             return;
@@ -120,42 +186,50 @@ function RegisterSellPage() {
             return parseFloat(String(value).replace(',', '.'));
         };
 
+        const formatarDataParaLocalDateTime = (dateString: string | undefined): string | undefined => {
+            if (!dateString) {
+                return undefined;
+            }
+            return `${dateString}T00:00:00`;
+        };
+
         const pedidoPayload: PedidoPayload = {
-            clienteId: venda.cliente.id,
-            receituario: Object.keys(venda.receituario).length > 0 ? 
+            clienteId: formData.cliente.id,
+            receituario: Object.keys(formData.receituario).length > 0 ? 
             {
-                ...venda.receituario,
-                esfericoOd: parseCurrency(venda.receituario.esfericoOd),
-                cilindricoOd: parseCurrency(venda.receituario.cilindricoOd),
-                eixoOd: parseCurrency(venda.receituario.eixoOd),
-                esfericoOe: parseCurrency(venda.receituario.esfericoOe),
-                cilindricoOe: parseCurrency(venda.receituario.cilindricoOe),
-                eixoOe: parseCurrency(venda.receituario.eixoOe),
-                adicao: parseCurrency(venda.receituario.adicao),
-                dnpOd: parseCurrency(venda.receituario.dnpOd),
-                dnpOe: parseCurrency(venda.receituario.dnpOe),
-                centroOpticoOd: parseCurrency(venda.receituario.centroOpticoOd),
-                centroOpticoOe: parseCurrency(venda.receituario.centroOpticoOe),
-                distanciaPupilar: parseCurrency(venda.receituario.distanciaPupilar),
-                anguloMaior: parseCurrency(venda.receituario.anguloMaior),
-                ponteAro: parseCurrency(venda.receituario.ponteAro),
-                anguloVertical: parseCurrency(venda.receituario.anguloVertical),
+                ...formData.receituario,
+                esfericoOd: parseCurrency(formData.receituario.esfericoOd),
+                cilindricoOd: parseCurrency(formData.receituario.cilindricoOd),
+                eixoOd: parseCurrency(formData.receituario.eixoOd),
+                esfericoOe: parseCurrency(formData.receituario.esfericoOe),
+                cilindricoOe: parseCurrency(formData.receituario.cilindricoOe),
+                eixoOe: parseCurrency(formData.receituario.eixoOe),
+                adicao: parseCurrency(formData.receituario.adicao),
+                dnpOd: parseCurrency(formData.receituario.dnpOd),
+                dnpOe: parseCurrency(formData.receituario.dnpOe),
+                centroOpticoOd: parseCurrency(formData.receituario.centroOpticoOd),
+                centroOpticoOe: parseCurrency(formData.receituario.centroOpticoOe),
+                distanciaPupilar: parseCurrency(formData.receituario.distanciaPupilar),
+                anguloMaior: parseCurrency(formData.receituario.anguloMaior),
+                ponteAro: parseCurrency(formData.receituario.ponteAro),
+                anguloVertical: parseCurrency(formData.receituario.anguloVertical),
             } 
             : undefined,
-            itens: venda.itens.map(item => ({
+            itens: formData.itens.map(item => ({
                 produtoId: item.produtoId, 
                 quantidade: item.quantidade,
             })),
-            pagamentos: venda.pagamentos.map(p => ({
+            pagamentos: formData.pagamentos.map(p => ({
                 formaPagamento: p.formaPagamento,
                 valorPago: p.valorPago,
                 numeroParcelas: p.numeroParcelas,
             })),
-            desconto: parseCurrency(venda.desconto),
-            valorLentes: parseCurrency(venda.valorLentes),
-            valorArmacao: parseCurrency(venda.valorArmacao),
-            dataPrevisaoEntrega: venda.dataPrevisaoEntrega || undefined,
-            ordemServico: venda.ordemServico ? parseInt(venda.ordemServico) : undefined,
+            desconto: parseCurrency(formData.desconto),
+            valorLentes: parseCurrency(formData.valorLentes),
+            valorArmacao: parseCurrency(formData.valorArmacao),
+            dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
+            dataPedido: formatarDataParaLocalDateTime(formData.dataPedido) || undefined,
+            ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
         };
 
         // console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
@@ -176,9 +250,6 @@ function RegisterSellPage() {
             setIsLoading(false);
         }
     };
-
-
-    const [produtosDisponiveis, setProdutosDisponiveis] = useState<ProdutoResponse[]>([]);
     
 
     useEffect(() => {
@@ -195,7 +266,7 @@ function RegisterSellPage() {
 
 
     const handleArmacaoSelect = (produto: ProdutoResponse | null) => {
-        setVenda(prev => {
+        setFormData(prev => {
             const armacaoAtualId = prev.itens.find(item => 
                 produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
             )?.produtoId;
@@ -219,7 +290,7 @@ function RegisterSellPage() {
 
 
      const handleLenteSelect = (produto: ProdutoResponse | null) => {
-         setVenda(prev => {
+         setFormData(prev => {
             const lenteAtualId = prev.itens.find(item => 
                 produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
             )?.produtoId;
@@ -257,7 +328,7 @@ function RegisterSellPage() {
                 <div className="flex divide-x divide-gray-200 border-y border-gray-200">
                     <InfoSection title="Cliente" className="w-2/3">
                         <ClienteSearch
-                            selectedCliente={venda.cliente}
+                            selectedCliente={formData.cliente}
                             onClienteSelect={handleClienteSelect}
                             onOpenClientModal={() => setIsClientModalOpen(true)}
                         />
@@ -272,7 +343,7 @@ function RegisterSellPage() {
                                 placeholder="O.S"
                                 className="w-24"
                                 labelClassName="sr-only"
-                                value={venda.ordemServico}
+                                value={formData.ordemServico}
                                 onChange={handleFormChange}
                             />
                         </div>
@@ -280,31 +351,31 @@ function RegisterSellPage() {
                 </div>
                 <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
                     <div className="flex flex-col w-2/3 " >
-                        <ReceituarioMedidas  data={venda.receituario} onChange={handleReceituarioChange} />
+                        <ReceituarioMedidas  data={formData.receituario} onChange={handleReceituarioChange} />
                         <ReceituarioInfoArea 
-                                receituarioData={venda.receituario}
-                                pedidoData={venda}
+                                receituarioData={formData.receituario}
+                                pedidoData={formData}
                                 onReceituarioChange={handleReceituarioChange}
-                                onPedidoChange={(data) => setVenda(prev => ({ ...prev, ...data }))}
+                                onPedidoChange={(data) => setFormData(prev => ({ ...prev, ...data }))}
                                 onArmacaoSelect={handleArmacaoSelect}
                                 onLenteSelect={handleLenteSelect}
-                                itens={venda.itens}
+                                itens={formData.itens}
                                 produtosDisponiveis={produtosDisponiveis}
                                 onOpenProductModal={handleOpenProductModal}/>
                     </div>
                     <div className="flex flex-col w-1/3">
                         <VendaPagamento 
-                            valorLentes={venda.valorLentes}
-                        valorArmacao={venda.valorArmacao}
-                        desconto={venda.desconto}
-                        pagamentos={venda.pagamentos}
+                            valorLentes={formData.valorLentes}
+                        valorArmacao={formData.valorArmacao}
+                        desconto={formData.desconto}
+                        pagamentos={formData.pagamentos}
                         onValorChange={handleValorChange}
                         onPagamentosChange={handlePagamentosChange}
                         onError={setError} 
                         />
                     </div>
                 </div>
-                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/" textButton2='Finalizar Venda' />
+                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={isEditMode && 'Salvar alterações' || 'Finalizar Venda'} />
             </form>
             </div>
             <AddClientModal
