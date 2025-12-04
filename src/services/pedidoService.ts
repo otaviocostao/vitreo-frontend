@@ -31,3 +31,13 @@ export const getPedidos = async (filtros: PedidoFiltros = {}): Promise<Page<Pedi
     throw error;
   }
 };
+
+export const getPedidoById = async (id: string): Promise<PedidoResponse> => {
+  try {
+    const response = await api.get<PedidoResponse>(`/pedidos/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao buscar pedido com ID ${id}:`, error);
+    throw error;
+  }
+};
