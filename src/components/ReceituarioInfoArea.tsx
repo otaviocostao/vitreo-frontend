@@ -69,6 +69,13 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
     }
   };
 
+  const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
+  if (!dataHoraString) {
+    return '';
+  }
+  return dataHoraString.substring(0, 10);
+};
+
 
   return (
     <div className=" p-4 border-t border-gray-200">
@@ -114,7 +121,15 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
         />
       
         <div className="md:col-span-2 mt-2">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-6 gap-y-4">
+            <InputField
+              id="dataPedido"
+              name="dataPedido"
+              label="Data do pedido"
+              type="date"
+              value={formatarParaInputDate((pedidoData as any).dataPedido) || ''}
+              onChange={handleChange}
+            />
             <InputField
               id="dataReceita"
               name="dataReceita"
