@@ -14,7 +14,7 @@ export interface ItemPedidoResponse {
 }
 
 export interface PagamentoPayload {
-  id: number,
+  id?: string | number,
   formaPagamento: 'DINHEIRO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'PIX' | 'PRAZO' | 'PENDENTE';
   valorPago: number;
   numeroParcelas: number;
