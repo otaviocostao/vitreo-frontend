@@ -21,7 +21,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
     valorLentes,
     valorArmacao,
     desconto,
-    pagamentos,
+    pagamentos = [],
     onValorChange,
     onPagamentosChange,
     onError
@@ -70,7 +70,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
     setNewPaymentInstallments(1);
   };
 
-  const handleRemovePayment = (paymentId: number) => {
+  const handleRemovePayment = (paymentId: string | number) => {
     const novosPagamentos = pagamentos.filter((payment) => payment.id !== paymentId);
     onPagamentosChange(novosPagamentos);
   };
@@ -187,23 +187,25 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
             <p className="text-sm text-gray-500 text-center py-4">Nenhum pagamento registrado.</p>
           ) : (
             pagamentos.map(payment => (
-              <div key={payment.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                <div className="flex items-center gap-3">
-                  {paymentIcons[payment.formaPagamento]}
-                  <div>
-                    <p className="font-semibold text-sm text-gray-800">{formaPagamentoDisplayMap[payment.formaPagamento] || payment.formaPagamento}</p>
-                    {payment.numeroParcelas > 1 && (
-                      <p className="text-xs text-gray-500">{payment.numeroParcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago / payment.numeroParcelas)}</p>
-                    )}
+              payment.id && (
+                <div key={payment.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <div className="flex items-center gap-3">
+                    {paymentIcons[payment.formaPagamento]}
+                    <div>
+                      <p className="font-semibold text-sm text-gray-800">{formaPagamentoDisplayMap[payment.formaPagamento] || payment.formaPagamento}</p>
+                      {payment.numeroParcelas > 1 && (
+                        <p className="text-xs text-gray-500">{payment.numeroParcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago / payment.numeroParcelas)}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-semibold text-sm text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago)}</span>
+                    <button onClick={() => handleRemovePayment(payment.id!)} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-semibold text-sm text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago)}</span>
-                  <button onClick={() => handleRemovePayment(payment.id)} className="text-gray-400 hover:text-red-500 transition-colors">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
+              )
             ))
           )}
         </div>
