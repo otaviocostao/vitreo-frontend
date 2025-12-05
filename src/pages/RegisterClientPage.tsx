@@ -167,7 +167,7 @@ const RegisterClientPage = () => {
               </div>
             </FormSection>
 
-            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isEditMode ? 'Salvar' : 'Cadastrar'} />
+            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} />
           </form>
       </div>
       {error && (

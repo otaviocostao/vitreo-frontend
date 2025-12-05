@@ -68,7 +68,13 @@ const RegisterSupplierPage = () => {
             telefone: supplierData.telefone,
             email: supplierData.email,
             ...supplierData.endereco,
+            logradouro: supplierData.endereco.logradouro || '',
+            numero: supplierData.endereco.numero || '',
+            bairro: supplierData.endereco.bairro || '',
             complemento: supplierData.endereco.complemento || '',
+            cidade: supplierData.endereco.cidade || '',
+            estado: supplierData.endereco.estado || '',
+            cep: formData.cep,
             marcasTrabalhadas: supplierData.marcasTrabalhadas,
           };
 
@@ -205,7 +211,7 @@ const RegisterSupplierPage = () => {
                 </div>
             </FormSection>
             
-            <SaveCancelButtonsArea textButton1='Cancelar' textButton2={isEditMode ? 'Salvar' : 'Cadastrar'}  cancelButtonPath='/fornecedores' />
+            <SaveCancelButtonsArea textButton1='Cancelar' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} cancelButtonPath='/fornecedores' />
         </form>
       </div>
       {error && (

@@ -182,7 +182,7 @@ const RegisterProductPage = () => {
               <InputField label="Tipo da Lente" name="tipoLente" value={formData.tipoLente} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
             </FormSection>
           )}
-            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar" : 'Cadastrar'} />
+            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} />
         </form>
       </div>
       {error && (

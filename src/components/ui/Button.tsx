@@ -1,12 +1,14 @@
+import { Loader2 } from 'lucide-react';
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'destructive' | 'smallDelete';
+  loading?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className, ...rest }) => {
+const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', loading=false, className, ...rest }) => {
   const baseClasses = `
-    inline-flex items-center justify-center gap-2 
+    relative inline-flex items-center justify-center gap-2 
      text-sm font-medium rounded-md 
     transition-colors duration-200 cursor-pointer
   `;
@@ -19,8 +21,13 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', classNam
     'px-2 py-2 bg-none bg-input/30 text-gray-700 border-none hover:text-red-500 hover:bg-gray-100',
   };
 
+  const spinnerClasses = `animate-spin text-white-600 w-4 h-4`;
+
   return (
     <button className={`${baseClasses} ${variantClasses[variant]} ${className}`} {...rest}>
+      {loading && (
+        <Loader2 className={spinnerClasses} /> 
+      )}
       {children}
     </button>
   );

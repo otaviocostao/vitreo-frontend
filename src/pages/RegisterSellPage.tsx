@@ -375,7 +375,7 @@ function RegisterSellPage() {
                         />
                     </div>
                 </div>
-                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={isEditMode && 'Salvar alterações' || 'Finalizar Venda'} />
+                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={isEditMode && 'Salvar alterações' || 'Finalizar Venda'} isLoading={isLoading} />
             </form>
             </div>
             <AddClientModal
