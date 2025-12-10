@@ -1,5 +1,5 @@
 import type { Page } from '../types/pagination';
-import type { PedidoPayload, PedidoResponse } from '../types/pedido';
+import type { PedidoPayload, PedidoResponse, PedidoUpdatePayload } from '../types/pedido';
 import api from './api';
 
 export interface PedidoFiltros {
@@ -38,6 +38,16 @@ export const getPedidoById = async (id: string): Promise<PedidoResponse> => {
     return response.data;
   } catch (error) {
     console.error(`Erro ao buscar pedido com ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updatePedido = async (id: string, payload: PedidoUpdatePayload): Promise<PedidoResponse> => {
+  try {
+    const response = await api.put<PedidoResponse>(`/pedidos/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao atualizar pedido com ID ${id}:`, error);
     throw error;
   }
 };
