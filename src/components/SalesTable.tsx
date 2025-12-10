@@ -12,7 +12,7 @@ interface SalesTableProps {
 }
 
 const SalesTable: React.FC<SalesTableProps> = ({ pedidos, isLoading, currentPage, pageSize }) => {
-  const tableHeaders = ['#', 'O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status'];
+  const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status'];
   const navigate = useNavigate();
 
   const handleRowClick = (pedidoId: string) => {
@@ -106,7 +106,6 @@ const SalesTable: React.FC<SalesTableProps> = ({ pedidos, isLoading, currentPage
               className="hover:bg-gray-50 cursor-pointer"
               onClick={() => handleRowClick(pedido.id)}
             >
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pedido.ordemServico}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pedido.cliente.nomeCompleto}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarLocalDateTimeParaData(pedido.dataPedido)}</td>
