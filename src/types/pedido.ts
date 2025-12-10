@@ -55,3 +55,16 @@ export interface PedidoResponse {
 }
 
 export type StatusPedido = 'ORCAMENTO' | 'SOLICITADO' | 'EM_PRODUCAO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO';
+
+export interface PedidoUpdatePayload {
+  receituario?: ReceituarioPayload;
+  ordemServico?: number;
+  itens: ItemPedidoPayload[];
+  dataPedido?: string;
+  dataPrevisaoEntrega?: string;
+  dataEntrega?: string;
+  valorLentes?: number;
+  valorArmacao?: number;
+  desconto?: number;
+  pagamentos?: PagamentoCreatePayload[];
+}
