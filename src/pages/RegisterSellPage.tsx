@@ -7,8 +7,8 @@ import InputField from "../components/ui/InputField";
 import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 import { useEffect, useState } from "react";
 import AddClientModal from "../components/AddClientModal";
-import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload } from "../types/pedido";
-import { createPedido, getPedidoById } from "../services/pedidoService";
+import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePayload } from "../types/pedido";
+import { createPedido, getPedidoById, updatePedido } from "../services/pedidoService";
 import type { ReceituarioPayload } from "../types/receituario";
 import { useNavigate, useParams } from "react-router-dom";
 import type { ClienteResponse } from "../types/cliente";
@@ -92,7 +92,7 @@ function RegisterSellPage() {
                     itens: itensDoFormulario,
                     pagamentos: pedidoData.pagamentos ?? [],
                     ordemServico: pedidoData.ordemServico?.toString() ?? '',
-                    dataPedido: pedidoData.dataPedido ?? '',
+                    dataPedido: formatarParaInputDate(pedidoData.dataPedido) ?? '',
                     dataPrevisaoEntrega: pedidoData.dataPrevisaoEntrega ?? '',
                     dataEntrega: pedidoData.dataEntrega ?? '',
                     valorLentes: pedidoData.valorLentes ?? 0,
@@ -111,6 +111,13 @@ function RegisterSellPage() {
         };
         loadPageData();
     }, [pedidoId, isEditMode, produtosDisponiveis]);
+
+      const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
+        if (!dataHoraString) {
+            return '';
+        }
+        return dataHoraString.substring(0, 10);
+      };
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -193,10 +200,9 @@ function RegisterSellPage() {
             return `${dateString}T00:00:00`;
         };
 
-        const pedidoPayload: PedidoPayload = {
-            clienteId: formData.cliente.id,
-            receituario: Object.keys(formData.receituario).length > 0 ? 
-            {
+        try {
+
+            const receituarioPayload = Object.keys(formData.receituario).length > 0 ? {
                 ...formData.receituario,
                 esfericoOd: parseCurrency(formData.receituario.esfericoOd),
                 cilindricoOd: parseCurrency(formData.receituario.cilindricoOd),
@@ -213,30 +219,53 @@ function RegisterSellPage() {
                 anguloMaior: parseCurrency(formData.receituario.anguloMaior),
                 ponteAro: parseCurrency(formData.receituario.ponteAro),
                 anguloVertical: parseCurrency(formData.receituario.anguloVertical),
-            } 
-            : undefined,
-            itens: formData.itens.map(item => ({
-                produtoId: item.produtoId, 
-                quantidade: item.quantidade,
-            })),
-            pagamentos: formData.pagamentos.map(p => ({
-                formaPagamento: p.formaPagamento,
-                valorPago: p.valorPago,
-                numeroParcelas: p.numeroParcelas,
-            })),
-            desconto: parseCurrency(formData.desconto),
-            valorLentes: parseCurrency(formData.valorLentes),
-            valorArmacao: parseCurrency(formData.valorArmacao),
-            dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
-            dataPedido: formatarDataParaLocalDateTime(formData.dataPedido) || undefined,
-            ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
-        };
+            } : undefined;
 
-        // console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
+            
+            if (isEditMode && pedidoId) {
+                const updatePayload: PedidoUpdatePayload = {
+                    receituario: receituarioPayload,
+                    ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
+                    itens: formData.itens,
+                    pagamentos: formData.pagamentos.map(({ id, ...resto }) => resto),
+                    desconto: parseCurrency(formData.desconto),
+                    valorLentes: parseCurrency(formData.valorLentes),
+                    valorArmacao: parseCurrency(formData.valorArmacao),
+                    dataPedido: formatarDataParaLocalDateTime(formData.dataPedido),
+                    dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
+                    dataEntrega: formData.dataEntrega || undefined,
+                };
 
-        try {
-            await createPedido(pedidoPayload);
+                await updatePedido(pedidoId, updatePayload)
+                console.log("PAYLOAD ENVIADO:", JSON.stringify(updatePayload, null, 2));
+            } else {
+                
+                const pedidoPayload: PedidoPayload = {
+                    clienteId: formData.cliente.id,
+                    receituario: receituarioPayload,
+                    itens: formData.itens.map(item => ({
+                        produtoId: item.produtoId, 
+                        quantidade: item.quantidade,
+                    })),
+                    pagamentos: formData.pagamentos.map(p => ({
+                        formaPagamento: p.formaPagamento,
+                        valorPago: p.valorPago,
+                        numeroParcelas: p.numeroParcelas,
+                    })),
+                    desconto: parseCurrency(formData.desconto),
+                    valorLentes: parseCurrency(formData.valorLentes),
+                    valorArmacao: parseCurrency(formData.valorArmacao),
+                    dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
+                    dataPedido: formatarDataParaLocalDateTime(formData.dataPedido) || undefined,
+                    ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
+                };
+
+                await createPedido(pedidoPayload);
+                console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
+            }
+
             navigate('/vendas');
+
         } catch (err: any) {
             if (err.response?.data) {
                 const errorData = err.response.data;
