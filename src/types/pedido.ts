@@ -67,4 +67,5 @@ export interface PedidoUpdatePayload {
   valorArmacao?: number;
   desconto?: number;
   pagamentos?: PagamentoCreatePayload[];
+  status?: StatusPedido;
 }
