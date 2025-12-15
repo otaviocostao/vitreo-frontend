@@ -19,7 +19,7 @@ const TopDashboardCard: React.FC<TopCardProps> = ({ title, value, trend, percent
   };
 
   return (
-    <div className="w-full flex flex-col gap-1 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+    <div className="w-full flex flex-col gap-1 bg-white border border-gray-200 rounded-lg p-4 ">
       <p className="text-sm text-gray-600">{title}</p>
       <div className="flex items-baseline gap-2">
         <h1 className="text-3xl font-bold text-gray-900">{value}</h1>
