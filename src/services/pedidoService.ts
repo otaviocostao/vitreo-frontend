@@ -1,5 +1,5 @@
 import type { Page } from '../types/pagination';
-import type { PedidoPayload, PedidoResponse, PedidoUpdatePayload } from '../types/pedido';
+import type { PedidoPayload, PedidoResponse, PedidoUpdatePayload, StatusPedido } from '../types/pedido';
 import api from './api';
 
 export interface PedidoFiltros {
@@ -48,6 +48,15 @@ export const updatePedido = async (id: string, payload: PedidoUpdatePayload): Pr
     return response.data;
   } catch (error) {
     console.error(`Erro ao atualizar pedido com ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updatePedidoStatus = async (id: string, status: StatusPedido): Promise<void> => {
+  try {
+    await api.patch(`/pedidos/${id}/status`, { status });
+  } catch (error) {
+    console.error(`Erro ao atualizar status do pedido ${id}:`, error);
     throw error;
   }
 };
