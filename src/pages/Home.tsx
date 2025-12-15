@@ -4,26 +4,67 @@ import TopDashboardCard from '../components/dashboard/TopDashboardCard';
 import ChartCard from '../components/dashboard/ChartCard';
 import TotalRevenueChart from '../components/dashboard/TotalRevenueChart';
 import Button from '../components/ui/Button'; 
-import LastSalesCard, { type Sale } from '../components/dashboard/LastSalesCard';
+import LastSalesCard from '../components/dashboard/LastSalesCard';
 import HeaderTitlePage from '../components/HeaderTitlePage';
-import DateInput from '../components/ui/DateInput';
+import { useCallback, useEffect, useState } from 'react';
+import type { DashboardResponse } from '../types/dashboard';
+import { getDashboardData } from '../services/dashboardService';
+import ErrorPopup from '../components/ErrorPopup';
 
-const lastSalesData: Sale[] = [
-  { id: 123, client: 'Ana Maria Braga', price: 1080.00, timeAgo: '2 min atrás' },
-  { id: 122, client: 'Mario Carlos', price: 1310.00, timeAgo: '15 min atrás' },
-  { id: 121, client: 'Antonio Mota', price: 880.00, timeAgo: '1 hora atrás' },
-  { id: 120, client: 'Juliana Paes', price: 2450.50, timeAgo: '3 horas atrás' },
-];
+const paraInputDate = (data: Date) => data.toISOString().split('T')[0];
 
 const Home = () => {
+
+  const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const hoje = new Date();
+  const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+  const [dataInicio, setDataInicio] = useState(paraInputDate(primeiroDiaDoMes));
+  const [dataFim, setDataFim] = useState(paraInputDate(ultimoDiaDoMes));
+
+  const fetchPedidos = useCallback(async (page: number, size:number) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const data = await getDashboardData(dataInicio, dataFim);
+      setDashboardData(data);
+      } catch (err) {
+        setError('Falha ao carregar os dados do Dashboard. Tente novamente');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+    }
+    }, [dataInicio, dataFim]);
+
+    useEffect(() => {
+      fetchPedidos(0, 4 );
+    }, [fetchPedidos]);
+
+
+  if (error) {
+    return <ErrorPopup message={error} onClose={() => setError(null)} />;
+  }
+
+  if (!dashboardData) {
+    return <div className="p-4 text-center text-gray-500">Nenhum dado encontrado para o período selecionado.</div>;
+  }
+
   return (
     <div>
         <div className='flex justify-between '>
           <HeaderTitlePage page_name='Dashboard' />
           <div className="flex items-center gap-2 p-4">
-              <DateInput label={''}/>
+              <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="px-2 py-2 bg-white border border-gray-300 rounded-md
+            text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"/>
               <span>-</span>
-              <DateInput label={''}/>
+              <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="px-2 py-2 bg-white border border-gray-300 rounded-md
+            text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"/>
+
               <Button variant="primary">
                   <Upload size={16} />
                   <span>Exportar</span>
@@ -33,28 +74,46 @@ const Home = () => {
       <div className="flex-1 flex-col w-full p-4 space-y-6">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <TopDashboardCard title="Vendas no período" value="84" trend="up" percentage={10} contextText="+ 8 vendas vs. mês passado" />
-          <TopDashboardCard title="Valor total das vendas" value="R$45.119" trend="up" percentage={15} contextText="+ R$5.885 vs. mês passado" />
-          <TopDashboardCard title="Ticket médio" value="R$539" trend="down" percentage={5} contextText="- R$28 vs. mês passado" />
-          <TopDashboardCard title="Novos clientes" value="23" trend="up" percentage={5} contextText="+ 1 cliente vs. mês passado" />
+          <TopDashboardCard 
+            title="Vendas no período" 
+            value={dashboardData.vendasNoPeriodo.valor} 
+            trend={dashboardData.vendasNoPeriodo.tendencia} 
+            percentage={dashboardData.vendasNoPeriodo.percentual}
+            contextText={dashboardData.vendasNoPeriodo.textoContexto} 
+          />
+          <TopDashboardCard 
+            title="Valor total das vendas" 
+            value={dashboardData.valorTotalVendas.valor} 
+            trend={dashboardData.valorTotalVendas.tendencia} 
+            percentage={dashboardData.valorTotalVendas.percentual}
+            contextText={dashboardData.valorTotalVendas.textoContexto} 
+          />
+          <TopDashboardCard 
+            title="Ticket médio das vendas" 
+            value={dashboardData.ticketMedio.valor} 
+            trend={dashboardData.ticketMedio.tendencia} 
+            percentage={dashboardData.ticketMedio.percentual}
+            contextText={dashboardData.ticketMedio.textoContexto} 
+          />
+          <TopDashboardCard 
+            title="Novos clientes" 
+            value={dashboardData.novosClientes.valor} 
+            trend={dashboardData.novosClientes.tendencia} 
+            percentage={dashboardData.novosClientes.percentual}
+            contextText={dashboardData.novosClientes.textoContexto} 
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <ChartCard
               title="Receita Total"
-              actions={
-                <Button variant="secondary">
-                  <Filter size={16} />
-                  <span>Filtrar</span>
-                </Button>
-              }
             >
-              <TotalRevenueChart />
+              <TotalRevenueChart data={dashboardData.graficoReceita} />
             </ChartCard>
           </div>
           <div>
-            <LastSalesCard sales={lastSalesData} />
+            <LastSalesCard sales={dashboardData.ultimasVendas} />
           </div>
         </div>
         
