@@ -1,21 +1,19 @@
 import React from 'react';
 import SaleListItem from './SaleListItem';
 import Button from '../ui/Button';
-
-export interface Sale {
-  id: number;
-  client: string;
-  price: number; 
-  timeAgo: string;
-}
+import type { VendaRecente } from '../../types/dashboard';
+import { useNavigate } from 'react-router-dom';
 
 interface LastSalesCardProps {
-  sales: Sale[];
+  sales: VendaRecente[];
 }
 
 const LastSalesCard: React.FC<LastSalesCardProps> = ({ sales }) => {
+
+  const navigate = useNavigate();
+  
   return (
-    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg p-4 box-border flex flex-col h-full shadow-lg">
+    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg p-4 box-border flex flex-col h-full">
       <header className="mb-4">
         <h3 className="text-xl font-bold text-white">Últimas vendas</h3>
       </header>
@@ -29,6 +27,7 @@ const LastSalesCard: React.FC<LastSalesCardProps> = ({ sales }) => {
       <Button
         variant="secondary"
         className="mt-4 w-full bg-white/20 text-white border-none hover:bg-white/30"
+        onClick={() => navigate(`/vendas`)}
       >
         <span>Ver todas as vendas →</span>
       </Button>
