@@ -7,7 +7,7 @@ import InputField from "../components/ui/InputField";
 import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 import { useEffect, useState } from "react";
 import AddClientModal from "../components/AddClientModal";
-import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePayload } from "../types/pedido";
+import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePayload, StatusPedido } from "../types/pedido";
 import { createPedido, getPedidoById, updatePedido } from "../services/pedidoService";
 import type { ReceituarioPayload } from "../types/receituario";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import ClienteSearch from "../components/ClienteSearch";
 import ErrorPopup from "../components/ErrorPopup";
 import AddProductModal from "../components/AddProductModal";
 import { getClienteById } from "../services/clienteService";
+import StatusSelector from "../components/StatusSelector";
 
 interface VendaFormData {
     cliente: ClienteResponse | null;
@@ -31,11 +32,12 @@ interface VendaFormData {
     desconto: number;
     valorLentes: number;
     valorArmacao: number;
+    status: StatusPedido;
 }
 
 const initialFormData = {
     cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '',
-    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0
+    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0, status: '' as StatusPedido
 }
 
 function RegisterSellPage() {
@@ -98,6 +100,7 @@ function RegisterSellPage() {
                     valorLentes: pedidoData.valorLentes ?? 0,
                     valorArmacao: pedidoData.valorArmacao ?? 0,
                     desconto: pedidoData.desconto ?? 0,
+                    status: pedidoData.status ?? '',
                 };
 
                 setFormData(dadosDoFormulario);
@@ -234,6 +237,7 @@ function RegisterSellPage() {
                     dataPedido: formatarDataParaLocalDateTime(formData.dataPedido),
                     dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
                     dataEntrega: formData.dataEntrega || undefined,
+                    status: formData.status,
                 };
 
                 await updatePedido(pedidoId, updatePayload)
@@ -341,6 +345,10 @@ function RegisterSellPage() {
         });
     };
 
+    const handleStatusChange = (newStatus: StatusPedido) => {
+        setFormData(prev => ({ ...prev, status: newStatus }));
+    };
+
     const handleOpenProductModal = (tipo: 'ARMACAO' | 'LENTE') => {
         setProductModalType(tipo);
     };
@@ -363,20 +371,33 @@ function RegisterSellPage() {
                         />
                     </InfoSection>
 
-                    <InfoSection title="Ordem de serviço" className="w-1/3">
-                        <div className="flex items-end"> 
-                            <InputField
-                                id="os-number"
-                                type="number"
-                                name="ordemServico"
-                                placeholder="O.S"
-                                className="w-24"
-                                labelClassName="sr-only"
-                                value={formData.ordemServico}
-                                onChange={handleFormChange}
-                            />
-                        </div>
-                    </InfoSection>
+                    <div  className="w-1/3 flex divide-x divide-gray-200 ">
+                        <InfoSection title="Ordem de serviço" className="w-full">
+                            <div className="flex items-end"> 
+                                <InputField
+                                    id="os-number"
+                                    type="number"
+                                    name="ordemServico"
+                                    placeholder="O.S"
+                                    className="w-24"
+                                    labelClassName="sr-only"
+                                    value={formData.ordemServico}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+                        </InfoSection>
+
+                        {isEditMode &&
+                            <InfoSection title="Status" className="w-full">
+                                <StatusSelector
+                                    currentStatus={formData.status}
+                                    onStatusChange={handleStatusChange}
+                                    disabled={formData.status === 'ENTREGUE' || formData.status === 'CANCELADO'}
+                                />
+                            </InfoSection>
+                        }
+                    </div>
+
                 </div>
                 <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
                     <div className="flex flex-col w-2/3 " >
