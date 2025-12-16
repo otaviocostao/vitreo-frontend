@@ -2,21 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import type { StatusPedido } from "../types/pedido";
 import { CheckCircle, ChevronDown, Clock, Cog, FileText, PackageCheck, XCircle } from "lucide-react";
 
-const useClickOutside = (ref: React.RefObject<HTMLDivElement>, handler: () => void) => {
-useEffect(() => {
+const useClickOutside = (
+  ref: React.RefObject<HTMLElement | null>,
+  handler: () => void
+) => {
+  useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-    if (!ref.current || ref.current.contains(event.target as Node)) {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
         return;
-    }
-    handler();
+      }
+      handler();
     };
     document.addEventListener('mousedown', listener);
     document.addEventListener('touchstart', listener);
     return () => {
-    document.removeEventListener('mousedown', listener);
-    document.removeEventListener('touchstart', listener);
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
     };
-}, [ref, handler]);
+  }, [ref, handler]);
 };
 
 
@@ -50,7 +53,7 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatus
     CANCELADO: { icon: <XCircle size={14} />, label: 'Cancelado', text: 'text-red-700', bg: 'bg-red-100' },
   };
 
-  const currentConfig = statusConfig[currentStatus] || statusConfig.CANCELADO;
+  const currentConfig = statusConfig[currentStatus] || '';
 
   const handleSelect = (newStatus: StatusPedido) => {
     onStatusChange(newStatus);
@@ -63,7 +66,7 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatus
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-1.5 px-2.5 py-1 box-border rounded-lg text-xs font-medium transition-all ${currentConfig.bg} ${currentConfig.text} ${disabled ? 'opacity-70 cursor-not-allowed' : 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-500'}`}
+        className={`w-fit flex items-center justify-between gap-1.5 px-2.5 py-3 box-border rounded-md text-xs font-medium transition-all ${currentConfig.bg} ${currentConfig.text} ${disabled ? 'opacity-70 cursor-not-allowed' : 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-500'}`}
       >
         <div className="flex items-center gap-1.5">
           {currentConfig.icon}
