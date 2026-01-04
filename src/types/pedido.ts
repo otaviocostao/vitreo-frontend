@@ -11,6 +11,8 @@ export interface ItemPedidoResponse {
   nomeProduto: string;
   tipoProduto: 'LENTE' | 'ARMACAO';
   quantidade: number;
+  precoUnitario: number;
+  subtotal: number;
 }
 
 export interface PagamentoPayload {
