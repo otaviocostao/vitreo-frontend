@@ -6,7 +6,7 @@ const Sidebar = () => {
   const iconSize = 18;
 
   return (
-    <div className='w-60 flex flex-col justify-between items-center border-r-1 border-gray-200 bg-white h-full'>
+    <div className='w-60 flex flex-col justify-between items-center border-r-1 border-gray-200 bg-white h-full print:hidden'>
       
       <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>
         <SidebarButton 
