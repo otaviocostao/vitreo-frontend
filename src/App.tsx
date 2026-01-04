@@ -11,6 +11,7 @@ import RegisterProductPage from './pages/RegisterProductPage'
 import RegisterSupplierPage from './pages/RegisterSupplierPage'
 import RegisterClientPage from './pages/RegisterClientPage'
 import RegisterSellPage from './pages/RegisterSellPage'
+import ConfirmedSellPage from './pages/ConfirmedSellPage'
 
 function App() {
 
@@ -33,6 +34,10 @@ function App() {
           <Route
                 path="/vendas/:id"
                 element={<RegisterSellPage />}
+              />
+          <Route
+                path="/vendas/:id/detalhes"
+                element={<ConfirmedSellPage />}
               />
           <Route
                 path="/clientes"
