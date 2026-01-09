@@ -10,7 +10,7 @@ import AddClientModal from "../components/AddClientModal";
 import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePayload, StatusPedido } from "../types/pedido";
 import { createPedido, getPedidoById, updatePedido } from "../services/pedidoService";
 import type { ReceituarioPayload } from "../types/receituario";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import type { ClienteResponse } from "../types/cliente";
 import type { ProdutoResponse } from "../types/produto";
 import { getProducts } from "../services/productService";
@@ -19,6 +19,8 @@ import ErrorPopup from "../components/ErrorPopup";
 import AddProductModal from "../components/AddProductModal";
 import { getClienteById } from "../services/clienteService";
 import StatusSelector from "../components/StatusSelector";
+import Button from "../components/ui/Button";
+import { FileText } from "lucide-react";
 
 interface VendaFormData {
     cliente: ClienteResponse | null;
@@ -245,6 +247,7 @@ function RegisterSellPage() {
 
                 await updatePedido(pedidoId, updatePayload)
                 console.log("PAYLOAD ENVIADO:", JSON.stringify(updatePayload, null, 2));
+                navigate(`/vendas/${pedidoId}/detalhes`);
             } else {
                 
                 const pedidoPayload: PedidoPayload = {
@@ -268,11 +271,10 @@ function RegisterSellPage() {
                     observacoes: formData.observacoes,
                 };
 
-                await createPedido(pedidoPayload);
-                console.log("PAYLOAD ENVIADO:", JSON.stringify(pedidoPayload, null, 2));
+                const novoPedido = await createPedido(pedidoPayload);
+                console.log("Resposta da API de criação:", novoPedido);
+                navigate(`/vendas/${novoPedido.id}/detalhes`); 
             }
-
-            navigate('/vendas');
 
         } catch (err: any) {
             if (err.response?.data) {
@@ -363,7 +365,21 @@ function RegisterSellPage() {
     
     return (
         <div className=" flex flex-col w-fit box-border">
-        <HeaderTitlePage page_name="Nova venda"/>
+        <div className="flex justify-between items-center print:hidden">
+            <HeaderTitlePage page_name={isEditMode ? 'Editar Venda' : 'Nova Venda'} />
+
+            {/* O botão só aparece no modo de edição */}
+            {isEditMode && (
+                <div className="p-4">
+                    <Link to={`/vendas/${pedidoId}/detalhes`}>
+                        <Button variant="secondary" >
+                            <FileText size={16} />
+                            <span>Ver Comprovante</span>
+                        </Button>
+                    </Link>
+                </div>
+            )}
+        </div>
         <div className="w-full flex flex-1 flex-col px-4 box-border">
             <form onSubmit={handleSubmit}>
                 <div className="flex divide-x divide-gray-200 border-y border-gray-200">
