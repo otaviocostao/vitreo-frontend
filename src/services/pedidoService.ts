@@ -8,10 +8,15 @@ export interface PedidoFiltros {
   size?: number;
 }
 
-export const createPedido = async (data: PedidoPayload) => {
-    const response = await api.post('/pedidos', data);
+export const createPedido = async (payload: PedidoPayload): Promise<PedidoResponse> => {
+  try {
+    const response = await api.post<PedidoResponse>('/pedidos', payload);
     return response.data;
-}
+  } catch (error) {
+    console.error("Erro ao criar pedido:", error);
+    throw error;
+  }
+};
 
 export const getPedidos = async (filtros: PedidoFiltros = {}): Promise<Page<PedidoResponse>> => {
   const params: Record<string, any> = {
