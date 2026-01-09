@@ -36,6 +36,7 @@ export interface PedidoPayload {
   valorArmacao?: number;
   desconto?: number;
   pagamentos?: PagamentoCreatePayload[];
+  observacoes?: string;
 }
 
 export interface PedidoResponse {
@@ -54,6 +55,7 @@ export interface PedidoResponse {
   valorFinal: number;
   desconto: number;
   pagamentos: PagamentoCreatePayload[];
+  observacoes: string;
 }
 
 export type StatusPedido = 'ORCAMENTO' | 'SOLICITADO' | 'EM_PRODUCAO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO';
@@ -70,4 +72,5 @@ export interface PedidoUpdatePayload {
   desconto?: number;
   pagamentos?: PagamentoCreatePayload[];
   status?: StatusPedido;
+  observacoes?: string;
 }

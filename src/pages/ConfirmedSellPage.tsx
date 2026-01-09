@@ -67,24 +67,6 @@ const SaleConfirmationPage = () => {
     return pedido.valorFinal - valorTotalPago;
   }, [pedido]);
 
-  const paymentIcons = {
-    'DINHEIRO': <CircleDollarSign size={20} className="text-teal-500" />,
-    'PIX': <Landmark size={20} className="text-blue-500" />,
-    'CARTAO_CREDITO': <CreditCard size={20} className="text-orange-500" />,
-    'CARTAO_DEBITO': <CreditCard size={20} className="text-green-500" />,
-    'PRAZO': <Banknote size={20} className="text-teal-500" />,
-    'PENDENTE': <CircleDashed size={20} className="text-gray-500" />,
-  };
-
-  const formaPagamentoDisplayMap: Record<string, string> = {
-    'DINHEIRO': 'Dinheiro',
-    'PIX': 'Pix',
-    'CARTAO_DEBITO': 'Cartão de Débito',
-    'CARTAO_CREDITO': 'Cartão de Crédito',
-    'PRAZO': 'Prazo',
-    'PENDENTE': 'Pendente'
-  };
-
   type PrintOption = 'AMBAS' | 'OTICA' | 'CLIENTE';
 
   const printOptions = [
@@ -230,39 +212,10 @@ const SaleConfirmationPage = () => {
                 </div>
 
                 <div className='w-1/4 print:w-[35%]'>
-                  <DetailSection title="Orçamento do pedido" className='border-none'>
+                  <DetailSection title="Orçamento do pedido">
                     <DetailItem label="Valor da armação" value={formatarMoeda(pedido.valorArmacao)} />
                     <DetailItem label="Valor das lentes" value={formatarMoeda(pedido.valorLentes)} />
                     <DetailItem label="Desconto aplicado" value={formatarMoeda(pedido.desconto)} />
-                    
-                    <div className='print:hidden'>
-
-                        <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Pagamentos Realizados</h2>
-                        <div className="space-y-2 max-h-40 overflow-y-auto pr-2 print:max-h-none print:overflow-visible print:pr-0">
-                        {pedido.pagamentos.length === 0 ? (
-                          <p className="text-sm text-gray-500 text-center py-4">Nenhum pagamento registrado.</p>
-                        ) : (
-                          pedido.pagamentos.map(payment => (
-                            payment.valorPago && (
-                              <div key={payment.valorPago} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                                <div className="flex items-center gap-3">
-                                  {paymentIcons[payment.formaPagamento]}
-                                  <div>
-                                    <p className="font-semibold text-sm text-gray-800">{formaPagamentoDisplayMap[payment.formaPagamento] || payment.formaPagamento}</p>
-                                    {payment.numeroParcelas > 1 && (
-                                      <p className="text-xs text-gray-500">{payment.numeroParcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago / payment.numeroParcelas)}</p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <span className="font-semibold text-sm text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago)}</span>
-                                </div>
-                              </div>
-                            )
-                          ))
-                        )}
-                      </div>
-                    </div>
 
                       <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Financeiro:</h2>
 
@@ -275,9 +228,13 @@ const SaleConfirmationPage = () => {
                       <span className="text-green-600">{formatarMoeda(valorTotalPago)}</span>
                     </div>
                     <div className={`flex justify-between text-sm font-bold ${valorRestante <= 0 ? 'text-green-600' : 'text-red-600'} print:text-black`}>
-                            <span>Valor Restante:</span>
-                            <span>{formatarMoeda(valorRestante)}</span>
-                        </div>
+                      <span>Valor Restante:</span>
+                      <span>{formatarMoeda(valorRestante)}</span>
+                    </div>
+
+                    <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Observações:</h2>
+                    <p className="text-sm text-gray-700 line-clamp-4">{pedido.observacoes || 'Nenhuma observação registrada.'}</p>
+                        
                   </DetailSection>
                 </div>
               </div>

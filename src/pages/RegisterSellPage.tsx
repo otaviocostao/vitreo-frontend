@@ -33,11 +33,12 @@ interface VendaFormData {
     valorLentes: number;
     valorArmacao: number;
     status: StatusPedido;
+    observacoes: string;
 }
 
 const initialFormData = {
     cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '',
-    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0, status: '' as StatusPedido
+    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0, status: '' as StatusPedido, observacoes: ''
 }
 
 function RegisterSellPage() {
@@ -101,6 +102,7 @@ function RegisterSellPage() {
                     valorArmacao: pedidoData.valorArmacao ?? 0,
                     desconto: pedidoData.desconto ?? 0,
                     status: pedidoData.status ?? '',
+                    observacoes: pedidoData.observacoes || '',
                 };
 
                 setFormData(dadosDoFormulario);
@@ -238,6 +240,7 @@ function RegisterSellPage() {
                     dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
                     dataEntrega: formData.dataEntrega || undefined,
                     status: formData.status,
+                    observacoes: formData.observacoes,
                 };
 
                 await updatePedido(pedidoId, updatePayload)
@@ -262,6 +265,7 @@ function RegisterSellPage() {
                     dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
                     dataPedido: formatarDataParaLocalDateTime(formData.dataPedido) || undefined,
                     ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
+                    observacoes: formData.observacoes,
                 };
 
                 await createPedido(pedidoPayload);
