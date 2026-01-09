@@ -8,12 +8,14 @@ interface ClienteSearchProps {
   selectedCliente: ClienteResponse | null;
   onClienteSelect: (cliente: ClienteResponse | null) => void;
   onOpenClientModal: () => void;
+  isEditMode: boolean;
 }
 
 const ClienteSearch: React.FC<ClienteSearchProps> = ({
   selectedCliente,
   onClienteSelect,
   onOpenClientModal,
+  isEditMode
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [options, setOptions] = useState<{ value: string; label: string }[]>([]);
@@ -65,13 +67,15 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
               <p className="flex items-center text-xs text-gray-600">• CPF: {selectedCliente.cpf}</p>
             </div>
           </div>
-          <button 
-            type="button" 
-            onClick={() => onClienteSelect(null)} 
-            className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
-          >
-            <X />
-          </button>
+          {!isEditMode && (
+            <button 
+              type="button" 
+              onClick={() => onClienteSelect(null)} 
+              className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
+            >
+              <X />
+            </button>
+          )}
         </div>
       ) : (
         <SearchableSelectWithButton

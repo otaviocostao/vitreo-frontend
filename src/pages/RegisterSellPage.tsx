@@ -388,6 +388,7 @@ function RegisterSellPage() {
                             selectedCliente={formData.cliente}
                             onClienteSelect={handleClienteSelect}
                             onOpenClientModal={() => setIsClientModalOpen(true)}
+                            isEditMode={isEditMode}
                         />
                     </InfoSection>
 
