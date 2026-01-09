@@ -143,7 +143,7 @@ const SaleConfirmationPage = () => {
                 <DetailItem label="Nome:" value={pedido.cliente.nomeCompleto} />
               </DetailSection>
 
-              <div className='flex flex-col lg:flex-row divide-x divide-y divide-gray-200 print:flex-row print:divide-x print:divide-gray-200'>
+              <div className='flex flex-col lg:flex-row divide-x divide-gray-200 print:flex-row print:divide-x print:divide-gray-200'>
                 
                 <div className='w-3/4 print:w-[65%]'>
                   {pedido.receituario && (
@@ -212,7 +212,7 @@ const SaleConfirmationPage = () => {
                 </div>
 
                 <div className='w-1/4 print:w-[35%]'>
-                  <DetailSection title="Orçamento do pedido">
+                  <DetailSection title="Orçamento do pedido" className='border-none'>
                     <DetailItem label="Valor da armação" value={formatarMoeda(pedido.valorArmacao)} />
                     <DetailItem label="Valor das lentes" value={formatarMoeda(pedido.valorLentes)} />
                     <DetailItem label="Desconto aplicado" value={formatarMoeda(pedido.desconto)} />
