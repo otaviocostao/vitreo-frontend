@@ -280,7 +280,7 @@ function RegisterSellPage() {
             if (err.response?.data) {
                 const errorData = err.response.data;
                 const messages = typeof errorData === 'object' ? Object.values(errorData).join('; ') : errorData.message;
-                setError(`Erro ao salvar: ${messages}`);
+                setError(messages || 'Ocorreu um erro ao processar sua solicitação.');
             } else {
                 setError('Ocorreu um erro de rede ou no servidor.');
             }
