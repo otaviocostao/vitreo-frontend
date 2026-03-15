@@ -1,67 +1,76 @@
-
-import { Boxes, Building2, LayoutDashboard, LogOut, PlusCircle, Settings, ShoppingCart, Users } from 'lucide-react'
-import SidebarButton from './ui/SidebarButton'
+import {
+  Boxes,
+  Building2,
+  LayoutDashboard,
+  LogOut,
+  PlusCircle,
+  Settings,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
+import SidebarButton from "./ui/SidebarButton";
+import { handleLogout } from "../services/authService";
 
 const Sidebar = () => {
   const iconSize = 18;
+  const handleLogoutCall = async () => {
+    await handleLogout();
+  }
+
 
   return (
-    <div className='w-60 flex flex-col justify-between items-center border-r-1 border-gray-200 bg-white h-full print:hidden'>
-      
-      <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>
-        <SidebarButton 
-        page_name='Início' 
-        to='/' 
-        icon={<LayoutDashboard size={iconSize} />}
-        end 
-      />
-      <SidebarButton 
-        page_name='Nova Venda' 
-        to='/vendas/nova' 
-        icon={<PlusCircle size={iconSize} />}
-        end 
-      />
-      <SidebarButton 
-        page_name='Vendas' 
-        to='/vendas' 
-        icon={<ShoppingCart size={iconSize} />} 
-        end
-      />
-      <SidebarButton 
-        page_name='Clientes' 
-        to='/clientes' 
-        icon={<Users size={iconSize} />}
-        
-      />
-      <SidebarButton 
-        page_name='Estoque' 
-        to='/produtos' 
-        icon={<Boxes size={iconSize} />} 
-        
-      />
-      <SidebarButton 
-        page_name='Fornecedores' 
-        to='/fornecedores' 
-        icon={<Building2 size={iconSize} />} 
-        
-      />
-      </div>
-      <div className='w-full flex flex-col justify-items-center box-border p-2 gap-3'>  
-        <SidebarButton 
-          page_name='Ajustes' 
-          to='/ajustes' 
-          icon={<Settings size={iconSize} />} 
+    <div className="w-60 flex flex-col justify-between items-center border-r-1 border-gray-200 bg-white h-full print:hidden">
+      <div className="w-full flex flex-col justify-items-center box-border p-2 gap-3">
+        <SidebarButton
+          page_name="Início"
+          to="/"
+          icon={<LayoutDashboard size={iconSize} />}
           end
         />
-        <SidebarButton 
-          page_name='Sair' 
-          to='/logout' 
-          icon={<LogOut size={iconSize} />} 
+        <SidebarButton
+          page_name="Nova Venda"
+          to="/vendas/nova"
+          icon={<PlusCircle size={iconSize} />}
+          end
+        />
+        <SidebarButton
+          page_name="Vendas"
+          to="/vendas"
+          icon={<ShoppingCart size={iconSize} />}
+          end
+        />
+        <SidebarButton
+          page_name="Clientes"
+          to="/clientes"
+          icon={<Users size={iconSize} />}
+        />
+        <SidebarButton
+          page_name="Estoque"
+          to="/produtos"
+          icon={<Boxes size={iconSize} />}
+        />
+        <SidebarButton
+          page_name="Fornecedores"
+          to="/fornecedores"
+          icon={<Building2 size={iconSize} />}
+        />
+      </div>
+      <div className="w-full flex flex-col justify-items-center box-border p-2 gap-3">
+        <SidebarButton
+          page_name="Ajustes"
+          to="/ajustes"
+          icon={<Settings size={iconSize} />}
+          end
+        />
+        <SidebarButton
+          page_name="Sair"
+          onClick={handleLogoutCall}
+          icon={<LogOut size={iconSize} />}
           end
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
