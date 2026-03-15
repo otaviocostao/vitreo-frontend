@@ -3,16 +3,13 @@ import Button from "../components/ui/Button";
 import InputField from "../components/ui/InputField";
 import ErrorPopup from "../components/ErrorPopup";
 import { Glasses } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-import type { LoginResponse } from "../types/login";
+import { handleLogin } from "../services/authService";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   if (error) {
     return <ErrorPopup message={error} onClose={() => setError(null)} />;
@@ -23,16 +20,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await api.post<LoginResponse>("/auth/login", {
-        email,
-        password,
-        rememberMe,
-      });
-
-      localStorage.setItem("token", response.data.jwtToken);
-      localStorage.setItem("userEmail", response.data.email);
-
-      navigate("/");
+      await handleLogin({ email, password, rememberMe });
     } catch (err: any) {
       if (err.response && err.response.status === 401) {
         setError("E-mail ou senha incorretos.");
