@@ -5,8 +5,8 @@ export const handleLogin = async (userData: any) => {
     try {
         const response = await api.post<LoginResponse>("/auth/login", userData);
 
-        localStorage.setItem("token", response.data.jwtToken);
-        localStorage.setItem("userEmail", response.data.email);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userEmail", response.data.user.email);
 
         window.location.href = "/"; 
     } catch (err: any) {

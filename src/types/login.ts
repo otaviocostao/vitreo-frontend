@@ -1,4 +1,8 @@
 export interface LoginResponse {
-  email: string;
-  jwtToken: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+  };
+  token: string;
 }
