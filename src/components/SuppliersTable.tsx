@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { FornecedorResponse } from '../types/fornecedor';
+import type { SupplierResponse } from '../types/supplier';
 import LoadingSpinner from './LoadingSpinner';
 import Button from './ui/Button';
 import { Trash2 } from 'lucide-react';
 
 interface SuppliersTableProps {
-  fornecedores: FornecedorResponse[];
+  suppliers: SupplierResponse[];
   isLoading: boolean;
   currentPage: number;
   pageSize: number;
@@ -14,42 +14,42 @@ interface SuppliersTableProps {
 
 }
 
-const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading, currentPage, pageSize, onDeleteClick}) => {
+const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoading, currentPage, pageSize, onDeleteClick }) => {
   const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
-    
+
   const navigate = useNavigate();
-  const handleRowClick = ( fornecedorId: string) => {
-    navigate(`/fornecedores/${fornecedorId}`);
+  const handleRowClick = (supplierId: string) => {
+    navigate(`/fornecedores/${supplierId}`);
   };
 
   return (
     <div className="bg-white border-1 border-gray-200 rounded-lg overflow-x-auto">
       <div className="max-h-[60vh] overflow-y-auto">
         <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <thead className="bg-gray-50">
             <tr>
-                {tableHeaders.map((header) => (
+              {tableHeaders.map((header) => (
                 <th
-                    key={header}
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >   
-                    {header}
+                  key={header}
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  {header}
                 </th>
-                ))}
+              ))}
             </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
             {isLoading ? (
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8">
-                  <LoadingSpinner 
+                  <LoadingSpinner
                     size="h-8 w-8"
-                    text="Carregando fornecedores..." 
+                    text="Carregando fornecedores..."
                   />
                 </td>
-              </tr> 
-            ) : fornecedores.length === 0 ? (
+              </tr>
+            ) : suppliers.length === 0 ? (
 
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
@@ -57,38 +57,39 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ fornecedores, isLoading
                 </td>
               </tr>
             ) : (
-              fornecedores.map((fornecedor, i) => {
+              suppliers.map((supplier, i) => {
                 const rowNumber = (currentPage - 1) * pageSize + i + 1;
-                return(
-                  <tr key={fornecedor.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(fornecedor.id)}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.razaoSocial}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.nomeFantasia}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.cnpj}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.logradouro}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.numero}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.bairro}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.cidade}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{fornecedor.endereco.estado}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                    <Button 
-                        variant="smallDelete" 
+                return (
+                  <tr key={supplier.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(supplier.id)}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.corporateName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.tradeName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.cnpj}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.street}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.number}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.neighborhood}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <Button
+                        variant="smallDelete"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteClick(fornecedor.id, fornecedor.nomeFantasia); 
+                          onDeleteClick(supplier.id, supplier.tradeName);
                         }}
-                        >
+                      >
                         <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </td>
+                      </Button>
+                    </td>
                   </tr>
-                )}
+                )
+              }
               ))
             }
-            </tbody>
+          </tbody>
         </table>
-        </div>
       </div>
+    </div>
   );
 };
 

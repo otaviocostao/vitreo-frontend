@@ -6,7 +6,7 @@ import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { FornecedorOption, MarcaOption, ProdutoPayload, ProdutoResponse, TipoProduto } from '../types/produto';
-import { getFornecedoresOptions } from '../services/fornecedorService';
+import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
 import ErrorPopup from '../components/ErrorPopup';
@@ -46,7 +46,7 @@ const RegisterProductPage = () => {
 
         if (isEditMode && productId) {
           const productData = await getProductById(productId);
-          
+
           const flattenedData = {
             tipoProduto: productData.tipoProduto,
             fornecedorId: productData.fornecedor.id,
@@ -100,7 +100,7 @@ const RegisterProductPage = () => {
     setIsLoading(true);
     setError(null);
 
-   const productPayload: ProdutoPayload = {
+    const productPayload: ProdutoPayload = {
       tipoProduto: formData.tipoProduto,
       fornecedorId: formData.fornecedorId,
       marcaId: formData.marcaId || undefined,
@@ -140,13 +140,13 @@ const RegisterProductPage = () => {
   const brandOptions = marcas.map(m => ({ value: m.id, label: m.nome }));
 
   if (isFetching) {
-    return <LoadingSpinner text='Carregando dados do fornecedor...'/>
+    return <LoadingSpinner text='Carregando dados do fornecedor...' />
   }
 
   return (
     <div className="w-full">
-      <HeaderTitlePage page_name={isEditMode ? "Editar Produto" : "Novo Produto"}/>
-      
+      <HeaderTitlePage page_name={isEditMode ? "Editar Produto" : "Novo Produto"} />
+
       <div className="w-full bg-white p-6">
         <form onSubmit={handleSubmit}>
 
@@ -154,7 +154,7 @@ const RegisterProductPage = () => {
             <SelectField label="Tipo do Produto *" name="tipoProduto" value={formData.tipoProduto} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
             <SelectField label="Fornecedor *" name="fornecedorId" value={formData.fornecedorId} onChange={handleChange} options={supplierOptions} className="md:col-span-4" required />
             <SelectField label="Marca" name="marcaId" value={formData.marcaId} onChange={handleChange} options={brandOptions} className="md:col-span-4" />
-            
+
             <InputField label="Nome / Descrição *" name="nome" value={formData.nome} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
             <InputField label="Referência" name="referencia" value={formData.referencia} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
             <InputField label="Código de Barras" name="codigoBarras" value={formData.codigoBarras} onChange={handleChange} placeholder="789..." className="md:col-span-6" />
@@ -182,7 +182,7 @@ const RegisterProductPage = () => {
               <InputField label="Tipo da Lente" name="tipoLente" value={formData.tipoLente} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
             </FormSection>
           )}
-            <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} />
+          <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} />
         </form>
       </div>
       {error && (

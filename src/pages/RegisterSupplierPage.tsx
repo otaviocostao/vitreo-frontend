@@ -6,33 +6,33 @@ import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import AssociatedBrandsManager from '../components/AssociatedBrandsManager';
 import { useNavigate, useParams } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
-import type { FornecedorPayload, FornecedorResponse } from '../types/fornecedor';
-import { associateMarca, createFornecedor, dissociateMarca, getFornecedorById, updateFornecedor } from '../services/fornecedorService';
+import type { SupplierPayload, SupplierResponse } from '../types/supplier';
+import { associateMarca, createFornecedor, dissociateMarca, getFornecedorById, updateFornecedor } from '../services/supplierService';
 import type { MarcaResponse } from '../types/marca';
 import { getMarcasOptions } from '../services/marcaService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 interface SupplierFormData {
-  razaoSocial: string;
-  nomeFantasia: string;
+  corporateName: string;
+  tradeName: string;
   cnpj: string;
-  inscricaoEstadual: string;
-  telefone: string;
+  stateRegistration: string;
+  cellPhone: string;
   email: string;
-  logradouro: string;
-  numero: string;
-  bairro: string;
-  complemento: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-  marcasTrabalhadas: MarcaResponse[];
+  street: string;
+  number: string;
+  neighborhood: string;
+  complement: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  brands: MarcaResponse[];
 }
 
 const initialFormData = {
-  razaoSocial: '', nomeFantasia: '', cnpj: '', inscricaoEstadual: '', telefone: '', email: '',
-  cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '', complemento: '',
-  marcasTrabalhadas: [],
+  corporateName: '', tradeName: '', cnpj: '', stateRegistration: '', cellPhone: '', email: '',
+  zipCode: '', street: '', number: '', neighborhood: '', city: '', state: '', complement: '',
+  brands: [],
 };
 
 const RegisterSupplierPage = () => {
@@ -45,7 +45,7 @@ const RegisterSupplierPage = () => {
   const [allBrands, setAllBrands] = useState<MarcaResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFetching, setIsFetching] = useState(isEditMode); 
+  const [isFetching, setIsFetching] = useState(isEditMode);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -59,27 +59,26 @@ const RegisterSupplierPage = () => {
           const supplierPromise = getFornecedorById(supplierId);
 
           const [supplierData, brandsData] = await Promise.all([supplierPromise, brandsPromise]);
-          
+
           const flattenedData: SupplierFormData = {
-            razaoSocial: supplierData.razaoSocial,
-            nomeFantasia: supplierData.nomeFantasia,
+            corporateName: supplierData.corporateName,
+            tradeName: supplierData.tradeName,
             cnpj: supplierData.cnpj,
-            inscricaoEstadual: supplierData.inscricaoEstadual,
-            telefone: supplierData.telefone,
+            stateRegistration: supplierData.stateRegistration,
+            cellPhone: supplierData.cellPhone,
             email: supplierData.email,
-            ...supplierData.endereco,
-            logradouro: supplierData.endereco.logradouro || '',
-            numero: supplierData.endereco.numero || '',
-            bairro: supplierData.endereco.bairro || '',
-            complemento: supplierData.endereco.complemento || '',
-            cidade: supplierData.endereco.cidade || '',
-            estado: supplierData.endereco.estado || '',
-            cep: formData.cep,
-            marcasTrabalhadas: supplierData.marcasTrabalhadas,
+            street: supplierData.street || '',
+            number: supplierData.number || '',
+            neighborhood: supplierData.neighborhood || '',
+            complement: supplierData.complement || '',
+            city: supplierData.city || '',
+            state: supplierData.state || '',
+            zipCode: supplierData.zipCode,
+            brands: supplierData.brands,
           };
 
           setFormData(flattenedData);
-          setInitialBrands(supplierData.marcasTrabalhadas);
+          setInitialBrands(supplierData.brands);
           setAllBrands(brandsData);
 
         } else {
@@ -93,7 +92,7 @@ const RegisterSupplierPage = () => {
         if (isEditMode) setIsFetching(false);
       }
     };
-    
+
     loadInitialData();
   }, [supplierId, isEditMode]);
 
@@ -114,31 +113,29 @@ const RegisterSupplierPage = () => {
     const cleanedCnpj = formData.cnpj.replace(/[^\d]/g, '');
 
 
-    const fornecedorPayload: FornecedorPayload = {
-      razaoSocial: formData.razaoSocial,
-      nomeFantasia: formData.nomeFantasia,
+    const supplierPayload: SupplierPayload = {
+      corporateName: formData.corporateName,
+      tradeName: formData.tradeName,
       cnpj: cleanedCnpj,
-      inscricaoEstadual: formData.inscricaoEstadual,
-      telefone: formData.telefone,
+      stateRegistration: formData.stateRegistration,
+      cellPhone: formData.cellPhone,
       email: formData.email,
-      endereco: {
-        logradouro: formData.logradouro,
-        numero: formData.numero,
-        bairro: formData.bairro,
-        complemento: formData.complemento,
-        cidade: formData.cidade,
-        estado: formData.estado,
-        cep: formData.cep,
-      },
+      street: formData.street,
+      number: formData.number,
+      neighborhood: formData.neighborhood,
+      complement: formData.complement,
+      city: formData.city,
+      state: formData.state,
+      zipCode: formData.zipCode,
     };
 
     try {
-      let savedFornecedor: FornecedorResponse;
+      let savedFornecedor: SupplierResponse;
 
       if (isEditMode && supplierId) {
-        savedFornecedor = await updateFornecedor(supplierId, fornecedorPayload);
+        savedFornecedor = await updateFornecedor(supplierId, supplierPayload);
       } else {
-        savedFornecedor = await createFornecedor(fornecedorPayload);
+        savedFornecedor = await createFornecedor(supplierPayload);
       }
 
       await syncMarcas(savedFornecedor.id);
@@ -155,15 +152,15 @@ const RegisterSupplierPage = () => {
 
   const syncMarcas = async (fornecedorId: string) => {
     const initialBrandIds = new Set(initialBrands.map(b => b.id));
-    const currentBrandIds = new Set(formData.marcasTrabalhadas.map(b => b.id));
+    const currentBrandIds = new Set(formData.brands.map(b => b.id));
 
-    const marcasToAdd = formData.marcasTrabalhadas.filter(b => !initialBrandIds.has(b.id));
+    const marcasToAdd = formData.brands.filter(b => !initialBrandIds.has(b.id));
     const marcasToRemove = initialBrands.filter(b => !currentBrandIds.has(b.id));
 
-    const associationPromises = marcasToAdd.map(marca => 
+    const associationPromises = marcasToAdd.map(marca =>
       associateMarca(fornecedorId, marca.id)
     );
-    const dissociationPromises = marcasToRemove.map(marca => 
+    const dissociationPromises = marcasToRemove.map(marca =>
       dissociateMarca(fornecedorId, marca.id)
     );
 
@@ -171,47 +168,47 @@ const RegisterSupplierPage = () => {
   };
 
   if (isFetching) {
-    return <LoadingSpinner text='Carregando dados do fornecedor...'/>
+    return <LoadingSpinner text='Carregando dados do fornecedor...' />
   }
 
   return (
     <div className="w-full">
-      <HeaderTitlePage page_name={isEditMode ? 'Editar Fornecedor' : 'Novo Fornecedor'}/>
-      
+      <HeaderTitlePage page_name={isEditMode ? 'Editar Fornecedor' : 'Novo Fornecedor'} />
+
       <div className="w-full bg-white p-6 rounded-lg shadow-sm">
         <form onSubmit={handleSubmit}>
-            <FormSection title="Dados da Empresa">
-              <InputField label="Razão Social *" name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} className="md:col-span-7" required />
-              <InputField label="Nome Fantasia" name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} className="md:col-span-5" />
-              <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-3" placeholder="00.000.000/0000-00" required />
-              <InputField label="Inscrição Estadual" name="inscricaoEstadual" value={formData.inscricaoEstadual} onChange={handleChange} className="md:col-span-3" />
-            </FormSection>
+          <FormSection title="Dados da Empresa">
+            <InputField label="Razão Social *" name="corporateName" value={formData.corporateName} onChange={handleChange} className="md:col-span-7" required />
+            <InputField label="Nome Fantasia" name="tradeName" value={formData.tradeName} onChange={handleChange} className="md:col-span-5" />
+            <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-3" placeholder="00.000.000/0000-00" required />
+            <InputField label="Inscrição Estadual" name="stateRegistration" value={formData.stateRegistration} onChange={handleChange} className="md:col-span-3" />
+          </FormSection>
 
-            <FormSection title="Endereço">
-              <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-8" />
-              <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-1" />
-              <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
-              <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
-            </FormSection>
+          <FormSection title="Endereço">
+            <InputField label="Logradouro" name="street" value={formData.street} onChange={handleChange} className="md:col-span-8" />
+            <InputField label="Número" name="number" value={formData.number} onChange={handleChange} className="md:col-span-1" />
+            <InputField label="Bairro" name="neighborhood" value={formData.neighborhood} onChange={handleChange} className="md:col-span-4" />
+            <InputField label="Cidade" name="city" value={formData.city} onChange={handleChange} className="md:col-span-4" />
+            <InputField label="Estado" name="state" value={formData.state} onChange={handleChange} className="md:col-span-4" />
+            <InputField label="CEP" name="zipCode" value={formData.zipCode} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
+            <InputField label="Complemento" name="complement" value={formData.complement} onChange={handleChange} className="md:col-span-9" />
+          </FormSection>
 
-            <FormSection title="Informações de Contato">
-              <InputField label="Telefone *" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" required />
-              <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-6" placeholder="contato@empresa.com" />
-            </FormSection>
-            
-            <FormSection title="Marcas Associadas">
-                <div className="md:col-span-12">
-                    <AssociatedBrandsManager
-                        selectedBrands={formData.marcasTrabalhadas}
-                        onChange={handleBrandChange}
-                    />
-                </div>
-            </FormSection>
-            
-            <SaveCancelButtonsArea textButton1='Cancelar' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} cancelButtonPath='/fornecedores' />
+          <FormSection title="Informações de Contato">
+            <InputField label="Telefone *" name="cellPhone" type="tel" value={formData.cellPhone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" required />
+            <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-6" placeholder="contato@empresa.com" />
+          </FormSection>
+
+          <FormSection title="Marcas Associadas">
+            <div className="md:col-span-12">
+              <AssociatedBrandsManager
+                selectedBrands={formData.brands}
+                onChange={handleBrandChange}
+              />
+            </div>
+          </FormSection>
+
+          <SaveCancelButtonsArea textButton1='Cancelar' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} cancelButtonPath='/fornecedores' />
         </form>
       </div>
       {error && (
