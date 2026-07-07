@@ -11,7 +11,7 @@ import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePa
 import { createPedido, getPedidoById, updatePedido } from "../services/pedidoService";
 import type { ReceituarioPayload } from "../types/receituario";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { ClienteResponse } from "../types/cliente";
+import type { CustomerResponse } from "../types/customer";
 import type { ProdutoResponse } from "../types/produto";
 import { getProducts } from "../services/productService";
 import ClienteSearch from "../components/ClienteSearch";
@@ -23,7 +23,7 @@ import Button from "../components/ui/Button";
 import { FileText } from "lucide-react";
 
 interface VendaFormData {
-    cliente: ClienteResponse | null;
+    cliente: CustomerResponse | null;
     receituario: ReceituarioPayload;
     itens: ItemPedidoPayload[];
     pagamentos: PagamentoPayload[];
@@ -55,14 +55,14 @@ function RegisterSellPage() {
     const navigate = useNavigate();
     const [isFetching, setIsFetching] = useState(isEditMode);
 
-    const [formData, setFormData] = useState<VendaFormData>(initialFormData);    
-    
+    const [formData, setFormData] = useState<VendaFormData>(initialFormData);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         const loadPageData = async () => {
             if (!isEditMode || !pedidoId || produtosDisponiveis.length === 0) {
                 if (!isEditMode) setFormData(initialFormData);
@@ -75,7 +75,7 @@ function RegisterSellPage() {
                 const pedidoData = await getPedidoById(pedidoId);
                 console.log(pedidoData);
 
-                let clienteCompleto: ClienteResponse | null = null;
+                let clienteCompleto: CustomerResponse | null = null;
                 if (pedidoData.cliente && pedidoData.cliente.id) {
                     clienteCompleto = await getClienteById(pedidoData.cliente.id);
                 }
@@ -86,7 +86,7 @@ function RegisterSellPage() {
                     );
 
                     return {
-                        produtoId: produtoCorrespondente ? produtoCorrespondente.id : '', 
+                        produtoId: produtoCorrespondente ? produtoCorrespondente.id : '',
                         quantidade: itemAPI.quantidade
                     };
                 }).filter(item => item.produtoId);
@@ -119,39 +119,39 @@ function RegisterSellPage() {
         loadPageData();
     }, [pedidoId, isEditMode, produtosDisponiveis]);
 
-      const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
+    const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
         if (!dataHoraString) {
             return '';
         }
         return dataHoraString.substring(0, 10);
-      };
+    };
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
-    
+
     const handleReceituarioChange = (data: Partial<ReceituarioPayload>) => {
-        setFormData(prev => ({ ...prev, receituario: { ...prev.receituario, ...data }}));
+        setFormData(prev => ({ ...prev, receituario: { ...prev.receituario, ...data } }));
     };
-    
+
     const handlePagamentosChange = (novosPagamentos: PagamentoPayload[]) => {
         setFormData(prev => ({ ...prev, pagamentos: novosPagamentos }));
     };
 
     const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
         const nomeDaPropriedade = campo === 'desconto'
-        ? 'desconto'
-        : `valor${campo.charAt(0).toUpperCase() + campo.slice(1)}`;
+            ? 'desconto'
+            : `valor${campo.charAt(0).toUpperCase() + campo.slice(1)}`;
 
         setFormData(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
     };
-    
-    const handleClienteSelect = (cliente: ClienteResponse | null) => {
+
+    const handleClienteSelect = (cliente: CustomerResponse | null) => {
         setFormData(prev => ({ ...prev, cliente }));
     };
 
-    const handleClientSubmit = (novoCliente: ClienteResponse) => {
+    const handleClientSubmit = (novoCliente: CustomerResponse) => {
 
         handleClienteSelect(novoCliente);
 
@@ -228,7 +228,7 @@ function RegisterSellPage() {
                 anguloVertical: parseCurrency(formData.receituario.anguloVertical),
             } : undefined;
 
-            
+
             if (isEditMode && pedidoId) {
                 const updatePayload: PedidoUpdatePayload = {
                     receituario: receituarioPayload,
@@ -249,12 +249,12 @@ function RegisterSellPage() {
                 console.log("PAYLOAD ENVIADO:", JSON.stringify(updatePayload, null, 2));
                 navigate(`/vendas/${pedidoId}/detalhes`);
             } else {
-                
+
                 const pedidoPayload: PedidoPayload = {
                     clienteId: formData.cliente.id,
                     receituario: receituarioPayload,
                     itens: formData.itens.map(item => ({
-                        produtoId: item.produtoId, 
+                        produtoId: item.produtoId,
                         quantidade: item.quantidade,
                     })),
                     pagamentos: formData.pagamentos.map(p => ({
@@ -273,7 +273,7 @@ function RegisterSellPage() {
 
                 const novoPedido = await createPedido(pedidoPayload);
                 console.log("Resposta da API de criação:", novoPedido);
-                navigate(`/vendas/${novoPedido.id}/detalhes`); 
+                navigate(`/vendas/${novoPedido.id}/detalhes`);
             }
 
         } catch (err: any) {
@@ -289,7 +289,7 @@ function RegisterSellPage() {
             setIsLoading(false);
         }
     };
-    
+
 
     useEffect(() => {
         const fetchAllProducts = async () => {
@@ -306,14 +306,14 @@ function RegisterSellPage() {
 
     const handleArmacaoSelect = (produto: ProdutoResponse | null) => {
         setFormData(prev => {
-            const armacaoAtualId = prev.itens.find(item => 
+            const armacaoAtualId = prev.itens.find(item =>
                 produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
             )?.produtoId;
 
-            const outrosItens = armacaoAtualId 
-                ? prev.itens.filter(item => item.produtoId !== armacaoAtualId) 
+            const outrosItens = armacaoAtualId
+                ? prev.itens.filter(item => item.produtoId !== armacaoAtualId)
                 : prev.itens;
-            
+
             let novosItens = outrosItens;
             if (produto) {
                 novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
@@ -328,16 +328,16 @@ function RegisterSellPage() {
     };
 
 
-     const handleLenteSelect = (produto: ProdutoResponse | null) => {
-         setFormData(prev => {
-            const lenteAtualId = prev.itens.find(item => 
+    const handleLenteSelect = (produto: ProdutoResponse | null) => {
+        setFormData(prev => {
+            const lenteAtualId = prev.itens.find(item =>
                 produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
             )?.produtoId;
 
-            const outrosItens = lenteAtualId 
-                ? prev.itens.filter(item => item.produtoId !== lenteAtualId) 
+            const outrosItens = lenteAtualId
+                ? prev.itens.filter(item => item.produtoId !== lenteAtualId)
                 : prev.itens;
-            
+
             let novosItens = outrosItens;
             if (produto) {
                 novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
@@ -362,68 +362,68 @@ function RegisterSellPage() {
     const handleCloseProductModal = () => {
         setProductModalType(null);
     };
-    
+
     return (
         <div className=" flex flex-col w-fit box-border">
-        <div className="flex justify-between items-center print:hidden">
-            <HeaderTitlePage page_name={isEditMode ? 'Editar Venda' : 'Nova Venda'} />
+            <div className="flex justify-between items-center print:hidden">
+                <HeaderTitlePage page_name={isEditMode ? 'Editar Venda' : 'Nova Venda'} />
 
-            {/* O botão só aparece no modo de edição */}
-            {isEditMode && (
-                <div className="p-4">
-                    <Link to={`/vendas/${pedidoId}/detalhes`}>
-                        <Button variant="secondary" >
-                            <FileText size={16} />
-                            <span>Ver Comprovante</span>
-                        </Button>
-                    </Link>
-                </div>
-            )}
-        </div>
-        <div className="w-full flex flex-1 flex-col px-4 box-border">
-            <form onSubmit={handleSubmit}>
-                <div className="flex divide-x divide-gray-200 border-y border-gray-200">
-                    <InfoSection title="Cliente" className="w-2/3">
-                        <ClienteSearch
-                            selectedCliente={formData.cliente}
-                            onClienteSelect={handleClienteSelect}
-                            onOpenClientModal={() => setIsClientModalOpen(true)}
-                            isEditMode={isEditMode}
-                        />
-                    </InfoSection>
-
-                    <div  className="w-1/3 flex divide-x divide-gray-200 ">
-                        <InfoSection title="Ordem de serviço" className="w-full">
-                            <div className="flex items-end"> 
-                                <InputField
-                                    id="os-number"
-                                    type="number"
-                                    name="ordemServico"
-                                    placeholder="O.S"
-                                    className="w-24"
-                                    labelClassName="sr-only"
-                                    value={formData.ordemServico}
-                                    onChange={handleFormChange}
-                                />
-                            </div>
+                {/* O botão só aparece no modo de edição */}
+                {isEditMode && (
+                    <div className="p-4">
+                        <Link to={`/vendas/${pedidoId}/detalhes`}>
+                            <Button variant="secondary" >
+                                <FileText size={16} />
+                                <span>Ver Comprovante</span>
+                            </Button>
+                        </Link>
+                    </div>
+                )}
+            </div>
+            <div className="w-full flex flex-1 flex-col px-4 box-border">
+                <form onSubmit={handleSubmit}>
+                    <div className="flex divide-x divide-gray-200 border-y border-gray-200">
+                        <InfoSection title="Cliente" className="w-2/3">
+                            <ClienteSearch
+                                selectedCliente={formData.cliente}
+                                onClienteSelect={handleClienteSelect}
+                                onOpenClientModal={() => setIsClientModalOpen(true)}
+                                isEditMode={isEditMode}
+                            />
                         </InfoSection>
 
-                        {isEditMode &&
-                            <InfoSection title="Status" className="w-full">
-                                <StatusSelector
-                                    currentStatus={formData.status}
-                                    onStatusChange={handleStatusChange}
-                                    disabled={formData.status === 'ENTREGUE' || formData.status === 'CANCELADO'}
-                                />
+                        <div className="w-1/3 flex divide-x divide-gray-200 ">
+                            <InfoSection title="Ordem de serviço" className="w-full">
+                                <div className="flex items-end">
+                                    <InputField
+                                        id="os-number"
+                                        type="number"
+                                        name="ordemServico"
+                                        placeholder="O.S"
+                                        className="w-24"
+                                        labelClassName="sr-only"
+                                        value={formData.ordemServico}
+                                        onChange={handleFormChange}
+                                    />
+                                </div>
                             </InfoSection>
-                        }
-                    </div>
 
-                </div>
-                <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
-                    <div className="flex flex-col w-2/3 " >
-                        <ReceituarioMedidas  data={formData.receituario} onChange={handleReceituarioChange} />
-                        <ReceituarioInfoArea 
+                            {isEditMode &&
+                                <InfoSection title="Status" className="w-full">
+                                    <StatusSelector
+                                        currentStatus={formData.status}
+                                        onStatusChange={handleStatusChange}
+                                        disabled={formData.status === 'ENTREGUE' || formData.status === 'CANCELADO'}
+                                    />
+                                </InfoSection>
+                            }
+                        </div>
+
+                    </div>
+                    <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
+                        <div className="flex flex-col w-2/3 " >
+                            <ReceituarioMedidas data={formData.receituario} onChange={handleReceituarioChange} />
+                            <ReceituarioInfoArea
                                 receituarioData={formData.receituario}
                                 pedidoData={formData}
                                 onReceituarioChange={handleReceituarioChange}
@@ -432,35 +432,35 @@ function RegisterSellPage() {
                                 onLenteSelect={handleLenteSelect}
                                 itens={formData.itens}
                                 produtosDisponiveis={produtosDisponiveis}
-                                onOpenProductModal={handleOpenProductModal}/>
+                                onOpenProductModal={handleOpenProductModal} />
+                        </div>
+                        <div className="flex flex-col w-1/3">
+                            <VendaPagamento
+                                valorLentes={formData.valorLentes}
+                                valorArmacao={formData.valorArmacao}
+                                desconto={formData.desconto}
+                                pagamentos={formData.pagamentos}
+                                onValorChange={handleValorChange}
+                                onPagamentosChange={handlePagamentosChange}
+                                onError={setError}
+                            />
+                        </div>
                     </div>
-                    <div className="flex flex-col w-1/3">
-                        <VendaPagamento 
-                            valorLentes={formData.valorLentes}
-                        valorArmacao={formData.valorArmacao}
-                        desconto={formData.desconto}
-                        pagamentos={formData.pagamentos}
-                        onValorChange={handleValorChange}
-                        onPagamentosChange={handlePagamentosChange}
-                        onError={setError} 
-                        />
-                    </div>
-                </div>
                     <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={isEditMode && 'Salvar alterações' || 'Finalizar Venda'} isLoading={isLoading} />
-            </form>
+                </form>
             </div>
             <AddClientModal
                 isOpen={isClientModalOpen}
                 onClose={() => setIsClientModalOpen(false)}
-                onSubmit={handleClientSubmit} 
-                />
+                onSubmit={handleClientSubmit}
+            />
             {error && (
                 <ErrorPopup message={error} onClose={() => setError(null)} />
             )}
             {productModalType !== null && (
                 <AddProductModal isOpen={!!productModalType} onClose={handleCloseProductModal} onSubmit={handleProductSubmit} initialType={productModalType} />
             )}
-        </div>          
+        </div>
 
     )
 };

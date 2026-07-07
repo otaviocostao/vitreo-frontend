@@ -3,21 +3,21 @@ import InputField from './ui/InputField';
 import type { ReceituarioPayload } from '../types/receituario';
 import type { ItemPedidoPayload, PagamentoPayload } from '../types/pedido';
 import type { ProdutoResponse } from '../types/produto';
-import type { ClienteResponse } from '../types/cliente';
+import type { CustomerResponse } from '../types/customer';
 import ProductSearch from './ProductSearch';
 
 interface VendaFormData {
-    cliente: ClienteResponse | null;
-    receituario: ReceituarioPayload;
-    itens: ItemPedidoPayload[];
-    pagamentos: PagamentoPayload[];
-    ordemServico: string;
-    dataPedido: string;
-    dataPrevisaoEntrega: string;
-    dataEntrega: string;
-    desconto: number;
-    valorLentes: number;
-    valorArmacao: number;
+  cliente: CustomerResponse | null;
+  receituario: ReceituarioPayload;
+  itens: ItemPedidoPayload[];
+  pagamentos: PagamentoPayload[];
+  ordemServico: string;
+  dataPedido: string;
+  dataPrevisaoEntrega: string;
+  dataEntrega: string;
+  desconto: number;
+  valorLentes: number;
+  valorArmacao: number;
 }
 
 interface ReceituarioInfoAreaProps {
@@ -26,42 +26,42 @@ interface ReceituarioInfoAreaProps {
   itens: ItemPedidoPayload[];
   onReceituarioChange: (data: Partial<ReceituarioPayload>) => void;
   onPedidoChange: (data: Partial<VendaFormData>) => void;
-  produtosDisponiveis: ProdutoResponse[]; 
+  produtosDisponiveis: ProdutoResponse[];
   onArmacaoSelect: (produto: ProdutoResponse | null) => void;
   onLenteSelect: (produto: ProdutoResponse | null) => void;
   onOpenProductModal: (tipo: 'ARMACAO' | 'LENTE') => void;
 }
 
 const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
-    receituarioData,
-    pedidoData,
-    itens,
-    onReceituarioChange,
-    onPedidoChange,
-    produtosDisponiveis,
-    onArmacaoSelect,
-    onLenteSelect,
-    onOpenProductModal
-  }) => {
+  receituarioData,
+  pedidoData,
+  itens,
+  onReceituarioChange,
+  onPedidoChange,
+  produtosDisponiveis,
+  onArmacaoSelect,
+  onLenteSelect,
+  onOpenProductModal
+}) => {
 
-  const armacaoItem = itens.find(item => 
+  const armacaoItem = itens.find(item =>
     produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
   );
 
-  const armacaoSelecionada = armacaoItem 
-    ? produtosDisponiveis.find(p => p.id === armacaoItem.produtoId) 
+  const armacaoSelecionada = armacaoItem
+    ? produtosDisponiveis.find(p => p.id === armacaoItem.produtoId)
     : null;
 
   const nomeMarcaArmacao = armacaoSelecionada ? armacaoSelecionada.marca.nome : '';
-  
-  const lentesItens = itens.find(item => 
+
+  const lentesItens = itens.find(item =>
     produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
   );
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'nomeMedico' || name === 'crmMedico' || name === 'dataReceita') {
       onReceituarioChange({ [name]: value });
     } else {
@@ -70,11 +70,11 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
   };
 
   const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
-  if (!dataHoraString) {
-    return '';
-  }
-  return dataHoraString.substring(0, 10);
-};
+    if (!dataHoraString) {
+      return '';
+    }
+    return dataHoraString.substring(0, 10);
+  };
 
 
   return (
@@ -91,16 +91,16 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
           value={receituarioData.nomeMedico || ''}
           onChange={handleChange}
         />
-        
 
-      <ProductSearch
-        label="Lentes"
-        tipo="LENTE"
-        selectedProductId={lentesItens?.produtoId}
-        produtosDisponiveis={produtosDisponiveis}
-        onProductSelect={onLenteSelect}
-        onOpenProductModal={() => onOpenProductModal('LENTE')}
-      />
+
+        <ProductSearch
+          label="Lentes"
+          tipo="LENTE"
+          selectedProductId={lentesItens?.produtoId}
+          produtosDisponiveis={produtosDisponiveis}
+          onProductSelect={onLenteSelect}
+          onOpenProductModal={() => onOpenProductModal('LENTE')}
+        />
 
         <InputField
           id="marca_armacao"
@@ -119,7 +119,7 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
           onProductSelect={onArmacaoSelect}
           onOpenProductModal={() => onOpenProductModal('ARMACAO')}
         />
-      
+
         <div className="md:col-span-2 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-x-6 gap-y-4">
             <InputField
@@ -152,11 +152,11 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
               label="Data de Entrega"
               type="date"
               value={(pedidoData as any).dataEntrega || ''}
-              readOnly  
+              readOnly
             />
           </div>
         </div>
-        
+
         <div className="md:col-span-2">
           <TextareaField
             id="observacoes"

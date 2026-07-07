@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, User, X } from 'lucide-react';
-import type { ClienteResponse } from '../types/cliente';
+import type { CustomerResponse } from '../types/customer';
 import { getClientes } from '../services/clienteService';
 import SearchableSelectWithButton from './SearchableSelectWithButton';
 
 interface ClienteSearchProps {
-  selectedCliente: ClienteResponse | null;
-  onClienteSelect: (cliente: ClienteResponse | null) => void;
+  selectedCliente: CustomerResponse | null;
+  onClienteSelect: (cliente: CustomerResponse | null) => void;
   onOpenClientModal: () => void;
   isEditMode: boolean;
 }
@@ -22,7 +22,7 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    
+
     if (searchTerm.length < 2) {
       setOptions([]);
       return;
@@ -34,7 +34,7 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
         const data = await getClientes({ query: searchTerm, size: 10 });
         const clientOptions = data.content.map(cliente => ({
           value: cliente.id,
-          label: `${cliente.nomeCompleto} - ${cliente.cpf}`,
+          label: `${cliente.firstName} ${cliente.lastName} - ${cliente.cpf}`,
           fullClient: cliente
         }));
         setOptions(clientOptions);
@@ -63,14 +63,14 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
           <div className="flex items-center gap-3">
             <User className="text-blue-600" />
             <div className='flex gap-2'>
-              <p className="font-semibold text-blue-800">{selectedCliente.nomeCompleto}</p>
+              <p className="font-semibold text-blue-800">{selectedCliente.firstName} {selectedCliente.lastName}</p>
               <p className="flex items-center text-xs text-gray-600">• CPF: {selectedCliente.cpf}</p>
             </div>
           </div>
           {!isEditMode && (
-            <button 
-              type="button" 
-              onClick={() => onClienteSelect(null)} 
+            <button
+              type="button"
+              onClick={() => onClienteSelect(null)}
               className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
             >
               <X />

@@ -1,4 +1,4 @@
-import type { ClienteSimplificadoDTO } from "./cliente";
+import type { ClienteSimplificadoDTO } from "./customer";
 import type { ReceituarioPayload } from "./receituario";
 
 export interface ItemPedidoPayload {
