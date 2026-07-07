@@ -1,4 +1,4 @@
-import type { MarcaResponse } from "./marca";
+import type { BrandResponse } from "./marca";
 
 export interface SupplierPayload {
   corporateName: string;
@@ -35,5 +35,5 @@ export interface SupplierResponse {
   city: string;
   state: string;
   zipCode: string;
-  brands: MarcaResponse[];
+  brands: BrandResponse[];
 }

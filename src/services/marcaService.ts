@@ -1,23 +1,24 @@
-import type { MarcaPayload, MarcaResponse } from '../types/marca';
-import type { Page } from '../types/pagination';
-import type { MarcaOption } from '../types/produto';
+import type { MarcaPayload, BrandResponse } from '../types/marca';
+import type { BrandOption } from '../types/produto';
 import api from './api';
 
-export const getMarcasOptions = async (): Promise<MarcaOption[]> => {
+export const getMarcasOptions = async (): Promise<BrandOption[]> => {
   try {
-    const response = await api.get<Page<MarcaOption>>('/marcas', {
-      params: { size: 1000 }
-    });
-    return response.data.content;
+    const response = await api.get<BrandResponse[]>('/brands');
+    const data = Array.isArray(response.data) ? response.data : [];
+    return data.map((brand) => ({
+      id: brand.id,
+      nome: brand.name,
+    }));
   } catch (error) {
     console.error("Erro ao buscar marcas:", error);
     throw error;
   }
-}
+};
 
-export const createMarca = async (data: MarcaPayload): Promise<MarcaResponse> => {
+export const createMarca = async (data: MarcaPayload): Promise<BrandResponse> => {
   try {
-    const response = await api.post<MarcaResponse>('/marcas', data);
+    const response = await api.post<BrandResponse>('/brands', data);
     return response.data;
   } catch (error) {
     console.error("Erro ao criar marca:", error);

@@ -1,8 +1,10 @@
 export interface MarcaPayload {
-  nome: string;
+  name: string;
+  isActive?: boolean;
 }
 
-export interface MarcaResponse {
+export interface BrandResponse {
   id: string;
-  nome: string;
+  name: string;
+  isActive?: boolean;
 }

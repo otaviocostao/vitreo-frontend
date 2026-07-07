@@ -5,7 +5,7 @@ import SelectField from '../components/ui/SelectField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { FornecedorOption, MarcaOption, ProdutoPayload, ProdutoResponse, TipoProduto } from '../types/produto';
+import type { FornecedorOption, BrandOption, ProdutoPayload, ProdutoResponse, TipoProduto } from '../types/produto';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
@@ -28,7 +28,7 @@ const RegisterProductPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorOption[]>([]);
-  const [marcas, setMarcas] = useState<MarcaOption[]>([]);
+  const [marcas, setMarcas] = useState<BrandOption[]>([]);
   const [formData, setFormData] = useState(initialFormData);
   const [isFetching, setIsFetching] = useState(isEditMode);
 

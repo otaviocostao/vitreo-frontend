@@ -26,7 +26,7 @@ export interface ProdutoResponse {
   id: string;
   tipoProduto: TipoProduto;
   fornecedor: FornecedorOption;
-  marca: MarcaOption;
+  marca: BrandOption;
   nome: string;
   referencia: string;
   codigoBarras: string;
@@ -51,7 +51,7 @@ export interface FornecedorOption {
   razaoSocial: string;
 }
 
-export interface MarcaOption {
+export interface BrandOption {
   id: string;
   nome: string;
 }

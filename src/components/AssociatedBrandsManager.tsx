@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { PlusCircle, Tag, Trash2 } from 'lucide-react';
 import { createMarca } from '../services/marcaService';
-import type { MarcaResponse } from '../types/marca';
+import type { BrandResponse } from '../types/marca';
 import InputField from './ui/InputField';
 import Button from './ui/Button';
 
 interface AssociatedBrandsManagerProps {
-  selectedBrands: MarcaResponse[]; 
-  onChange: (newBrands: MarcaResponse[]) => void; 
+  selectedBrands: BrandResponse[]; 
+  onChange: (newBrands: BrandResponse[]) => void; 
 }
 
-const AssociatedBrandsManager: React.FC<AssociatedBrandsManagerProps> = ({ selectedBrands, onChange }) => {
+const AssociatedBrandsManager: React.FC<AssociatedBrandsManagerProps> = ({ selectedBrands = [], onChange }) => {
   const [newBrandName, setNewBrandName] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ const AssociatedBrandsManager: React.FC<AssociatedBrandsManagerProps> = ({ selec
   const handleAddBrand = async () => {
     const brandName = newBrandName.trim();
     
-    if (!brandName || selectedBrands.some(brand => brand.nome.toLowerCase() === brandName.toLowerCase())) {
+    if (!brandName || selectedBrands.some(brand => brand.name.toLowerCase() === brandName.toLowerCase())) {
       setNewBrandName('');
       return;
     }
@@ -27,7 +27,7 @@ const AssociatedBrandsManager: React.FC<AssociatedBrandsManagerProps> = ({ selec
     setError(null);
 
     try {
-      const newMarca = await createMarca({ nome: brandName });
+      const newMarca = await createMarca({ name: brandName });
       
       onChange([...selectedBrands, newMarca]);
       
@@ -81,7 +81,7 @@ const AssociatedBrandsManager: React.FC<AssociatedBrandsManagerProps> = ({ selec
               <div key={brand.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
                 <div className="flex items-center gap-3">
                   <Tag size={16} className="text-gray-500" />
-                  <p className="font-medium text-sm text-gray-800">{brand.nome}</p>
+                  <p className="font-medium text-sm text-gray-800">{brand.name}</p>
                 </div>
                 <button onClick={() => handleRemoveBrand(brand.id)} className="text-gray-400 hover:text-red-500 transition-colors">
                   <Trash2 size={16} />

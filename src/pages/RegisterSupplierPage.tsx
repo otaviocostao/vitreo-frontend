@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 import type { SupplierPayload, SupplierResponse } from '../types/supplier';
 import { associateMarca, createFornecedor, dissociateMarca, getFornecedorById, updateFornecedor } from '../services/supplierService';
-import type { MarcaResponse } from '../types/marca';
+import type { BrandResponse } from '../types/marca';
 import { getMarcasOptions } from '../services/marcaService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -26,7 +26,7 @@ interface SupplierFormData {
   city: string;
   state: string;
   zipCode: string;
-  brands: MarcaResponse[];
+  brands: BrandResponse[];
 }
 
 const initialFormData = {
@@ -41,8 +41,8 @@ const RegisterSupplierPage = () => {
   const isEditMode = !!supplierId;
 
   const [formData, setFormData] = useState<SupplierFormData>(initialFormData);
-  const [initialBrands, setInitialBrands] = useState<MarcaResponse[]>([]);
-  const [allBrands, setAllBrands] = useState<MarcaResponse[]>([]);
+  const [initialBrands, setInitialBrands] = useState<BrandResponse[]>([]);
+  const [allBrands, setAllBrands] = useState<BrandResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(isEditMode);
@@ -101,7 +101,7 @@ const RegisterSupplierPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleBrandChange = (updatedBrands: MarcaResponse[]) => {
+  const handleBrandChange = (updatedBrands: BrandResponse[]) => {
     setFormData(prev => ({ ...prev, marcasTrabalhadas: updatedBrands }));
   };
 

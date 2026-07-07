@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
-import type { FornecedorOption, MarcaOption, ProdutoPayload, ProdutoResponse } from '../types/produto';
+import type { FornecedorOption, BrandOption, ProdutoPayload, ProdutoResponse } from '../types/produto';
 import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
@@ -30,7 +30,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fornecedores, setFornecedores] = useState<FornecedorOption[]>([]);
-  const [marcas, setMarcas] = useState<MarcaOption[]>([]);
+  const [marcas, setMarcas] = useState<BrandOption[]>([]);
 
 
   useEffect(() => {
