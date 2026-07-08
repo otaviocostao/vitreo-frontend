@@ -1,9 +1,9 @@
 import React from 'react';
-import { CheckCircle, Cog, Clock, PackageCheck, XCircle, FileText } from 'lucide-react';
-import type { StatusPedido } from '../../types/pedido';
+import { CheckCircle, Cog, Clock, XCircle } from 'lucide-react';
+import type { OrderStatus } from '../../types/order';
 
 interface StatusBadgeProps {
-  status: StatusPedido;
+  status: OrderStatus;
 }
 
 interface StatusConfig {
@@ -14,38 +14,26 @@ interface StatusConfig {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const statusConfig: Record<StatusPedido, StatusConfig> = {
-    ORCAMENTO: {
-      icon: <FileText size={14} />,
-      label: 'Orçamento',
-      text: 'text-indigo-700',
-      bg: 'bg-indigo-100',
-    },
-    SOLICITADO: {
+  const statusConfig: Record<OrderStatus, StatusConfig> = {
+    PENDING: {
       icon: <Clock size={14} />,
-      label: 'Solicitado',
+      label: 'Pendente',
       text: 'text-blue-700',
       bg: 'bg-blue-100',
     },
-    EM_PRODUCAO: {
+    PROCESSING: {
       icon: <Cog size={14} />,
-      label: 'Em produção',
+      label: 'Em processamento',
       text: 'text-yellow-700',
       bg: 'bg-yellow-100',
     },
-    PRONTO: {
-      icon: <PackageCheck size={14} />,
-      label: 'Pronto',
-      text: 'text-cyan-700',
-      bg: 'bg-cyan-100',
-    },
-    ENTREGUE: {
+    COMPLETED: {
       icon: <CheckCircle size={14} />,
-      label: 'Entregue',
+      label: 'Finalizado',
       text: 'text-green-700',
       bg: 'bg-green-100',
     },
-    CANCELADO: {
+    CANCELLED: {
       icon: <XCircle size={14} />,
       label: 'Cancelado',
       text: 'text-red-700',
@@ -53,7 +41,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     },
   };
 
-  const config = statusConfig[status] || statusConfig.CANCELADO; 
+  const config = statusConfig[status] || statusConfig.PENDING; 
 
   return (
     <span

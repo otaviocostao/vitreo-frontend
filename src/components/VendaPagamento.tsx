@@ -1,19 +1,19 @@
 import { useState, useMemo } from 'react';
-import { CreditCard, Landmark, CircleDollarSign, Trash2, PlusCircle, Banknote, CircleDashed } from 'lucide-react';
+import { CreditCard, Landmark, CircleDollarSign, Trash2, PlusCircle, Banknote } from 'lucide-react';
 
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
 import PriceInput from './ui/PriceInput';
-import type { PagamentoPayload } from '../types/pedido';
+import type { PaymentPayload, PaymentMethodType } from '../types/order';
 
 interface VendaPagamentoProps {
   valorLentes: number;
   valorArmacao: number;
   desconto: number;
-  pagamentos: PagamentoPayload[];
+  payments: PaymentPayload[];
   onValorChange: (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => void;
-  onPagamentosChange: (novosPagamentos: PagamentoPayload[]) => void;
+  onPaymentsChange: (novosPagamentos: PaymentPayload[]) => void;
   onError: (message: string | null) => void;
 }
 
@@ -21,24 +21,24 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
     valorLentes,
     valorArmacao,
     desconto,
-    pagamentos = [],
+    payments = [],
     onValorChange,
-    onPagamentosChange,
+    onPaymentsChange,
     onError
   }) => {
 
 
-  const [newPaymentMethod, setNewPaymentMethod] = useState<'DINHEIRO' | 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'PIX' | 'PRAZO' | 'PENDENTE'>('DINHEIRO');
+  const [newPaymentMethod, setNewPaymentMethod] = useState<PaymentMethodType>('CASH');
   const [newPaymentAmount, setNewPaymentAmount] = useState<number | ''>('');
   const [newPaymentInstallments, setNewPaymentInstallments] = useState(1);
 
   const totalOrderValue = useMemo(() => {
-    return (valorLentes || 0) + (valorArmacao || 0) - (desconto || 0);
+    return (Number(valorLentes) || 0) + (Number(valorArmacao) || 0) - (Number(desconto) || 0);
   }, [valorLentes, valorArmacao, desconto]);
 
   const totalPaid = useMemo(() => {
-    return pagamentos.reduce((sum, payment) => sum + payment.valorPago, 0);
-  }, [pagamentos]);
+    return payments.reduce((sum, payment) => sum + payment.amountPaid, 0);
+  }, [payments]);
 
   const remainingBalance = useMemo(() => {
     return totalOrderValue - totalPaid;
@@ -57,48 +57,46 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
         return;
     }
 
-    const newPayment: PagamentoPayload = {
+    const newPayment: PaymentPayload = {
       id: Date.now(),
-      formaPagamento: newPaymentMethod,
-      valorPago: valorASerAdicionado,
-      numeroParcelas: (newPaymentMethod === 'CARTAO_CREDITO' || newPaymentMethod === 'PRAZO') ? newPaymentInstallments : 1,
+      paymentMethod: newPaymentMethod,
+      amountPaid: valorASerAdicionado,
+      installments: (newPaymentMethod === 'CREDIT_CARD' || newPaymentMethod === 'BANK_SLIP') ? newPaymentInstallments : 1,
     };
 
-    onPagamentosChange([...pagamentos, newPayment]);
+    onPaymentsChange([...payments, newPayment]);
 
     setNewPaymentAmount('');
     setNewPaymentInstallments(1);
   };
 
   const handleRemovePayment = (paymentId: string | number) => {
-    const novosPagamentos = pagamentos.filter((payment) => payment.id !== paymentId);
-    onPagamentosChange(novosPagamentos);
+    const novosPagamentos = payments.filter((payment) => payment.id !== paymentId);
+    onPaymentsChange(novosPagamentos);
   };
   
   const paymentOptions = [
-    { value: 'DINHEIRO', label: 'Dinheiro' },
+    { value: 'CASH', label: 'Dinheiro' },
     { value: 'PIX', label: 'Pix' },
-    { value: 'CARTAO_DEBITO', label: 'Cartão de Débito' },
-    { value: 'CARTAO_CREDITO', label: 'Cartão de Crédito' },
-    { value: 'PRAZO', label: 'Prazo' }
+    { value: 'DEBIT_CARD', label: 'Cartão de Débito' },
+    { value: 'CREDIT_CARD', label: 'Cartão de Crédito' },
+    { value: 'BANK_SLIP', label: 'Prazo' }
   ];
   
   const paymentIcons = {
-    'DINHEIRO': <CircleDollarSign size={20} className="text-teal-500" />,
+    'CASH': <CircleDollarSign size={20} className="text-teal-500" />,
     'PIX': <Landmark size={20} className="text-blue-500" />,
-    'CARTAO_CREDITO': <CreditCard size={20} className="text-orange-500" />,
-    'CARTAO_DEBITO': <CreditCard size={20} className="text-green-500" />,
-    'PRAZO': <Banknote size={20} className="text-teal-500" />,
-    'PENDENTE': <CircleDashed size={20} className="text-gray-500" />,
+    'CREDIT_CARD': <CreditCard size={20} className="text-orange-500" />,
+    'DEBIT_CARD': <CreditCard size={20} className="text-green-500" />,
+    'BANK_SLIP': <Banknote size={20} className="text-teal-500" />,
   };
 
-  const formaPagamentoDisplayMap: Record<string, string> = {
-    'DINHEIRO': 'Dinheiro',
+  const paymentMethodDisplayMap: Record<PaymentMethodType, string> = {
+    'CASH': 'Dinheiro',
     'PIX': 'Pix',
-    'CARTAO_DEBITO': 'Cartão de Débito',
-    'CARTAO_CREDITO': 'Cartão de Crédito',
-    'PRAZO': 'Prazo',
-    'PENDENTE': 'Pendente'
+    'DEBIT_CARD': 'Cartão de Débito',
+    'CREDIT_CARD': 'Cartão de Crédito',
+    'BANK_SLIP': 'Prazo'
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -154,7 +152,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
             options={paymentOptions} 
             value={newPaymentMethod} 
             onChange={(e) => setNewPaymentMethod(e.target.value as any)} 
-            id={'formaPagamento'} 
+            id={'paymentMethod'} 
           />
           <InputField 
             label="Valor:" 
@@ -162,7 +160,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
             placeholder="R$ 0,00" 
             value={newPaymentAmount} 
             onChange={(e) => setNewPaymentAmount(parseFloat(e.target.value))} 
-            id={'valorPago'} 
+            id={'amountPaid'} 
             onKeyDown={handleKeyDown}
           />
           <InputField 
@@ -170,7 +168,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
             type="number" 
             value={newPaymentInstallments} 
             onChange={(e) => setNewPaymentInstallments(parseInt(e.target.value))} 
-            disabled={newPaymentMethod !== 'CARTAO_CREDITO' && newPaymentMethod !== 'PRAZO' }  id={'numeroParcelas'}
+            disabled={newPaymentMethod !== 'CREDIT_CARD' && newPaymentMethod !== 'BANK_SLIP' }  id={'installments'}
             onKeyDown={handleKeyDown}
             />
         </div>
@@ -183,23 +181,23 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
       <div className=" p-4 border-b-1 border-gray-200 flex-1">
         <h3 className="text-md font-semibold text-gray-700 mb-3">Pagamentos Realizados</h3>
         <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
-          {pagamentos.length === 0 ? (
+          {payments.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">Nenhum pagamento registrado.</p>
           ) : (
-            pagamentos.map(payment => (
+            payments.map(payment => (
               payment.id && (
                 <div key={payment.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
                   <div className="flex items-center gap-3">
-                    {paymentIcons[payment.formaPagamento]}
+                    {paymentIcons[payment.paymentMethod]}
                     <div>
-                      <p className="font-semibold text-sm text-gray-800">{formaPagamentoDisplayMap[payment.formaPagamento] || payment.formaPagamento}</p>
-                      {payment.numeroParcelas > 1 && (
-                        <p className="text-xs text-gray-500">{payment.numeroParcelas}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago / payment.numeroParcelas)}</p>
+                      <p className="font-semibold text-sm text-gray-800">{paymentMethodDisplayMap[payment.paymentMethod] || payment.paymentMethod}</p>
+                      {payment.installments > 1 && (
+                        <p className="text-xs text-gray-500">{payment.installments}x de {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.amountPaid / payment.installments)}</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-semibold text-sm text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.valorPago)}</span>
+                    <span className="font-semibold text-sm text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payment.amountPaid)}</span>
                     <button onClick={() => handleRemovePayment(payment.id!)} className="text-gray-400 hover:text-red-500 transition-colors">
                       <Trash2 size={16} />
                     </button>

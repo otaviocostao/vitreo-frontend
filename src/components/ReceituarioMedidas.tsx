@@ -1,5 +1,3 @@
-import StyledInput from './ui/StyledInput';
-import MedidaInput from './ui/MedidaInput';
 import type { ReceituarioPayload } from '../types/receituario';
 
 interface ReceituarioMedidasProps {

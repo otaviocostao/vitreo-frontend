@@ -7,8 +7,8 @@ import InputField from "../components/ui/InputField";
 import SaveCancelButtonsArea from "../components/SaveCancelButtonsArea";
 import { useEffect, useState } from "react";
 import AddClientModal from "../components/AddClientModal";
-import type { ItemPedidoPayload, PagamentoPayload, PedidoPayload, PedidoUpdatePayload, StatusPedido } from "../types/pedido";
-import { createPedido, getPedidoById, updatePedido } from "../services/pedidoService";
+import type { OrderItemPayload, PaymentPayload, OrderPayload, OrderUpdatePayload, OrderStatus, OrderResponse } from "../types/order";
+import { createOrder, getOrderById, updateOrder } from "../services/orderService";
 import type { ReceituarioPayload } from "../types/receituario";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { CustomerResponse } from "../types/customer";
@@ -21,39 +21,76 @@ import { getClienteById } from "../services/clienteService";
 import StatusSelector from "../components/StatusSelector";
 import Button from "../components/ui/Button";
 import { FileText } from "lucide-react";
+import api from "../services/api";
 
-interface VendaFormData {
-    cliente: CustomerResponse | null;
-    receituario: ReceituarioPayload;
-    itens: ItemPedidoPayload[];
-    pagamentos: PagamentoPayload[];
-    ordemServico: string;
-    dataPedido: string;
-    dataPrevisaoEntrega: string;
-    dataEntrega: string;
-    desconto: number;
-    valorLentes: number;
-    valorArmacao: number;
-    status: StatusPedido;
-    observacoes: string;
+interface OrderFormData {
+    customer: CustomerResponse | null;
+    prescription: ReceituarioPayload;
+    items: OrderItemPayload[];
+    payments: PaymentPayload[];
+    serviceOrder: string;
+    orderDate: string;
+    deliveryForecastDate: string;
+    deliveryDate: string;
+    discount: number;
+    lensValue: number;
+    frameValue: number;
+    status: OrderStatus;
+    observations: string;
 }
 
 const initialFormData = {
-    cliente: null, receituario: {} as ReceituarioPayload, itens: [], pagamentos: [], ordemServico: '',
-    dataPedido: '', dataPrevisaoEntrega: '', dataEntrega: '', desconto: 0, valorLentes: 0, valorArmacao: 0, status: '' as StatusPedido, observacoes: ''
-}
+    customer: null,
+    prescription: {} as ReceituarioPayload,
+    items: [],
+    payments: [],
+    serviceOrder: '',
+    orderDate: '',
+    deliveryForecastDate: '',
+    deliveryDate: '',
+    discount: 0,
+    lensValue: 0,
+    frameValue: 0,
+    status: 'PENDING' as OrderStatus,
+    observations: ''
+};
 
 function RegisterSellPage() {
     const { id: pedidoId } = useParams<{ id: string }>();
     const isEditMode = !!pedidoId;
     const [produtosDisponiveis, setProdutosDisponiveis] = useState<ProductResponse[]>([]);
+    const [fetchedOrder, setFetchedOrder] = useState<OrderResponse | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [productModalType, setProductModalType] = useState<'frame' | 'lens' | null>(null);
     const navigate = useNavigate();
-    const [formData, setFormData] = useState<VendaFormData>(initialFormData);
+    const [formData, setFormData] = useState<OrderFormData>(initialFormData);
+
+    const mapPrescriptionToPortuguese = (prescription: any): ReceituarioPayload => {
+        if (!prescription) return {} as ReceituarioPayload;
+        return {
+            esfericoOd: prescription.sphericalOd,
+            cilindricoOd: prescription.cylindricalOd,
+            eixoOd: prescription.axisOd,
+            esfericoOe: prescription.sphericalOe,
+            cilindricoOe: prescription.cylindricalOe,
+            eixoOe: prescription.axisOe,
+            adicao: prescription.addition,
+            distanciaPupilar: prescription.pupillaryDistance,
+            dnpOd: prescription.dnpOd,
+            dnpOe: prescription.dnpOe,
+            centroOpticoOd: prescription.opticalCenterOd,
+            centroOpticoOe: prescription.opticalCenterOe,
+            anguloMaior: prescription.greaterAngle,
+            ponteAro: prescription.bridgeFrame,
+            anguloVertical: prescription.verticalAngle,
+            nomeMedico: prescription.doctorName,
+            crmMedico: prescription.doctorCrm,
+            dataReceita: prescription.prescriptionDate ? prescription.prescriptionDate.substring(0, 10) : undefined,
+        };
+    };
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -62,42 +99,48 @@ function RegisterSellPage() {
                 return;
             }
 
-
             setError(null);
             try {
-                const pedidoData = await getPedidoById(pedidoId);
-                console.log(pedidoData);
+                const orderData = await getOrderById(pedidoId);
+                setFetchedOrder(orderData);
+                console.log(orderData);
 
                 let clienteCompleto: CustomerResponse | null = null;
-                if (pedidoData.cliente && pedidoData.cliente.id) {
-                    clienteCompleto = await getClienteById(pedidoData.cliente.id);
+                if (orderData.customer && orderData.customer.id) {
+                    clienteCompleto = await getClienteById(orderData.customer.id);
                 }
 
-                const itensDoFormulario = pedidoData.itens.map(itemAPI => {
-                    const produtoCorrespondente = produtosDisponiveis.find(
-                        p => p.name === itemAPI.nomeProduto && p.productType === (itemAPI.tipoProduto === 'ARMACAO' ? 'frame' : 'lens')
-                    );
-
+                const itensDoFormulario = orderData.items.map(itemAPI => {
                     return {
-                        produtoId: produtoCorrespondente ? produtoCorrespondente.id : '',
-                        quantidade: itemAPI.quantidade
+                        productId: itemAPI.product.id,
+                        quantity: itemAPI.quantity,
+                        unitPrice: itemAPI.unitPrice
                     };
-                }).filter(item => item.produtoId);
+                });
 
-                const dadosDoFormulario: VendaFormData = {
-                    cliente: clienteCompleto,
-                    receituario: pedidoData.receituario ?? {},
-                    itens: itensDoFormulario,
-                    pagamentos: pedidoData.pagamentos ?? [],
-                    ordemServico: pedidoData.ordemServico?.toString() ?? '',
-                    dataPedido: formatarParaInputDate(pedidoData.dataPedido) ?? '',
-                    dataPrevisaoEntrega: pedidoData.dataPrevisaoEntrega ?? '',
-                    dataEntrega: pedidoData.dataEntrega ?? '',
-                    valorLentes: pedidoData.valorLentes ?? 0,
-                    valorArmacao: pedidoData.valorArmacao ?? 0,
-                    desconto: pedidoData.desconto ?? 0,
-                    status: pedidoData.status ?? '',
-                    observacoes: pedidoData.observacoes || '',
+                const pagamentosDoFormulario = orderData.payments.map(p => {
+                    return {
+                        id: p.id,
+                        paymentMethod: p.paymentMethod,
+                        amountPaid: Number(p.amountPaid),
+                        installments: p.installments
+                    };
+                });
+
+                const dadosDoFormulario: OrderFormData = {
+                    customer: clienteCompleto,
+                    prescription: mapPrescriptionToPortuguese(orderData.prescription),
+                    items: itensDoFormulario,
+                    payments: pagamentosDoFormulario,
+                    serviceOrder: orderData.serviceOrder?.toString() ?? '',
+                    orderDate: formatarParaInputDate(orderData.orderDate) ?? '',
+                    deliveryForecastDate: orderData.deliveryForecastDate ? orderData.deliveryForecastDate.substring(0, 10) : '',
+                    deliveryDate: orderData.deliveryDate ? orderData.deliveryDate.substring(0, 10) : '',
+                    lensValue: orderData.lensValue ?? 0,
+                    frameValue: orderData.frameValue ?? 0,
+                    discount: orderData.discount ?? 0,
+                    status: orderData.status ?? 'PENDING',
+                    observations: orderData.observations || '',
                 };
 
                 setFormData(dadosDoFormulario);
@@ -105,8 +148,6 @@ function RegisterSellPage() {
             } catch (err) {
                 setError("Falha ao carregar os dados do pedido.");
                 console.error(err);
-            } finally {
-    
             }
         };
         loadPageData();
@@ -125,35 +166,31 @@ function RegisterSellPage() {
     };
 
     const handleReceituarioChange = (data: Partial<ReceituarioPayload>) => {
-        setFormData(prev => ({ ...prev, receituario: { ...prev.receituario, ...data } }));
+        setFormData(prev => ({ ...prev, prescription: { ...prev.prescription, ...data } }));
     };
 
-    const handlePagamentosChange = (novosPagamentos: PagamentoPayload[]) => {
-        setFormData(prev => ({ ...prev, pagamentos: novosPagamentos }));
+    const handlePagamentosChange = (novosPagamentos: PaymentPayload[]) => {
+        setFormData(prev => ({ ...prev, payments: novosPagamentos }));
     };
 
     const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
         const nomeDaPropriedade = campo === 'desconto'
-            ? 'desconto'
-            : `valor${campo.charAt(0).toUpperCase() + campo.slice(1)}`;
+            ? 'discount'
+            : (campo === 'lentes' ? 'lensValue' : 'frameValue');
 
         setFormData(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
     };
 
     const handleClienteSelect = (cliente: CustomerResponse | null) => {
-        setFormData(prev => ({ ...prev, cliente }));
+        setFormData(prev => ({ ...prev, customer: cliente }));
     };
 
     const handleClientSubmit = (novoCliente: CustomerResponse) => {
-
         handleClienteSelect(novoCliente);
-
         setIsClientModalOpen(false);
     };
 
     const handleProductSubmit = (novoProduto: ProductResponse) => {
-
-
         if (!novoProduto || !novoProduto.id || !novoProduto.productType) {
             console.error("Produto inválido recebido do modal!");
             setProductModalType(null);
@@ -182,7 +219,7 @@ function RegisterSellPage() {
         setIsLoading(true);
         setError(null);
 
-        if (!formData.cliente) {
+        if (!formData.customer) {
             setError("Por favor, selecione um cliente.");
             setIsLoading(false);
             return;
@@ -201,70 +238,94 @@ function RegisterSellPage() {
         };
 
         try {
-
-            const receituarioPayload = Object.keys(formData.receituario).length > 0 ? {
-                ...formData.receituario,
-                esfericoOd: parseCurrency(formData.receituario.esfericoOd),
-                cilindricoOd: parseCurrency(formData.receituario.cilindricoOd),
-                eixoOd: parseCurrency(formData.receituario.eixoOd),
-                esfericoOe: parseCurrency(formData.receituario.esfericoOe),
-                cilindricoOe: parseCurrency(formData.receituario.cilindricoOe),
-                eixoOe: parseCurrency(formData.receituario.eixoOe),
-                adicao: parseCurrency(formData.receituario.adicao),
-                dnpOd: parseCurrency(formData.receituario.dnpOd),
-                dnpOe: parseCurrency(formData.receituario.dnpOe),
-                centroOpticoOd: parseCurrency(formData.receituario.centroOpticoOd),
-                centroOpticoOe: parseCurrency(formData.receituario.centroOpticoOe),
-                distanciaPupilar: parseCurrency(formData.receituario.distanciaPupilar),
-                anguloMaior: parseCurrency(formData.receituario.anguloMaior),
-                ponteAro: parseCurrency(formData.receituario.ponteAro),
-                anguloVertical: parseCurrency(formData.receituario.anguloVertical),
+            const hasPrescriptionData = Object.keys(formData.prescription).length > 0;
+            const prescriptionPayload = hasPrescriptionData ? {
+                customerId: formData.customer.id,
+                sphericalOd: parseCurrency(formData.prescription.esfericoOd),
+                cylindricalOd: parseCurrency(formData.prescription.cilindricoOd),
+                axisOd: parseCurrency(formData.prescription.eixoOd),
+                sphericalOe: parseCurrency(formData.prescription.esfericoOe),
+                cylindricalOe: parseCurrency(formData.prescription.cilindricoOe),
+                axisOe: parseCurrency(formData.prescription.eixoOe),
+                addition: parseCurrency(formData.prescription.adicao),
+                dnpOd: parseCurrency(formData.prescription.dnpOd),
+                dnpOe: parseCurrency(formData.prescription.dnpOe),
+                opticalCenterOd: parseCurrency(formData.prescription.centroOpticoOd),
+                opticalCenterOe: parseCurrency(formData.prescription.centroOpticoOe),
+                pupillaryDistance: parseCurrency(formData.prescription.distanciaPupilar),
+                greaterAngle: parseCurrency(formData.prescription.anguloMaior),
+                bridgeFrame: parseCurrency(formData.prescription.ponteAro),
+                verticalAngle: parseCurrency(formData.prescription.anguloVertical),
+                doctorName: formData.prescription.nomeMedico,
+                doctorCrm: formData.prescription.crmMedico,
+                prescriptionDate: formData.prescription.dataReceita || undefined,
             } : undefined;
 
+            let prescriptionId: string | undefined = undefined;
+
+            if (prescriptionPayload) {
+                if (isEditMode && fetchedOrder?.prescription?.id) {
+                    await api.patch(`/prescriptions/${fetchedOrder.prescription.id}`, prescriptionPayload);
+                    prescriptionId = fetchedOrder.prescription.id;
+                } else {
+                    const presResp = await api.post<{ id: string }>('/prescriptions', prescriptionPayload);
+                    prescriptionId = presResp.data.id;
+                }
+            }
 
             if (isEditMode && pedidoId) {
-                const updatePayload: PedidoUpdatePayload = {
-                    receituario: receituarioPayload,
-                    ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
-                    itens: formData.itens,
-                    pagamentos: formData.pagamentos.map(({ id, ...resto }) => resto),
-                    desconto: parseCurrency(formData.desconto),
-                    valorLentes: parseCurrency(formData.valorLentes),
-                    valorArmacao: parseCurrency(formData.valorArmacao),
-                    dataPedido: formatarDataParaLocalDateTime(formData.dataPedido),
-                    dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
-                    dataEntrega: formData.dataEntrega || undefined,
+                const updatePayload: OrderUpdatePayload = {
+                    customerId: formData.customer.id,
+                    prescriptionId: prescriptionId,
+                    serviceOrder: formData.serviceOrder ? parseInt(formData.serviceOrder) : undefined,
+                    items: formData.items.map(item => ({
+                        productId: item.productId,
+                        quantity: Number(item.quantity),
+                        unitPrice: Number(item.unitPrice),
+                    })),
+                    payments: formData.payments.map(p => ({
+                        paymentMethod: p.paymentMethod,
+                        amountPaid: Number(p.amountPaid),
+                        installments: p.installments ? Number(p.installments) : 1,
+                    })),
+                    discount: parseCurrency(formData.discount),
+                    lensValue: parseCurrency(formData.lensValue),
+                    frameValue: parseCurrency(formData.frameValue),
+                    orderDate: formatarDataParaLocalDateTime(formData.orderDate),
+                    deliveryForecastDate: formData.deliveryForecastDate || undefined,
+                    deliveryDate: formData.deliveryDate || undefined,
                     status: formData.status,
-                    observacoes: formData.observacoes,
+                    observations: formData.observations,
                 };
 
-                await updatePedido(pedidoId, updatePayload)
+                await updateOrder(pedidoId, updatePayload);
                 console.log("PAYLOAD ENVIADO:", JSON.stringify(updatePayload, null, 2));
                 navigate(`/vendas/${pedidoId}/detalhes`);
             } else {
-
-                const pedidoPayload: PedidoPayload = {
-                    clienteId: formData.cliente.id,
-                    receituario: receituarioPayload,
-                    itens: formData.itens.map(item => ({
-                        produtoId: item.produtoId,
-                        quantidade: item.quantidade,
+                const orderPayload: OrderPayload = {
+                    customerId: formData.customer.id,
+                    prescriptionId: prescriptionId,
+                    items: formData.items.map(item => ({
+                        productId: item.productId,
+                        quantity: Number(item.quantity),
+                        unitPrice: Number(item.unitPrice),
                     })),
-                    pagamentos: formData.pagamentos.map(p => ({
-                        formaPagamento: p.formaPagamento,
-                        valorPago: p.valorPago,
-                        numeroParcelas: p.numeroParcelas,
+                    payments: formData.payments.map(p => ({
+                        paymentMethod: p.paymentMethod,
+                        amountPaid: Number(p.amountPaid),
+                        installments: p.installments ? Number(p.installments) : 1,
                     })),
-                    desconto: parseCurrency(formData.desconto),
-                    valorLentes: parseCurrency(formData.valorLentes),
-                    valorArmacao: parseCurrency(formData.valorArmacao),
-                    dataPrevisaoEntrega: formData.dataPrevisaoEntrega || undefined,
-                    dataPedido: formatarDataParaLocalDateTime(formData.dataPedido) || undefined,
-                    ordemServico: formData.ordemServico ? parseInt(formData.ordemServico) : undefined,
-                    observacoes: formData.observacoes,
+                    discount: parseCurrency(formData.discount),
+                    lensValue: parseCurrency(formData.lensValue),
+                    frameValue: parseCurrency(formData.frameValue),
+                    deliveryForecastDate: formData.deliveryForecastDate || undefined,
+                    orderDate: formatarDataParaLocalDateTime(formData.orderDate) || new Date().toISOString(),
+                    serviceOrder: formData.serviceOrder ? parseInt(formData.serviceOrder) : undefined,
+                    status: formData.status,
+                    observations: formData.observations,
                 };
 
-                const novoPedido = await createPedido(pedidoPayload);
+                const novoPedido = await createOrder(orderPayload);
                 console.log("Resposta da API de criação:", novoPedido);
                 navigate(`/vendas/${novoPedido.id}/detalhes`);
             }
@@ -299,23 +360,23 @@ function RegisterSellPage() {
 
     const handleArmacaoSelect = (produto: ProductResponse | null) => {
         setFormData(prev => {
-            const armacaoAtualId = prev.itens.find(item =>
-                produtosDisponiveis.some(p => p.id === item.produtoId && p.productType === 'frame')
-            )?.produtoId;
+            const armacaoAtualId = prev.items.find(item =>
+                produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'frame')
+            )?.productId;
 
             const outrosItens = armacaoAtualId
-                ? prev.itens.filter(item => item.produtoId !== armacaoAtualId)
-                : prev.itens;
+                ? prev.items.filter(item => item.productId !== armacaoAtualId)
+                : prev.items;
 
             let novosItens = outrosItens;
             if (produto) {
-                novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
+                novosItens = [...outrosItens, { productId: produto.id, quantity: 1, unitPrice: produto.salePrice }];
             }
 
             return {
                 ...prev,
-                itens: novosItens,
-                valorArmacao: produto ? produto.salePrice : 0
+                items: novosItens,
+                frameValue: produto ? produto.salePrice : 0
             }
         });
     };
@@ -323,28 +384,28 @@ function RegisterSellPage() {
 
     const handleLenteSelect = (produto: ProductResponse | null) => {
         setFormData(prev => {
-            const lenteAtualId = prev.itens.find(item =>
-                produtosDisponiveis.some(p => p.id === item.produtoId && p.productType === 'lens')
-            )?.produtoId;
+            const lenteAtualId = prev.items.find(item =>
+                produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'lens')
+            )?.productId;
 
             const outrosItens = lenteAtualId
-                ? prev.itens.filter(item => item.produtoId !== lenteAtualId)
-                : prev.itens;
+                ? prev.items.filter(item => item.productId !== lenteAtualId)
+                : prev.items;
 
             let novosItens = outrosItens;
             if (produto) {
-                novosItens = [...outrosItens, { produtoId: produto.id, quantidade: 1 }];
+                novosItens = [...outrosItens, { productId: produto.id, quantity: 1, unitPrice: produto.salePrice }];
             }
 
             return {
                 ...prev,
-                itens: novosItens,
-                valorLentes: produto ? produto.salePrice : 0
+                items: novosItens,
+                lensValue: produto ? produto.salePrice : 0
             }
         });
     };
 
-    const handleStatusChange = (newStatus: StatusPedido) => {
+    const handleStatusChange = (newStatus: OrderStatus) => {
         setFormData(prev => ({ ...prev, status: newStatus }));
     };
 
@@ -378,7 +439,7 @@ function RegisterSellPage() {
                     <div className="flex divide-x divide-gray-200 border-y border-gray-200">
                         <InfoSection title="Cliente" className="w-2/3">
                             <ClienteSearch
-                                selectedCliente={formData.cliente}
+                                selectedCliente={formData.customer}
                                 onClienteSelect={handleClienteSelect}
                                 onOpenClientModal={() => setIsClientModalOpen(true)}
                                 isEditMode={isEditMode}
@@ -391,11 +452,10 @@ function RegisterSellPage() {
                                     <InputField
                                         id="os-number"
                                         type="number"
-                                        name="ordemServico"
+                                        name="serviceOrder"
                                         placeholder="O.S"
                                         className="w-24"
-                                        labelClassName="sr-only"
-                                        value={formData.ordemServico}
+                                        value={formData.serviceOrder}
                                         onChange={handleFormChange}
                                     />
                                 </div>
@@ -406,7 +466,7 @@ function RegisterSellPage() {
                                     <StatusSelector
                                         currentStatus={formData.status}
                                         onStatusChange={handleStatusChange}
-                                        disabled={formData.status === 'ENTREGUE' || formData.status === 'CANCELADO'}
+                                        disabled={formData.status === 'COMPLETED' || formData.status === 'CANCELLED'}
                                     />
                                 </InfoSection>
                             }
@@ -415,31 +475,31 @@ function RegisterSellPage() {
                     </div>
                     <div className="flex w-full border-b border-gray-200 divide-x-1 divide-gray-200">
                         <div className="flex flex-col w-2/3 " >
-                            <ReceituarioMedidas data={formData.receituario} onChange={handleReceituarioChange} />
+                            <ReceituarioMedidas data={formData.prescription} onChange={handleReceituarioChange} />
                             <ReceituarioInfoArea
-                                receituarioData={formData.receituario}
-                                pedidoData={formData}
+                                receituarioData={formData.prescription}
+                                orderData={formData}
                                 onReceituarioChange={handleReceituarioChange}
-                                onPedidoChange={(data) => setFormData(prev => ({ ...prev, ...data }))}
+                                onOrderChange={(data) => setFormData(prev => ({ ...prev, ...data }))}
                                 onArmacaoSelect={handleArmacaoSelect}
                                 onLenteSelect={handleLenteSelect}
-                                itens={formData.itens}
+                                items={formData.items}
                                 produtosDisponiveis={produtosDisponiveis}
                                 onOpenProductModal={handleOpenProductModal} />
                         </div>
                         <div className="flex flex-col w-1/3">
                             <VendaPagamento
-                                valorLentes={formData.valorLentes}
-                                valorArmacao={formData.valorArmacao}
-                                desconto={formData.desconto}
-                                pagamentos={formData.pagamentos}
+                                valorLentes={formData.lensValue}
+                                valorArmacao={formData.frameValue}
+                                desconto={formData.discount}
+                                payments={formData.payments}
                                 onValorChange={handleValorChange}
-                                onPagamentosChange={handlePagamentosChange}
+                                onPaymentsChange={handlePagamentosChange}
                                 onError={setError}
                             />
                         </div>
                     </div>
-                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={isEditMode && 'Salvar alterações' || 'Finalizar Venda'} isLoading={isLoading} />
+                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={(isEditMode && 'Salvar alterações') || 'Finalizar Venda'} isLoading={isLoading} />
                 </form>
             </div>
             <AddClientModal
@@ -456,7 +516,6 @@ function RegisterSellPage() {
         </div>
 
     )
-};
-
+}
 
 export default RegisterSellPage;

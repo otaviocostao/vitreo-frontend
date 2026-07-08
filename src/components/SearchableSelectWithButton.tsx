@@ -38,6 +38,7 @@ const SearchableSelectWithButton: React.FC<SearchableSelectWithButtonProps> = ({
             isLoading={isLoading}
             isClearable
             onInputChange={onInputChange}
+            filterOption={() => true}
             noOptionsMessage={() => "Nenhum resultado encontrado"}
             className='border-gray-300 text-sm text-gray-700 placeholder-gray-400 '
             styles={{

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+import { Plus } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
 import Button from '../components/ui/Button';
@@ -8,34 +8,28 @@ import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SalesTable from '../components/SalesTable';
 import { NavLink } from 'react-router-dom';
-import type { PedidoResponse } from '../types/pedido';
-import type { Page } from '../types/pagination';
-import { getPedidos } from '../services/pedidoService';
+import type { OrderResponse } from '../types/order';
+import { getOrders } from '../services/orderService';
 import ErrorPopup from '../components/ErrorPopup';
 import { useDebounce } from '../hooks/useDebounce';
 
 const SalesPage = () => {
-  const [pedidos, setPedidos] = useState<PedidoResponse[]>([]);
-  const [pageInfo, setPageInfo] = useState<Page<PedidoResponse> | null>(null);
+  const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = pageInfo ? pageInfo.totalPages : 1;
   const pageSize = 20;
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   
 
-  const fetchPedidos = useCallback(async (page: number, query: string) => {
+  const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const pageIndex = page - 1; 
-      const data = await getPedidos({page: pageIndex, size: pageSize, query: query});
-      setPedidos(data.content);
-      setPageInfo(data);
-      setCurrentPage(page);
+      const data = await getOrders();
+      setOrders(data);
     } catch (err) {
       setError('Falha ao carregar pedidos.');
       console.error(err);
@@ -45,8 +39,8 @@ const SalesPage = () => {
   }, []);
     
     useEffect(() => {
-        fetchPedidos(currentPage, debouncedSearchTerm);
-    }, [debouncedSearchTerm, fetchPedidos, currentPage]);
+        fetchOrders();
+    }, [fetchOrders]);
         
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -56,6 +50,24 @@ const SalesPage = () => {
     setSearchTerm(event.target.value);
     setCurrentPage(1);
   };
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      if (!debouncedSearchTerm) return true;
+      const s = debouncedSearchTerm.toLowerCase();
+      const os = order.serviceOrder?.toString() || '';
+      const name = `${order.customer.firstName} ${order.customer.lastName}`.toLowerCase();
+      const cpf = order.customer.cpf?.toLowerCase() || '';
+      return os.includes(s) || name.includes(s) || cpf.includes(s);
+    });
+  }, [orders, debouncedSearchTerm]);
+
+  const totalPages = Math.ceil(filteredOrders.length / pageSize) || 1;
+
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredOrders.slice(startIndex, startIndex + pageSize);
+  }, [filteredOrders, currentPage, pageSize]);
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -95,7 +107,7 @@ const SalesPage = () => {
                     </div>
                 </div>
             </div>
-        <SalesTable pedidos={pedidos} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} />
+        <SalesTable orders={paginatedOrders} isLoading={isLoading} />
         </div>
         {error && (
         <ErrorPopup

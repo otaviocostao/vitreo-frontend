@@ -1,22 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from './ui/StatusBadge';
-import type { ItemPedidoResponse, PedidoResponse } from '../types/pedido';
+import type { OrderResponse } from '../types/order';
 import LoadingSpinner from './LoadingSpinner';
 
 
 interface SalesTableProps {
-  pedidos: PedidoResponse[];
+  orders: OrderResponse[];
   isLoading: boolean;
-  currentPage: number;
-  pageSize: number;
 }
 
-const SalesTable: React.FC<SalesTableProps> = ({ pedidos, isLoading, currentPage, pageSize }) => {
+const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
   const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status'];
   const navigate = useNavigate();
 
-  const handleRowClick = (pedidoId: string) => {
-    navigate(`/vendas/${pedidoId}`);
+  const handleRowClick = (orderId: string) => {
+    navigate(`/vendas/${orderId}`);
   };
 
   const formatarData = (data: string | null | undefined): string => {
@@ -47,17 +45,6 @@ const SalesTable: React.FC<SalesTableProps> = ({ pedidos, isLoading, currentPage
     return new Intl.DateTimeFormat('pt-BR').format(dateObj);
   };
   
-  const getNomesDosItens = (itens: ItemPedidoResponse[]) => {
-    const lente = itens.find(item => item.tipoProduto === 'LENTE');
-    
-    const armacao = itens.find(item => item.tipoProduto === 'ARMACAO');
-
-    return {
-      nomeLente: lente ? lente.nomeProduto : 'N/A', 
-      nomeArmacao: armacao ? armacao.nomeProduto : 'N/A'
-    };
-  };
-
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
       <div className="max-h-[60vh] overflow-y-auto">
@@ -85,38 +72,38 @@ const SalesTable: React.FC<SalesTableProps> = ({ pedidos, isLoading, currentPage
               />
             </td>
           </tr> 
-      ) : pedidos.length === 0 ? (
+      ) : orders.length === 0 ? (
         <tr>
           <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
             Nenhuma venda encontrada.
           </td>
         </tr>
       ) : (
-        pedidos.map((pedido, i) => {
-          const rowNumber = (currentPage - 1) * pageSize + i + 1;
-          const lente = pedido.itens.find(item => item.tipoProduto === 'LENTE');
-          const armacao = pedido.itens.find(item => item.tipoProduto === 'ARMACAO');
+        orders.map((order) => {
+          const lente = order.items.find(item => item.product.productType === 'lens');
+          const armacao = order.items.find(item => item.product.productType === 'frame');
           
-          const nomeLente = lente ? lente.nomeProduto : '-';
-          const nomeArmacao = armacao ? armacao.nomeProduto : '-';
+          const nomeLente = lente ? lente.product.name : '-';
+          const nomeArmacao = armacao ? armacao.product.name : '-';
+          const nomeCliente = `${order.customer.firstName} ${order.customer.lastName}`;
 
           return (
             <tr 
-              key={pedido.id} 
+              key={order.id} 
               className="hover:bg-gray-50 cursor-pointer"
-              onClick={() => handleRowClick(pedido.id)}
+              onClick={() => handleRowClick(order.id)}
             >
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pedido.ordemServico}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{pedido.cliente.nomeCompleto}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarLocalDateTimeParaData(pedido.dataPedido)}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarData(pedido.dataEntrega)}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{order.serviceOrder || '-'}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeCliente}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarLocalDateTimeParaData(order.orderDate)}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarData(order.deliveryDate)}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeLente}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeArmacao}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(pedido.valorFinal)}
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.finalValue)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                <StatusBadge status={pedido.status} />
+                <StatusBadge status={order.status} />
               </td>
             </tr>
           );

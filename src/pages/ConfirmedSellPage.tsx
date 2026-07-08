@@ -1,11 +1,9 @@
-
-
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Printer, Edit, CheckCircle, CircleDollarSign, Landmark, CreditCard, Banknote, CircleDashed, Scissors } from 'lucide-react';
+import { Printer, Edit, CheckCircle, Scissors } from 'lucide-react';
 
-import { getPedidoById } from '../services/pedidoService';
-import type { PedidoResponse } from '../types/pedido';
+import { getOrderById } from '../services/orderService';
+import type { OrderResponse } from '../types/order';
 
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import Button from '../components/ui/Button';
@@ -23,7 +21,7 @@ const formatarMoeda = (valor: number | null | undefined): string => {
 
 const SaleConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [pedido, setPedido] = useState<PedidoResponse | null>(null);
+  const [order, setOrder] = useState<OrderResponse | null>(null);
   const [selectedPrintOption, setSelectedPrintOption] = useState<'AMBAS' | 'OTICA' | 'CLIENTE'>('AMBAS');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,12 +33,12 @@ const SaleConfirmationPage = () => {
       return;
     }
 
-    const fetchPedido = async () => {
+    const fetchOrder = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getPedidoById(id);
-        setPedido(data);
+        const data = await getOrderById(id);
+        setOrder(data);
       } catch (err) {
         setError("Falha ao carregar os detalhes do pedido.");
         console.error(err);
@@ -49,23 +47,23 @@ const SaleConfirmationPage = () => {
       }
     };
 
-    fetchPedido();
+    fetchOrder();
   }, [id]);
 
   const valorTotalPago = useMemo(() => {
-    if (!pedido || !pedido.pagamentos) {
+    if (!order || !order.payments) {
       return 0;
     }
-    return pedido.pagamentos.reduce((total, pagamento) => total + pagamento.valorPago, 0);
-  }, [pedido]);
+    return order.payments.reduce((total, payment) => total + payment.amountPaid, 0);
+  }, [order]);
 
   const valorRestante = useMemo(() => {
-    if (!pedido || !pedido.pagamentos) {
+    if (!order || !order.payments) {
       return 0;
     }
 
-    return pedido.valorFinal - valorTotalPago;
-  }, [pedido]);
+    return order.finalValue - valorTotalPago;
+  }, [order, valorTotalPago]);
 
   type PrintOption = 'AMBAS' | 'OTICA' | 'CLIENTE';
 
@@ -78,7 +76,7 @@ const SaleConfirmationPage = () => {
   const handlePrintOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value as PrintOption;
     setSelectedPrintOption(newValue);
-};
+  };
 
   if (isLoading) {
     return <LoadingSpinner text="Carregando detalhes da venda..." />;
@@ -88,14 +86,16 @@ const SaleConfirmationPage = () => {
     return <div className="p-8 text-center text-red-600">{error}</div>;
   }
 
-  if (!pedido) {
+  if (!order) {
     return <div className="p-8 text-center text-gray-500">Pedido não encontrado.</div>;
   }
+
+  const nomeCliente = `${order.customer.firstName} ${order.customer.lastName}`;
 
   return (
     <div className="flex flex-col w-full">
         <div className='print:hidden'>
-          <HeaderTitlePage page_name={`Detalhes do Pedido #${pedido.ordemServico || pedido.id.substring(0, 8)}`} />
+          <HeaderTitlePage page_name={`Detalhes do Pedido #${order.serviceOrder || order.id.substring(0, 8)}`} />
         </div>
       
       <div className="px-4 py-6">
@@ -115,7 +115,7 @@ const SaleConfirmationPage = () => {
             <Printer size={16} />
             Imprimir
           </Button>
-          <Link to={`/vendas/${pedido.id}`}>
+          <Link to={`/vendas/${order.id}`}>
             <Button variant="primary">
               <Edit size={16} />
               Editar Pedido
@@ -130,23 +130,23 @@ const SaleConfirmationPage = () => {
              
               <DetailSection title="Informações do Pedido">
                 <div className="grid grid-cols-4 md:grid-cols-4 gap-4">
-                  <DetailItem label="Ordem de Serviço:" value={pedido.ordemServico || 'N/A'} />
-                  <DetailItem label="Data do Pedido:" value={new Date(pedido.dataPedido).toLocaleDateString('pt-BR')} />
-                  <DetailItem label="Data Prevista:" value={new Date(pedido.dataPrevisaoEntrega).toLocaleDateString('pt-BR')} />
+                  <DetailItem label="Ordem de Serviço:" value={order.serviceOrder || 'N/A'} />
+                  <DetailItem label="Data do Pedido:" value={new Date(order.orderDate).toLocaleDateString('pt-BR')} />
+                  <DetailItem label="Data Prevista:" value={order.deliveryForecastDate ? new Date(order.deliveryForecastDate).toLocaleDateString('pt-BR') : 'N/A'} />
                   <div className='print:hidden'>
-                    <DetailItem label="Status:" value={<StatusBadge status={pedido.status} />} />
+                    <DetailItem label="Status:" value={<StatusBadge status={order.status} />} />
                   </div>
                 </div>
               </DetailSection>
 
               <DetailSection title="Cliente">
-                <DetailItem label="Nome:" value={pedido.cliente.nomeCompleto} />
+                <DetailItem label="Nome:" value={nomeCliente} />
               </DetailSection>
 
               <div className='flex flex-col lg:flex-row divide-x divide-gray-200 print:flex-row print:divide-x print:divide-gray-200'>
                 
                 <div className='w-3/4 print:w-[65%]'>
-                  {pedido.receituario && (
+                  {order.prescription && (
                     <DetailSection title="Receituário">
                       <div className="overflow-x-auto">
                         <table className="w-[60%] divide-y divide-gray-200 border border-gray-200 text-sm">
@@ -164,25 +164,25 @@ const SaleConfirmationPage = () => {
                           <tbody className="bg-white divide-y divide-gray-200">
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">OD</td>
-                              <td className="px-4 py-2 text-center text-gray-800 ">{pedido.receituario.esfericoOd}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.cilindricoOd}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.eixoOd}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.dnpOd}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.centroOpticoOd}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.distanciaPupilar}</td>
+                              <td className="px-4 py-2 text-center text-gray-800 ">{order.prescription.sphericalOd}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.cylindricalOd}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.axisOd}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.dnpOd}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.opticalCenterOd}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.pupillaryDistance}</td>
                             </tr>
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">OE</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.esfericoOe}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.cilindricoOe}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.eixoOe}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.dnpOe}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{pedido.receituario.centroOpticoOe}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.sphericalOe}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.cylindricalOe}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.axisOe}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.dnpOe}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{order.prescription.opticalCenterOe}</td>
                               <td className="px-4 py-2 text-center text-gray-800">{}</td>
                             </tr>
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">AD</td>
-                              <td className="px-4 py-2 text-center text-gray-800 border-r-1 border-gray-200">{pedido.receituario.adicao}</td>
+                              <td className="px-4 py-2 text-center text-gray-800 border-r-1 border-gray-200">{order.prescription.addition}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -190,22 +190,22 @@ const SaleConfirmationPage = () => {
                   
                       <div className='flex gap-2 items-center align-middle mt-2'>
                         <h2 className="text-lg font-semibold text-gray-800">Médico:</h2>
-                        <DetailItem label="Dr." value={pedido.receituario?.nomeMedico || 'N/A'} />
+                        <DetailItem label="Dr." value={order.prescription.doctorName || 'N/A'} />
                       </div>
                     </DetailSection>
                   )}
 
 
                   <DetailSection title="Itens do Pedido" className='border-none'>
-                    {pedido.itens.map(item => (
-                      <div key={item.produtoId} className="flex gap-1 items-center py-1">
-                        {item.tipoProduto === 'ARMACAO' ? (
+                    {order.items.map(item => (
+                      <div key={item.id} className="flex gap-1 items-center py-1">
+                        {item.product.productType === 'frame' ? (
                           <p className="text-sm text-gray-700">Armação:</p>
                           
                         ) : (
                           <p className="text-sm text-gray-700">Lentes:</p>
                         )}
-                        <p className="text-sm text-gray-700 font-semibold">{item.nomeProduto}</p>
+                        <p className="text-sm text-gray-700 font-semibold">{item.product.name}</p>
                       </div>
                     ))}
                   </DetailSection>
@@ -213,15 +213,15 @@ const SaleConfirmationPage = () => {
 
                 <div className='w-1/4 print:w-[35%]'>
                   <DetailSection title="Orçamento do pedido" className='border-none'>
-                    <DetailItem label="Valor da armação" value={formatarMoeda(pedido.valorArmacao)} />
-                    <DetailItem label="Valor das lentes" value={formatarMoeda(pedido.valorLentes)} />
-                    <DetailItem label="Desconto aplicado" value={formatarMoeda(pedido.desconto)} />
+                    <DetailItem label="Valor da armação" value={formatarMoeda(order.frameValue)} />
+                    <DetailItem label="Valor das lentes" value={formatarMoeda(order.lensValue)} />
+                    <DetailItem label="Desconto aplicado" value={formatarMoeda(order.discount)} />
 
                       <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Financeiro:</h2>
 
                     <div className="flex justify-between text-sm font-medium text-gray-700">
                       <span>Valor Final:</span>
-                      <span>{formatarMoeda(pedido.valorFinal)}</span>
+                      <span>{formatarMoeda(order.finalValue)}</span>
                     </div>
                     <div className="flex justify-between text-sm font-medium text-gray-700">
                       <span>Valor Pago:</span>
@@ -233,7 +233,7 @@ const SaleConfirmationPage = () => {
                     </div>
 
                     <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Observações:</h2>
-                    <p className="text-sm text-gray-700 line-clamp-4">{pedido.observacoes || 'Nenhuma observação registrada.'}</p>
+                    <p className="text-sm text-gray-700 line-clamp-4">{order.observations || 'Nenhuma observação registrada.'}</p>
                         
                   </DetailSection>
                 </div>
@@ -251,7 +251,7 @@ const SaleConfirmationPage = () => {
 
 
           {(selectedPrintOption === 'AMBAS' || selectedPrintOption === 'CLIENTE') && (
-            <ClientReceipt pedido={pedido} valorTotalPago={valorTotalPago} valorRestante={valorRestante} />
+            <ClientReceipt order={order} valorTotalPago={valorTotalPago} valorRestante={valorRestante} />
           )}
 
         </div>
