@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import ProductsTable from '../components/ProductsTable';
-import type { ProdutoResponse } from '../types/produto';
+import type { ProductResponse } from '../types/product';
 import { deleteProductById, getProducts } from '../services/productService';
 import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
@@ -17,8 +17,8 @@ import { useDebounce } from '../hooks/useDebounce';
 
 
 const StockPage = () => {
-  const [products, setProducts] = useState<ProdutoResponse[]>([]);
-  const [pageInfo, setPageInfo] = useState<Page<ProdutoResponse> | null>(null);
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [pageInfo, setPageInfo] = useState<Page<ProductResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,20 +32,20 @@ const StockPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const fetchProdutos = useCallback(async(page:number, query: string) => {
+  const fetchProdutos = useCallback(async (page: number, query: string) => {
     setIsLoading(true);
     setError(null);
 
-    try{
-        const pageIndex = page - 1; 
-        const data = await getProducts({page: pageIndex, size: pageSize, query: query});
-        setProducts(data.content);
-        setPageInfo(data);
-    }catch (err) {
-        setError('Falha ao carregar produtos')
-        console.error(err);
-    }finally{
-        setIsLoading(false);
+    try {
+      const pageIndex = page - 1;
+      const data = await getProducts({ page: pageIndex, size: pageSize, query: query });
+      setProducts(data.content);
+      setPageInfo(data);
+    } catch (err) {
+      setError('Falha ao carregar produtos')
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   }, [pageSize]);
 
@@ -80,7 +80,7 @@ const StockPage = () => {
     try {
       await deleteProductById(productToDelete);
       handleCloseDeleteModal();
-      fetchProdutos(currentPage, debouncedSearchTerm); 
+      fetchProdutos(currentPage, debouncedSearchTerm);
     } catch (err) {
       setError('Falha ao deletar o produto.');
       console.error(err);
@@ -91,63 +91,63 @@ const StockPage = () => {
 
   return (
     <div className='flex flex-col w-full box-border'>
-        <HeaderTitlePage page_name='Estoque' />
+      <HeaderTitlePage page_name='Estoque' />
 
-        <div className="w-full flex flex-1 flex-col px-4 box-border">
-            <div className="mb-6 px-2 pb-4 border-b-1 border-gray-200">
-                <div className="flex justify-between items-center ">
-                <h2 className="text-lg font-semibold text-gray-800">Buscar produto</h2>
-                </div>
-            
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            
-                    <div className="relative w-full md:max-w-md">
-                        <InputField
-                            id="client-search"
-                            name="search"
-                            placeholder="Buscar produto pela referência ou descrição..."
-                            className="pr-10"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                        />
-                    </div>
+      <div className="w-full flex flex-1 flex-col px-4 box-border">
+        <div className="mb-6 px-2 pb-4 border-b-1 border-gray-200">
+          <div className="flex justify-between items-center ">
+            <h2 className="text-lg font-semibold text-gray-800">Buscar produto</h2>
+          </div>
 
-                    <div className="flex items-center justify-end gap-4">
-                        <NavLink to={"/produtos/novo"}>
-                            <Button variant="primary">
-                                <Plus size={18} />
-                                <span>Novo produto</span>
-                            </Button>
-                        </NavLink>
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={handlePageChange}
-                        />
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
 
-                    </div>
-                </div>
+            <div className="relative w-full md:max-w-md">
+              <InputField
+                id="client-search"
+                name="search"
+                placeholder="Buscar produto pela referência ou descrição..."
+                className="pr-10"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
             </div>
-        <ProductsTable 
-          product={products} 
-          isLoading={isLoading} 
-          currentPage={currentPage} 
-          pageSize={pageSize}
-          onDeleteClick={handleOpenDeleteModal} 
-          />
+
+            <div className="flex items-center justify-end gap-4">
+              <NavLink to={"/produtos/novo"}>
+                <Button variant="primary">
+                  <Plus size={18} />
+                  <span>Novo produto</span>
+                </Button>
+              </NavLink>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+
+            </div>
+          </div>
         </div>
-        <PopupModal 
-            isOpen={isDeleteModalOpen}
-            onClose={handleCloseDeleteModal}
-            onConfirm={handleConfirmDelete}
-            title="Confirmar Exclusão"
-            message="Tem certeza que deseja deletar o produto "
-            itemName={productNameToDelete}
+        <ProductsTable
+          products={products}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onDeleteClick={handleOpenDeleteModal}
         />
-        {error && (
+      </div>
+      <PopupModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Confirmar Exclusão"
+        message="Tem certeza que deseja deletar o produto "
+        itemName={productNameToDelete}
+      />
+      {error && (
         <ErrorPopup
           message={error}
-          onClose={() => setError(null)} 
+          onClose={() => setError(null)}
         />
       )}
     </div>

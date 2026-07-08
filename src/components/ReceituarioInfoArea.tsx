@@ -2,7 +2,7 @@ import TextareaField from './ui/TextareaField';
 import InputField from './ui/InputField';
 import type { ReceituarioPayload } from '../types/receituario';
 import type { ItemPedidoPayload, PagamentoPayload } from '../types/pedido';
-import type { ProdutoResponse } from '../types/produto';
+import type { ProductResponse } from '../types/product';
 import type { CustomerResponse } from '../types/customer';
 import ProductSearch from './ProductSearch';
 
@@ -26,10 +26,10 @@ interface ReceituarioInfoAreaProps {
   itens: ItemPedidoPayload[];
   onReceituarioChange: (data: Partial<ReceituarioPayload>) => void;
   onPedidoChange: (data: Partial<VendaFormData>) => void;
-  produtosDisponiveis: ProdutoResponse[];
-  onArmacaoSelect: (produto: ProdutoResponse | null) => void;
-  onLenteSelect: (produto: ProdutoResponse | null) => void;
-  onOpenProductModal: (tipo: 'ARMACAO' | 'LENTE') => void;
+  produtosDisponiveis: ProductResponse[];
+  onArmacaoSelect: (produto: ProductResponse | null) => void;
+  onLenteSelect: (produto: ProductResponse | null) => void;
+  onOpenProductModal: (tipo: 'frame' | 'lens') => void;
 }
 
 const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
@@ -45,17 +45,17 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
 }) => {
 
   const armacaoItem = itens.find(item =>
-    produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'ARMACAO')
+    produtosDisponiveis.some(p => p.id === item.produtoId && p.productType === 'frame')
   );
 
   const armacaoSelecionada = armacaoItem
     ? produtosDisponiveis.find(p => p.id === armacaoItem.produtoId)
     : null;
 
-  const nomeMarcaArmacao = armacaoSelecionada ? armacaoSelecionada.marca.nome : '';
+  const nomeMarcaArmacao = armacaoSelecionada?.brand?.name || '';
 
   const lentesItens = itens.find(item =>
-    produtosDisponiveis.some(p => p.id === item.produtoId && p.tipoProduto === 'LENTE')
+    produtosDisponiveis.some(p => p.id === item.produtoId && p.productType === 'lens')
   );
 
 
@@ -95,11 +95,11 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
 
         <ProductSearch
           label="Lentes"
-          tipo="LENTE"
+          type="lens"
           selectedProductId={lentesItens?.produtoId}
           produtosDisponiveis={produtosDisponiveis}
           onProductSelect={onLenteSelect}
-          onOpenProductModal={() => onOpenProductModal('LENTE')}
+          onOpenProductModal={() => onOpenProductModal('lens')}
         />
 
         <InputField
@@ -113,11 +113,11 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
 
         <ProductSearch
           label="Armação"
-          tipo="ARMACAO"
+          type="frame"
           selectedProductId={armacaoItem?.produtoId}
           produtosDisponiveis={produtosDisponiveis}
           onProductSelect={onArmacaoSelect}
-          onOpenProductModal={() => onOpenProductModal('ARMACAO')}
+          onOpenProductModal={() => onOpenProductModal('frame')}
         />
 
         <div className="md:col-span-2 mt-2">

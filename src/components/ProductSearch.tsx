@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, X } from 'lucide-react';
-import type { ProdutoResponse, TipoProduto } from '../types/produto';
+import type { ProductResponse, ProductType } from '../types/product';
 import { getProductById, getProducts } from '../services/productService';
 import SearchableSelectWithButton from './SearchableSelectWithButton';
+
 interface ProductSearchProps {
   label: string;
-  tipo: TipoProduto;
-  selectedProductId: string | undefined; 
-  produtosDisponiveis: ProdutoResponse[];
-  onProductSelect: (produto: ProdutoResponse | null) => void;
+  type: ProductType;
+  selectedProductId: string | undefined;
+  produtosDisponiveis: ProductResponse[];
+  onProductSelect: (product: ProductResponse | null) => void;
   onOpenProductModal: () => void;
-  
 }
 
 const ProductSearch: React.FC<ProductSearchProps> = ({
   label,
-  tipo,
+  type,
   selectedProductId,
   produtosDisponiveis,
   onProductSelect,
@@ -27,7 +27,6 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
 
   const selectedProduct = produtosDisponiveis.find(p => p.id === selectedProductId);
 
-
   useEffect(() => {
     if (searchTerm.length < 2) {
       setOptions([]);
@@ -36,32 +35,31 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     const debounceTimeout = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await getProducts({ query: searchTerm, tipo: tipo, size: 20 });
+        const data = await getProducts({ query: searchTerm, type: type, size: 20 });
         const productOptions = data.content.map(p => ({
           value: p.id,
-          label: `${p.nome}`,
+          label: `${p.name}`,
         }));
         setOptions(productOptions);
       } catch (error) {
-        console.error(`Erro na busca de ${tipo}:`, error);
+        console.error(`Erro na busca de ${type}:`, error);
       } finally {
         setIsLoading(false);
       }
     }, 500);
     return () => clearTimeout(debounceTimeout);
-  }, [searchTerm, tipo]);
+  }, [searchTerm, type]);
 
   const handleSelectChange = async (selectedOption: any) => {
     if (selectedOption && selectedOption.value) {
       setIsLoading(true);
-      try{
+      try {
         const fullProductData = await getProductById(selectedOption.value);
-
         onProductSelect(fullProductData);
       } catch (error) {
         console.error("Falha ao buscar detalhes do produto:", error);
         onProductSelect(null);
-      }finally{
+      } finally {
         setIsLoading(false);
       }
     } else {
@@ -69,27 +67,25 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     }
   };
 
-  
-
   return (
     <div className='flex flex-1 items-end justify-start '>
       {selectedProduct ? (
         <div className='flex flex-col flex-1'>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-            <div className="flex flex-1 items-center justify-between p-1.5 px-3 m-0 border border-gray-300 rounded-md">
+          <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+          <div className="flex flex-1 items-center justify-between p-1.5 px-3 m-0 border border-gray-300 rounded-md">
             <div className="flex items-center gap-3">
-                <div >
-                <p className="font-semibold text-gray-700 text-sm">{selectedProduct.nome}</p>
-                </div>
+              <div >
+                <p className="font-semibold text-gray-700 text-sm">{selectedProduct.name}</p>
+              </div>
             </div>
-            <button 
-                type="button" 
-                onClick={() => onProductSelect(null)} 
-                className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
+            <button
+              type="button"
+              onClick={() => onProductSelect(null)}
+              className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
             >
-                <X/>
+              <X />
             </button>
-            </div>
+          </div>
         </div>
       ) : (
         <SearchableSelectWithButton

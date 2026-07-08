@@ -1,18 +1,18 @@
 import { useNavigate } from 'react-router-dom';
-import type { ProdutoResponse } from '../types/produto';
+import type { ProductResponse } from '../types/product';
 import LoadingSpinner from './LoadingSpinner';
 import Button from './ui/Button';
 import { Trash2 } from 'lucide-react';
 
 interface ProductsTableProps {
-  product: ProdutoResponse[];
+  products: ProductResponse[];
   isLoading: boolean;
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, productName: string) => void;
 }
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, currentPage, pageSize, onDeleteClick }) => {
+const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, currentPage, pageSize, onDeleteClick }) => {
   const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor', ''];
   const navigate = useNavigate();
 
@@ -41,47 +41,46 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ product, isLoading, curre
             {isLoading ? (
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8">
-                  <LoadingSpinner 
+                  <LoadingSpinner
                     size="h-8 w-8"
-                    text="Carregando produtos..." 
+                    text="Carregando produtos..."
                   />
                 </td>
-              </tr> 
-            ) : product.length === 0 ? (
-
+              </tr>
+            ) : products.length === 0 ? (
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
                   Nenhum produto encontrado.
                 </td>
               </tr>
             ) : (
-              product.map((product, i) => {
+              products.map((prod, i) => {
                 const rowNumber = (currentPage - 1) * pageSize + i + 1;
-                return(
-                  <tr 
-                    key={product.id} 
+                return (
+                  <tr
+                    key={prod.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleRowClick(product.id)}
+                    onClick={() => handleRowClick(prod.id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.nome}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.marca.nome}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.quantidadeEstoque}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{prod.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{prod.brand?.name || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{prod.stockQuantity}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.custo) || ''}
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prod.cost) || ''}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.margemLucroPercentual}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{prod.profitMargin}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.valorVenda)}
+                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prod.salePrice)}
                     </td>
                     <td>
-                      <Button 
-                        variant="smallDelete" 
+                      <Button
+                        variant="smallDelete"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteClick(product.id, product.nome); 
+                          onDeleteClick(prod.id, prod.name);
                         }}
-                        >
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>

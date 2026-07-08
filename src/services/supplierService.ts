@@ -1,6 +1,6 @@
 import type { SupplierPayload, SupplierResponse } from '../types/supplier';
 import type { Page } from '../types/pagination';
-import type { FornecedorOption } from '../types/produto';
+import type { SupplierOption } from '../types/product';
 
 import api from './api';
 
@@ -67,13 +67,13 @@ export const getFornecedores = async (filtros: FornecedorFiltros = {}): Promise<
   }
 };
 
-export const getFornecedoresOptions = async (): Promise<FornecedorOption[]> => {
+export const getFornecedoresOptions = async (): Promise<SupplierOption[]> => {
   try {
     const response = await api.get<SupplierResponse[]>('/suppliers');
     const data = Array.isArray(response.data) ? response.data : [];
     return data.map((s) => ({
       id: s.id,
-      razaoSocial: s.corporateName,
+      corporateName: s.corporateName,
     }));
   } catch (error) {
     console.error("Erro ao buscar opções de fornecedores:", error);

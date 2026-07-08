@@ -5,7 +5,7 @@ import SelectField from '../components/ui/SelectField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { FornecedorOption, BrandOption, ProdutoPayload, ProdutoResponse, TipoProduto } from '../types/produto';
+import type { SupplierOption, BrandOption, ProductPayload, ProductType } from '../types/product';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
@@ -13,11 +13,11 @@ import ErrorPopup from '../components/ErrorPopup';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const initialFormData = {
-  tipoProduto: 'ARMACAO' as TipoProduto,
-  fornecedorId: '', marcaId: '', nome: '', referencia: '', codigoBarras: '',
-  custo: '', valorVenda: '', margemLucroPercentual: '', quantidadeEstoque: '', ativo: true,
-  cor: '', material: '', tamanho: '',
-  materialLente: '', tratamento: '', tipoLente: '',
+  productType: 'frame' as ProductType,
+  supplierId: '', brandId: '', name: '', reference: '', barcode: '',
+  cost: '', salePrice: '', profitMargin: '', stockQuantity: '', isActive: true,
+  color: '', material: '', size: '',
+  lensMaterial: '', treatment: '', lensType: '',
 };
 
 const RegisterProductPage = () => {
@@ -27,7 +27,7 @@ const RegisterProductPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fornecedores, setFornecedores] = useState<FornecedorOption[]>([]);
+  const [fornecedores, setFornecedores] = useState<SupplierOption[]>([]);
   const [marcas, setMarcas] = useState<BrandOption[]>([]);
   const [formData, setFormData] = useState(initialFormData);
   const [isFetching, setIsFetching] = useState(isEditMode);
@@ -48,23 +48,23 @@ const RegisterProductPage = () => {
           const productData = await getProductById(productId);
 
           const flattenedData = {
-            tipoProduto: productData.tipoProduto,
-            fornecedorId: productData.fornecedor.id,
-            marcaId: productData.marca.id || '',
-            nome: productData.nome,
-            referencia: productData.referencia || '',
-            codigoBarras: productData.codigoBarras || '',
-            custo: String(productData.custo || ''),
-            valorVenda: String(productData.valorVenda || ''),
-            margemLucroPercentual: String(productData.margemLucroPercentual || ''),
-            quantidadeEstoque: String(productData.quantidadeEstoque),
-            ativo: productData.ativo,
-            cor: productData.cor || '',
+            productType: productData.productType,
+            supplierId: productData.supplier.id,
+            brandId: productData.brand?.id || '',
+            name: productData.name,
+            reference: productData.reference || '',
+            barcode: productData.barcode || '',
+            cost: String(productData.cost || ''),
+            salePrice: String(productData.salePrice || ''),
+            profitMargin: String(productData.profitMargin || ''),
+            stockQuantity: String(productData.stockQuantity),
+            isActive: productData.isActive,
+            color: productData.color || '',
             material: productData.material || '',
-            tamanho: productData.tamanho || '',
-            materialLente: productData.materialLente,
-            tratamento: productData.tratamento || '',
-            tipoLente: productData.tipoLente || '',
+            size: productData.size || '',
+            lensMaterial: productData.lensMaterial || '',
+            treatment: productData.treatment || '',
+            lensType: productData.lensType || '',
           };
           setFormData(flattenedData);
         }
@@ -85,13 +85,13 @@ const RegisterProductPage = () => {
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as TipoProduto;
+    const newType = e.target.value as ProductType;
     setFormData(prev => ({
       ...initialFormData,
-      tipoProduto: newType,
-      fornecedorId: prev.fornecedorId,
-      marcaId: prev.marcaId,
-      nome: prev.nome,
+      productType: newType,
+      supplierId: prev.supplierId,
+      brandId: prev.brandId,
+      name: prev.name,
     }));
   };
 
@@ -100,24 +100,24 @@ const RegisterProductPage = () => {
     setIsLoading(true);
     setError(null);
 
-    const productPayload: ProdutoPayload = {
-      tipoProduto: formData.tipoProduto,
-      fornecedorId: formData.fornecedorId,
-      marcaId: formData.marcaId || undefined,
-      nome: formData.nome,
-      referencia: formData.referencia,
-      codigoBarras: formData.codigoBarras,
-      custo: formData.custo ? parseFloat(formData.custo.replace(',', '.')) : 0,
-      valorVenda: formData.valorVenda ? parseFloat(formData.valorVenda.replace(',', '.')) : 0,
-      margemLucroPercentual: formData.margemLucroPercentual ? parseFloat(formData.margemLucroPercentual.replace(',', '.')) : 0,
-      quantidadeEstoque: formData.quantidadeEstoque ? parseInt(formData.quantidadeEstoque, 10) : 0,
-      ativo: formData.ativo,
-      cor: formData.cor,
+    const productPayload: ProductPayload = {
+      productType: formData.productType,
+      supplierId: formData.supplierId,
+      brandId: formData.brandId || undefined,
+      name: formData.name,
+      reference: formData.reference,
+      barcode: formData.barcode,
+      cost: formData.cost ? parseFloat(formData.cost.replace(',', '.')) : 0,
+      salePrice: formData.salePrice ? parseFloat(formData.salePrice.replace(',', '.')) : 0,
+      profitMargin: formData.profitMargin ? parseFloat(formData.profitMargin.replace(',', '.')) : 0,
+      stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 0,
+      isActive: formData.isActive,
+      color: formData.color,
       material: formData.material,
-      tamanho: formData.tamanho,
-      materialLente: formData.materialLente,
-      tratamento: formData.tratamento,
-      tipoLente: formData.tipoLente,
+      size: formData.size,
+      lensMaterial: formData.lensMaterial,
+      treatment: formData.treatment,
+      lensType: formData.lensType,
     };
 
     try {
@@ -135,9 +135,9 @@ const RegisterProductPage = () => {
     }
   };
 
-  const productTypeOptions = [{ value: 'ARMACAO', label: 'Armação' }, { value: 'LENTE', label: 'Lente' }];
-  const supplierOptions = fornecedores.map(f => ({ value: f.id, label: f.razaoSocial }));
-  const brandOptions = marcas.map(m => ({ value: m.id, label: m.nome }));
+  const productTypeOptions = [{ value: 'frame', label: 'Armação' }, { value: 'lens', label: 'Lente' }];
+  const supplierOptions = fornecedores.map(f => ({ value: f.id, label: f.corporateName }));
+  const brandOptions = marcas.map(m => ({ value: m.id, label: m.name }));
 
   if (isFetching) {
     return <LoadingSpinner text='Carregando dados do fornecedor...' />
@@ -151,35 +151,35 @@ const RegisterProductPage = () => {
         <form onSubmit={handleSubmit}>
 
           <FormSection title="Informações Gerais">
-            <SelectField label="Tipo do Produto *" name="tipoProduto" value={formData.tipoProduto} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
-            <SelectField label="Fornecedor *" name="fornecedorId" value={formData.fornecedorId} onChange={handleChange} options={supplierOptions} className="md:col-span-4" required />
-            <SelectField label="Marca" name="marcaId" value={formData.marcaId} onChange={handleChange} options={brandOptions} className="md:col-span-4" />
+            <SelectField label="Tipo do Produto *" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
+            <SelectField label="Fornecedor *" name="supplierId" value={formData.supplierId} onChange={handleChange} options={supplierOptions} className="md:col-span-4" required />
+            <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleChange} options={brandOptions} className="md:col-span-4" />
 
-            <InputField label="Nome / Descrição *" name="nome" value={formData.nome} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
-            <InputField label="Referência" name="referencia" value={formData.referencia} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
-            <InputField label="Código de Barras" name="codigoBarras" value={formData.codigoBarras} onChange={handleChange} placeholder="789..." className="md:col-span-6" />
+            <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
+            <InputField label="Referência" name="reference" value={formData.reference} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
+            <InputField label="Código de Barras" name="barcode" value={formData.barcode} onChange={handleChange} placeholder="789..." className="md:col-span-6" />
           </FormSection>
 
           <FormSection title="Valores e Estoque">
-            <InputField label="Custo (R$)" name="custo" type="number" value={parseFloat(formData.custo) === 0 ? '' : formData.custo} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
-            <InputField label="Valor Final (R$)" name="valorVenda" type="number" value={parseFloat(formData.valorVenda) === 0 ? '' : formData.valorVenda} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
-            <InputField label="Margem de Lucro (%)" readOnly name="margemLucroPercentual" type="number" value={parseFloat(formData.margemLucroPercentual) === 0 ? '' : formData.margemLucroPercentual} onChange={handleChange} placeholder="100" className="md:col-span-2" />
-            <InputField label="Estoque Inicial *" name="quantidadeEstoque" type="number" value={parseInt(formData.quantidadeEstoque) === 0 ? '' : formData.quantidadeEstoque} onChange={handleChange} placeholder="0" className="md:col-span-2" required />
+            <InputField label="Custo (R$)" name="cost" type="number" value={parseFloat(formData.cost) === 0 ? '' : formData.cost} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
+            <InputField label="Valor Final (R$)" name="salePrice" type="number" value={parseFloat(formData.salePrice) === 0 ? '' : formData.salePrice} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
+            <InputField label="Margem de Lucro (%)" readOnly name="profitMargin" type="number" value={parseFloat(formData.profitMargin) === 0 ? '' : formData.profitMargin} onChange={handleChange} placeholder="100" className="md:col-span-2" />
+            <InputField label="Estoque Inicial *" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" required />
           </FormSection>
 
-          {formData.tipoProduto === 'ARMACAO' && (
+          {formData.productType === 'frame' && (
             <FormSection title="Detalhes da Armação">
-              <InputField label="Cor" name="cor" value={formData.cor} onChange={handleChange} placeholder="Preto, Dourado..." className="md:col-span-4" />
+              <InputField label="Cor" name="color" value={formData.color} onChange={handleChange} placeholder="Preto, Dourado..." className="md:col-span-4" />
               <InputField label="Material" name="material" value={formData.material} onChange={handleChange} placeholder="Acetato, Metal..." className="md:col-span-4" />
-              <InputField label="Tamanho" name="tamanho" value={formData.tamanho} onChange={handleChange} placeholder="58-14-140" className="md:col-span-4" />
+              <InputField label="Tamanho" name="size" value={formData.size} onChange={handleChange} placeholder="58-14-140" className="md:col-span-4" />
             </FormSection>
           )}
 
-          {formData.tipoProduto === 'LENTE' && (
+          {formData.productType === 'lens' && (
             <FormSection title="Detalhes da Lente">
-              <InputField label="Material" name="materialLente" value={formData.materialLente} onChange={handleChange} placeholder="Poli, Orma..." className="md:col-span-4" />
-              <InputField label="Tratamento" name="tratamento" value={formData.tratamento} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
-              <InputField label="Tipo da Lente" name="tipoLente" value={formData.tipoLente} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
+              <InputField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} placeholder="Poli, Orma..." className="md:col-span-4" />
+              <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
+              <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
             </FormSection>
           )}
           <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} />
