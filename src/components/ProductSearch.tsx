@@ -11,6 +11,7 @@ interface ProductSearchProps {
   produtosDisponiveis: ProductResponse[];
   onProductSelect: (product: ProductResponse | null) => void;
   onOpenProductModal: () => void;
+  selectedProduct?: ProductResponse | null;
 }
 
 const ProductSearch: React.FC<ProductSearchProps> = ({
@@ -20,12 +21,15 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
   produtosDisponiveis,
   onProductSelect,
   onOpenProductModal,
+  selectedProduct: passedSelectedProduct,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [options, setOptions] = useState<{ value: string; label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const selectedProduct = produtosDisponiveis.find(p => p.id === selectedProductId);
+  const selectedProduct = passedSelectedProduct !== undefined ? passedSelectedProduct : (
+    produtosDisponiveis.find(p => p.id === selectedProductId)
+  );
 
   useEffect(() => {
     if (searchTerm.length < 2) {

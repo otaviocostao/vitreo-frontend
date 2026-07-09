@@ -31,6 +31,8 @@ interface ReceituarioInfoAreaProps {
   onArmacaoSelect: (produto: ProductResponse | null) => void;
   onLenteSelect: (produto: ProductResponse | null) => void;
   onOpenProductModal: (tipo: 'frame' | 'lens') => void;
+  selectedFrame?: ProductResponse | null;
+  selectedLens?: ProductResponse | null;
 }
 
 const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
@@ -42,21 +44,27 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
   produtosDisponiveis,
   onArmacaoSelect,
   onLenteSelect,
-  onOpenProductModal
+  onOpenProductModal,
+  selectedFrame,
+  selectedLens,
 }) => {
 
   const armacaoItem = items.find(item =>
     produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'frame')
   );
 
-  const armacaoSelecionada = armacaoItem
-    ? produtosDisponiveis.find(p => p.id === armacaoItem.productId)
-    : null;
+  const armacaoSelecionada = selectedFrame !== undefined ? selectedFrame : (
+    armacaoItem ? produtosDisponiveis.find(p => p.id === armacaoItem.productId) : null
+  );
 
   const nomeMarcaArmacao = armacaoSelecionada?.brand?.name || '';
 
   const lentesItens = items.find(item =>
     produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'lens')
+  );
+
+  const lentesSelecionada = selectedLens !== undefined ? selectedLens : (
+    lentesItens ? produtosDisponiveis.find(p => p.id === lentesItens.productId) : null
   );
 
 
@@ -101,6 +109,7 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
           produtosDisponiveis={produtosDisponiveis}
           onProductSelect={onLenteSelect}
           onOpenProductModal={() => onOpenProductModal('lens')}
+          selectedProduct={lentesSelecionada}
         />
 
         <InputField
@@ -119,6 +128,7 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
           produtosDisponiveis={produtosDisponiveis}
           onProductSelect={onArmacaoSelect}
           onOpenProductModal={() => onOpenProductModal('frame')}
+          selectedProduct={armacaoSelecionada}
         />
 
         <div className="md:col-span-2 mt-2">

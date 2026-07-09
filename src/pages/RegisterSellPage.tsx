@@ -67,6 +67,8 @@ function RegisterSellPage() {
     const [productModalType, setProductModalType] = useState<'frame' | 'lens' | null>(null);
     const navigate = useNavigate();
     const [formData, setFormData] = useState<OrderFormData>(initialFormData);
+    const [selectedFrame, setSelectedFrame] = useState<ProductResponse | null>(null);
+    const [selectedLens, setSelectedLens] = useState<ProductResponse | null>(null);
 
     const mapPrescriptionToPortuguese = (prescription: any): ReceituarioPayload => {
         if (!prescription) return {} as ReceituarioPayload;
@@ -93,17 +95,24 @@ function RegisterSellPage() {
     };
 
     useEffect(() => {
-        const loadPageData = async () => {
-            if (!isEditMode || !pedidoId || produtosDisponiveis.length === 0) {
-                if (!isEditMode) setFormData(initialFormData);
-                return;
-            }
+        if (!isEditMode) {
+            setFormData(initialFormData);
+            setSelectedFrame(null);
+            setSelectedLens(null);
+            return;
+        }
 
+        const loadPageData = async () => {
             setError(null);
             try {
                 const orderData = await getOrderById(pedidoId);
                 setFetchedOrder(orderData);
                 console.log(orderData);
+
+                const frameItem = orderData.items.find(item => item.product.productType === 'frame');
+                const lensItem = orderData.items.find(item => item.product.productType === 'lens');
+                setSelectedFrame(frameItem ? frameItem.product : null);
+                setSelectedLens(lensItem ? lensItem.product : null);
 
                 let clienteCompleto: CustomerResponse | null = null;
                 if (orderData.customer && orderData.customer.id) {
@@ -150,8 +159,11 @@ function RegisterSellPage() {
                 console.error(err);
             }
         };
-        loadPageData();
-    }, [pedidoId, isEditMode, produtosDisponiveis]);
+
+        if (pedidoId) {
+            loadPageData();
+        }
+    }, [pedidoId, isEditMode]);
 
     const formatarParaInputDate = (dataHoraString: string | null | undefined): string => {
         if (!dataHoraString) {
@@ -191,23 +203,27 @@ function RegisterSellPage() {
     };
 
     const handleProductSubmit = (novoProduto: ProductResponse) => {
-        if (!novoProduto || !novoProduto.id || !novoProduto.productType) {
+        const productType = novoProduto.productType || productModalType;
+
+        if (!novoProduto || !novoProduto.id || !productType) {
             console.error("Produto inválido recebido do modal!");
             setProductModalType(null);
             return;
         }
 
+        const produtoComTipo = { ...novoProduto, productType };
+
         setProdutosDisponiveis(prev => {
-            const novaLista = [novoProduto, ...prev];
+            const novaLista = [produtoComTipo, ...prev];
             return novaLista;
         });
 
-        if (novoProduto.productType === 'lens') {
-            handleLenteSelect(novoProduto);
+        if (productType === 'lens') {
+            handleLenteSelect(produtoComTipo);
         }
 
-        if (novoProduto.productType === 'frame') {
-            handleArmacaoSelect(novoProduto);
+        if (productType === 'frame') {
+            handleArmacaoSelect(produtoComTipo);
         }
 
         setProductModalType(null);
@@ -359,13 +375,10 @@ function RegisterSellPage() {
 
 
     const handleArmacaoSelect = (produto: ProductResponse | null) => {
+        setSelectedFrame(produto);
         setFormData(prev => {
-            const armacaoAtualId = prev.items.find(item =>
-                produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'frame')
-            )?.productId;
-
-            const outrosItens = armacaoAtualId
-                ? prev.items.filter(item => item.productId !== armacaoAtualId)
+            const outrosItens = selectedFrame
+                ? prev.items.filter(item => item.productId !== selectedFrame.id)
                 : prev.items;
 
             let novosItens = outrosItens;
@@ -383,13 +396,10 @@ function RegisterSellPage() {
 
 
     const handleLenteSelect = (produto: ProductResponse | null) => {
+        setSelectedLens(produto);
         setFormData(prev => {
-            const lenteAtualId = prev.items.find(item =>
-                produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'lens')
-            )?.productId;
-
-            const outrosItens = lenteAtualId
-                ? prev.items.filter(item => item.productId !== lenteAtualId)
+            const outrosItens = selectedLens
+                ? prev.items.filter(item => item.productId !== selectedLens.id)
                 : prev.items;
 
             let novosItens = outrosItens;
@@ -485,7 +495,9 @@ function RegisterSellPage() {
                                 onLenteSelect={handleLenteSelect}
                                 items={formData.items}
                                 produtosDisponiveis={produtosDisponiveis}
-                                onOpenProductModal={handleOpenProductModal} />
+                                onOpenProductModal={handleOpenProductModal}
+                                selectedFrame={selectedFrame}
+                                selectedLens={selectedLens} />
                         </div>
                         <div className="flex flex-col w-1/3">
                             <VendaPagamento
