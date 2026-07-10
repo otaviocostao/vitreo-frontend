@@ -162,9 +162,9 @@ const RegisterProductPage = () => {
 
           <FormSection title="Valores e Estoque">
             <InputField label="Custo (R$)" name="cost" type="number" value={parseFloat(formData.cost) === 0 ? '' : formData.cost} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
-            <InputField label="Valor Final (R$)" name="salePrice" type="number" value={parseFloat(formData.salePrice) === 0 ? '' : formData.salePrice} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
+            <InputField label="Valor Final (R$) *" name="salePrice" type="number" value={parseFloat(formData.salePrice) === 0 ? '' : formData.salePrice} onChange={handleChange} placeholder="0.00" className="md:col-span-2" required />
             <InputField label="Margem de Lucro (%)" readOnly name="profitMargin" type="number" value={parseFloat(formData.profitMargin) === 0 ? '' : formData.profitMargin} onChange={handleChange} placeholder="100" className="md:col-span-2" />
-            <InputField label="Estoque Inicial *" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" required />
+            <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" />
           </FormSection>
 
           {formData.productType === 'frame' && (

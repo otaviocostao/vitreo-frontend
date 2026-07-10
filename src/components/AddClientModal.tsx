@@ -118,7 +118,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
             <FormSection title="Informações de contato">
               <InputField label="Telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} className="md:col-span-4" />
               <InputField label="Tel. secundário" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="E-mail (opcional)" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-4" />
             </FormSection>
 
             <FormSection title="Informações adicionais">

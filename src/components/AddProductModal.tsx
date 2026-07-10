@@ -130,8 +130,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InputField label="Custo (R$)" name="cost" type="number" value={formData.cost} onChange={handleChange} placeholder="0.00" />
-              <InputField label="Valor de venda (R$)" name="salePrice" type="number" value={formData.salePrice} onChange={handleChange} placeholder="0.00" />
-              <InputField label="Estoque Inicial *" name="stockQuantity" type="number" value={formData.stockQuantity} onChange={handleChange} placeholder="0" required />
+              <InputField label="Valor de venda (R$) *" name="salePrice" type="number" value={formData.salePrice} onChange={handleChange} placeholder="0.00" required />
+              <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={formData.stockQuantity} onChange={handleChange} placeholder="0" />
             </div>
 
             {formData.productType === 'frame' && (
