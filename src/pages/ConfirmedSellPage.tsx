@@ -54,7 +54,7 @@ const SaleConfirmationPage = () => {
     if (!order || !order.payments) {
       return 0;
     }
-    return order.payments.reduce((total, payment) => total + payment.amountPaid, 0);
+    return order.payments.reduce((total, payment) => Number(total) + Number(payment.amountPaid), 0);
   }, [order]);
 
   const valorRestante = useMemo(() => {
@@ -62,7 +62,7 @@ const SaleConfirmationPage = () => {
       return 0;
     }
 
-    return order.finalValue - valorTotalPago;
+    return Number(order.finalValue) - Number(valorTotalPago);
   }, [order, valorTotalPago]);
 
   type PrintOption = 'AMBAS' | 'OTICA' | 'CLIENTE';
