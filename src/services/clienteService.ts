@@ -10,6 +10,7 @@ export interface ClienteFiltros {
 
 export const createCliente = async (customerPayload: CustomerPayload) => {
   try {
+    console.log('payload:', customerPayload);
     const response = await api.post<CustomerResponse>('/customers', customerPayload);
     return response.data;
   } catch (error) {

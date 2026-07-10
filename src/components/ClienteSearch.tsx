@@ -64,7 +64,9 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
             <User className="text-blue-600" />
             <div className='flex gap-2'>
               <p className="font-semibold text-blue-800">{selectedCliente.firstName} {selectedCliente.lastName}</p>
-              <p className="flex items-center text-xs text-gray-600">• CPF: {selectedCliente.cpf}</p>
+              {selectedCliente.cpf && (
+                <p className="flex items-center text-xs text-gray-600">• CPF: {selectedCliente.cpf}</p>
+              )}
             </div>
           </div>
           {!isEditMode && (

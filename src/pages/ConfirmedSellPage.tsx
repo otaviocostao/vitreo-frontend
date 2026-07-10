@@ -25,6 +25,7 @@ const SaleConfirmationPage = () => {
   const [selectedPrintOption, setSelectedPrintOption] = useState<'AMBAS' | 'OTICA' | 'CLIENTE'>('AMBAS');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isEditMode = !!id;
 
   useEffect(() => {
     if (!id) {
@@ -94,23 +95,31 @@ const SaleConfirmationPage = () => {
 
   return (
     <div className="flex flex-col w-full">
-        <div className='print:hidden'>
-          <HeaderTitlePage page_name={`Detalhes do Pedido #${order.serviceOrder || order.id.substring(0, 8)}`} />
-        </div>
-      
+      <div className='print:hidden'>
+        <HeaderTitlePage page_name={`Detalhes do Pedido #${order.serviceOrder || order.id.substring(0, 8)}`} />
+      </div>
+
       <div className="px-4 py-6">
         <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6 print:hidden" role="alert">
           <div className="flex items-center">
             <CheckCircle className="h-6 w-6 mr-3" />
             <div>
-              <p className="font-bold">Venda Finalizada com Sucesso!</p>
+              {!isEditMode ? (
+                <>
+                  <p className="font-bold">Venda Finalizada com Sucesso!</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-bold">Venda Atualizada com Sucesso!</p>
+                </>
+              )}
               <p className="text-sm">Os detalhes do pedido estão listados abaixo.</p>
             </div>
           </div>
         </div>
 
         <div className="flex justify-end items-center gap-4 mb-6 print:hidden">
-          <SelectField label="" className="w-38" value={selectedPrintOption} options={printOptions} defaultValue="AMBAS" onChange={handlePrintOptionChange}/>
+          <SelectField label="" className="w-38" value={selectedPrintOption} options={printOptions} defaultValue="AMBAS" onChange={handlePrintOptionChange} />
           <Button variant="secondary" onClick={() => window.print()}>
             <Printer size={16} />
             Imprimir
@@ -124,15 +133,15 @@ const SaleConfirmationPage = () => {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden print:border-none print:shadow-none">
-          
+
           {(selectedPrintOption === 'AMBAS' || selectedPrintOption === 'OTICA') && (
-             <>
-             
+            <>
+
               <DetailSection title="Informações do Pedido">
                 <div className="grid grid-cols-4 md:grid-cols-4 gap-4">
                   <DetailItem label="Ordem de Serviço:" value={order.serviceOrder || 'N/A'} />
                   <DetailItem label="Data do Pedido:" value={new Date(order.orderDate).toLocaleDateString('pt-BR')} />
-                  <DetailItem label="Data Prevista:" value={order.deliveryForecastDate ? new Date(order.deliveryForecastDate).toLocaleDateString('pt-BR') : 'N/A'} />
+                  <DetailItem label="Data Prevista:" value={order.deliveryForecastDate ? new Date(order.deliveryForecastDate).toLocaleDateString('pt-BR') : '-'} />
                   <div className='print:hidden'>
                     <DetailItem label="Status:" value={<StatusBadge status={order.status} />} />
                   </div>
@@ -144,7 +153,7 @@ const SaleConfirmationPage = () => {
               </DetailSection>
 
               <div className='flex flex-col lg:flex-row divide-x divide-gray-200 print:flex-row print:divide-x print:divide-gray-200'>
-                
+
                 <div className='w-3/4 print:w-[65%]'>
                   {order.prescription && (
                     <DetailSection title="Receituário">
@@ -178,7 +187,7 @@ const SaleConfirmationPage = () => {
                               <td className="px-4 py-2 text-center text-gray-800">{order.prescription.axisOe}</td>
                               <td className="px-4 py-2 text-center text-gray-800">{order.prescription.dnpOe}</td>
                               <td className="px-4 py-2 text-center text-gray-800">{order.prescription.opticalCenterOe}</td>
-                              <td className="px-4 py-2 text-center text-gray-800">{}</td>
+                              <td className="px-4 py-2 text-center text-gray-800">{ }</td>
                             </tr>
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">AD</td>
@@ -187,11 +196,12 @@ const SaleConfirmationPage = () => {
                           </tbody>
                         </table>
                       </div>
-                  
-                      <div className='flex gap-2 items-center align-middle mt-2'>
-                        <h2 className="text-lg font-semibold text-gray-800">Médico:</h2>
-                        <DetailItem label="Dr." value={order.prescription.doctorName || 'N/A'} />
-                      </div>
+                      {order.prescription.doctorName && (
+                        <div className='flex gap-2 items-center align-middle mt-2'>
+                          <h2 className="text-lg font-semibold text-gray-800">Médico:</h2>
+                          <DetailItem label="Dr." value={order.prescription.doctorName} />
+                        </div>
+                      )}
                     </DetailSection>
                   )}
 
@@ -201,7 +211,7 @@ const SaleConfirmationPage = () => {
                       <div key={item.id} className="flex gap-1 items-center py-1">
                         {item.product.productType === 'frame' ? (
                           <p className="text-sm text-gray-700">Armação:</p>
-                          
+
                         ) : (
                           <p className="text-sm text-gray-700">Lentes:</p>
                         )}
@@ -217,7 +227,7 @@ const SaleConfirmationPage = () => {
                     <DetailItem label="Valor das lentes" value={formatarMoeda(order.lensValue)} />
                     <DetailItem label="Desconto aplicado" value={formatarMoeda(order.discount)} />
 
-                      <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Financeiro:</h2>
+                    <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Financeiro:</h2>
 
                     <div className="flex justify-between text-sm font-medium text-gray-700">
                       <span>Valor Final:</span>
@@ -234,18 +244,18 @@ const SaleConfirmationPage = () => {
 
                     <h2 className="text-md font-semibold text-gray-800 my-3 border-b-1 border-gray-200">Observações:</h2>
                     <p className="text-sm text-gray-700 line-clamp-4">{order.observations || 'Nenhuma observação registrada.'}</p>
-                        
+
                   </DetailSection>
                 </div>
               </div>
-             </> 
+            </>
           )}
 
           {(selectedPrintOption === 'AMBAS') && (
             <div className="border-t-2 border-dashed border-gray-300 mx-2 my-3">
-                <div className="flex justify-center items-center -mt-3">
-                    <Scissors className="bg-white px-2 text-gray-400" size={24}/>
-                </div>
+              <div className="flex justify-center items-center -mt-3">
+                <Scissors className="bg-white px-2 text-gray-400" size={24} />
+              </div>
             </div>
           )}
 
