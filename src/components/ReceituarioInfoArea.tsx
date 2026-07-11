@@ -33,6 +33,7 @@ interface ReceituarioInfoAreaProps {
   onOpenProductModal: (tipo: 'frame' | 'lens') => void;
   selectedFrame?: ProductResponse | null;
   selectedLens?: ProductResponse | null;
+  isEditMode: boolean;
 }
 
 const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
@@ -47,6 +48,7 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
   onOpenProductModal,
   selectedFrame,
   selectedLens,
+  isEditMode,
 }) => {
 
   const armacaoItem = items.find(item =>
@@ -157,14 +159,16 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
               value={orderData.deliveryForecastDate || ''}
               onChange={handleChange}
             />
-            <InputField
-              id="deliveryDate"
-              name="deliveryDate"
-              label="Data de Entrega"
-              type="date"
-              value={orderData.deliveryDate || ''}
-              readOnly
-            />
+            {(isEditMode) && (
+              <InputField
+                id="deliveryDate"
+                name="deliveryDate"
+                label="Data de Entrega"
+                type="date"
+                value={orderData.deliveryDate || ''}
+                readOnly
+              />
+            )}
           </div>
         </div>
 

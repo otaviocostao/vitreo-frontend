@@ -497,7 +497,8 @@ function RegisterSellPage() {
                                 produtosDisponiveis={produtosDisponiveis}
                                 onOpenProductModal={handleOpenProductModal}
                                 selectedFrame={selectedFrame}
-                                selectedLens={selectedLens} />
+                                selectedLens={selectedLens}
+                                isEditMode={isEditMode} />
                         </div>
                         <div className="flex flex-col w-1/3">
                             <VendaPagamento
