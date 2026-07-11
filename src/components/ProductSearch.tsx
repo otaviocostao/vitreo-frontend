@@ -79,7 +79,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
           <div className="flex flex-1 items-center justify-between p-1.5 px-3 m-0 border border-gray-300 rounded-md">
             <div className="flex items-center gap-3">
               <div >
-                <p className="font-semibold text-gray-700 text-sm">{selectedProduct.name}</p>
+                <p className="font-medium text-gray-700 text-sm">{selectedProduct.name}</p>
               </div>
             </div>
             <button
