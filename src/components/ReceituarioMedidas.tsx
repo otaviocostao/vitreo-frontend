@@ -13,6 +13,51 @@ const ReceituarioMedidas: React.FC<ReceituarioMedidasProps> = ({ data, onChange 
         onChange({ [name]: value });
     };
 
+    const handleEsfCilChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        const cleanValue = value.replace(',', '.');
+        if (cleanValue === '' || /^[+-]?\d*\.?\d*$/.test(cleanValue)) {
+            onChange({ [name]: cleanValue });
+        }
+    };
+
+    const handleEsfCilBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        if (!value.trim()) {
+            onChange({ [name]: '' });
+            return;
+        }
+
+        const cleanValue = value.replace(',', '.');
+        const val = parseFloat(cleanValue);
+
+        if (!isNaN(val)) {
+            let rounded = Math.round(val / 0.25) * 0.25;
+
+            if (name === 'cilindricoOd' || name === 'cilindricoOe') {
+                if (rounded > 0) {
+                    rounded = -rounded;
+                }
+            } else if (name === 'adicao') {
+                if (rounded < 0) {
+                    rounded = -rounded;
+                }
+            }
+
+            let formattedValue: string;
+            if (rounded > 0) {
+                formattedValue = `+${rounded.toFixed(2)}`;
+            } else if (rounded < 0) {
+                formattedValue = rounded.toFixed(2);
+            } else {
+                formattedValue = "0.00";
+            }
+            onChange({ [name]: formattedValue });
+        } else {
+            onChange({ [name]: '' });
+        }
+    };
+
     return (
         <div className="flex w-full divide-x divide-gray-200">
             <div className="flex-1 p-4 flex justify-start">
@@ -38,50 +83,84 @@ const ReceituarioMedidas: React.FC<ReceituarioMedidasProps> = ({ data, onChange 
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">OD</td>
                               <td className="min-w-18 text-center text-gray-800 ">
-                                <input type="text" name="esfericoOd" value={data.esfericoOd} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input
+                                  type="text"
+                                  name="esfericoOd"
+                                  value={data.esfericoOd ?? ''}
+                                  onChange={handleEsfCilChange}
+                                  onBlur={handleEsfCilBlur}
+                                  className='w-full py-2 px-1 text-center '
+                                />
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name="cilindricoOd" value={data.cilindricoOd} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input
+                                  type="text"
+                                  name="cilindricoOd"
+                                  value={data.cilindricoOd ?? ''}
+                                  onChange={handleEsfCilChange}
+                                  onBlur={handleEsfCilBlur}
+                                  className='w-full py-2 px-1 text-center '
+                                />
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name="eixoOd" value={data.eixoOd} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input type="text" name="eixoOd" value={data.eixoOd ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='dnpOd' value={data.dnpOd} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input type="text" name='dnpOd' value={data.dnpOd ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='centroOpticoOd' value={data.centroOpticoOd} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input type="text" name='centroOpticoOd' value={data.centroOpticoOd ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='distanciaPupilar' value={data.distanciaPupilar} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
+                                <input type="text" name='distanciaPupilar' value={data.distanciaPupilar ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
                               </td>
                             </tr>
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">OE</td>
                               <td className="min-w-18 text-center text-gray-800 ">
-                                <input type="text" name="esfericoOe" value={data.esfericoOe} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input
+                                  type="text"
+                                  name="esfericoOe"
+                                  value={data.esfericoOe ?? ''}
+                                  onChange={handleEsfCilChange}
+                                  onBlur={handleEsfCilBlur}
+                                  className='w-full py-2 px-1 text-center '
+                                />
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name="cilindricoOe" value={data.cilindricoOe} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input
+                                  type="text"
+                                  name="cilindricoOe"
+                                  value={data.cilindricoOe ?? ''}
+                                  onChange={handleEsfCilChange}
+                                  onBlur={handleEsfCilBlur}
+                                  className='w-full py-2 px-1 text-center '
+                                />
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name="eixoOe" value={data.eixoOe} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input type="text" name="eixoOe" value={data.eixoOe ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='dnpOe' value={data.dnpOe} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input type="text" name='dnpOe' value={data.dnpOe ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='centroOpticoOe' value={data.centroOpticoOe} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
+                                <input type="text" name='centroOpticoOe' value={data.centroOpticoOe ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
                               </td>
                               <td className="min-w-18 text-center text-gray-800">
-                                <input type="text" name='distanciaPupilar' value={data.distanciaPupilar} disabled={true} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
+                                <input type="text" name='distanciaPupilar' value={data.distanciaPupilar ?? ''} disabled={true} onChange={handleChange} className='w-full py-2 px-1 text-center'/>
                               </td>
-                              
                             </tr>
                             <tr className='divide-x divide-gray-200'>
                               <td className="px-4 py-2 font-medium text-gray-600 text-right">AD</td>
                               <td className="min-w-18 text-center text-gray-800 border-r-1 border-gray-200">
-                                <input type="text" name="adicao" value={data.adicao} onChange={handleChange} className='w-full py-2 px-1 text-center '/>
+                                <input
+                                  type="text"
+                                  name="adicao"
+                                  value={data.adicao ?? ''}
+                                  onChange={handleEsfCilChange}
+                                  onBlur={handleEsfCilBlur}
+                                  className='w-full py-2 px-1 text-center '
+                                />
                               </td>
                             </tr>
                           </tbody>
