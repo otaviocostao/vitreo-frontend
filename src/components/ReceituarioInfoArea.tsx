@@ -59,7 +59,11 @@ const ReceituarioInfoArea: React.FC<ReceituarioInfoAreaProps> = ({
     armacaoItem ? produtosDisponiveis.find(p => p.id === armacaoItem.productId) : null
   );
 
-  const nomeMarcaArmacao = armacaoSelecionada?.brand?.name || '';
+  const armacaoCompleta = armacaoSelecionada
+    ? (armacaoSelecionada.brand ? armacaoSelecionada : produtosDisponiveis.find(p => p.id === armacaoSelecionada.id) || armacaoSelecionada)
+    : null;
+
+  const nomeMarcaArmacao = armacaoCompleta?.brand?.name || '';
 
   const lentesItens = items.find(item =>
     produtosDisponiveis.some(p => p.id === item.productId && p.productType === 'lens')
