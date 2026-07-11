@@ -127,9 +127,13 @@ const RegisterProductPage = () => {
         await createProduct(productPayload);
       }
       navigate('/produtos');
-    } catch (err) {
-      setError(`Falha ao ${isEditMode ? 'atualizar' : 'cadastrar'} o produto. Verifique os dados.`);
-      console.error(err);
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        const errorMessages = Object.values(err.response.data).join(', ');
+        setError(`Falha ao ${isEditMode ? 'atualizar' : 'cadastrar'} o produto: ${errorMessages}`);
+      } else {
+        setError('Falha ao cadastrar o produto...');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -119,6 +119,8 @@ const RegisterClientPage = () => {
       } else {
         setError('Falha ao cadastrar o cliente...');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,8 +130,8 @@ const RegisterClientPage = () => {
       <div className="w-full flex flex-1 flex-col p-4 box-border">
         <form onSubmit={handleSubmit}>
           <FormSection title="Dados pessoais">
-            <InputField label="Nome *" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" />
-            <InputField label="Sobrenome *" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" />
+            <InputField label="Nome *" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" required />
+            <InputField label="Sobrenome *" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" required />
             <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" />
             <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-00" className="md:col-span-2" />
             <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-2" />

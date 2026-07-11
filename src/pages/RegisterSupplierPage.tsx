@@ -142,9 +142,13 @@ const RegisterSupplierPage = () => {
 
       navigate('/fornecedores');
 
-    } catch (err) {
-      setError(`Falha ao salvar o fornecedor. Verifique os dados e tente novamente.`);
-      console.error(err);
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        const errorMessages = Object.values(err.response.data).join(', ');
+        setError(`Falha ao ${isEditMode ? 'atualizar' : 'cadastrar'} o fornecedor: ${errorMessages}`);
+      } else {
+        setError('Falha ao cadastrar o fornecedor...');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -195,7 +199,7 @@ const RegisterSupplierPage = () => {
           </FormSection>
 
           <FormSection title="Informações de Contato">
-            <InputField label="Telefone *" name="cellPhone" type="tel" value={formData.cellPhone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" required />
+            <InputField label="Telefone" name="cellPhone" type="tel" value={formData.cellPhone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" />
             <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-6" placeholder="contato@empresa.com" />
           </FormSection>
 

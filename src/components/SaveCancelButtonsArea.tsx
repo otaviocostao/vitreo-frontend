@@ -11,15 +11,15 @@ interface ButtonsAreaProps {
 const SaveCancelButtonsArea = (props: ButtonsAreaProps) => {
   return (
     <div className="flex justify-end items-center gap-4 py-3">
-        <NavLink to={{ pathname: props.cancelButtonPath}}>
-          <Button type="button" variant="secondary">
-              {props.textButton1}
-          </Button>
-        </NavLink>
-        <Button type="submit" variant="primary" loading={props.isLoading}>
-            {props.textButton2}
+      <NavLink to={{ pathname: props.cancelButtonPath }}>
+        <Button type="button" variant="secondary">
+          {props.textButton1}
         </Button>
-            </div>
+      </NavLink>
+      <Button type="submit" variant="primary" loading={props.isLoading}>
+        {props.textButton2}
+      </Button>
+    </div>
   )
 }
 
