@@ -7,6 +7,7 @@ import SelectField from './ui/SelectField';
 import { createCliente } from '../services/clienteService';
 import type { CustomerPayload, CustomerResponse } from '../types/customer';
 import ErrorPopup from './ErrorPopup';
+import { formatCPF } from '../lib/utils';
 
 
 interface AddClientModalProps {
@@ -29,8 +30,10 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const processedValue = name === 'cpf' ? formatCPF(value) : value;
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
+
 
 
   useEffect(() => {

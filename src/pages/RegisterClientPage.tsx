@@ -9,6 +9,7 @@ import type { CustomerPayload } from '../types/customer';
 import { createCliente, getClienteById, updateCliente } from '../services/clienteService';
 import { useNavigate, useParams } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
+import { formatCPF } from '../lib/utils';
 
 const initialFormData = {
   nome: '', sobrenome: '', cpf: '', rg: '', genero: '', dataNascimento: '', naturalidade: '',
@@ -31,7 +32,8 @@ const RegisterClientPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const processedValue = name === 'cpf' ? formatCPF(value) : value;
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
   useEffect(() => {
@@ -44,7 +46,7 @@ const RegisterClientPage = () => {
           const flattenedData = {
             nome: clientData.firstName || '',
             sobrenome: clientData.lastName || '',
-            cpf: clientData.cpf || '',
+            cpf: formatCPF(clientData.cpf || ''),
             rg: clientData.rg || '',
             dataNascimento: clientData.birthDate || '',
             genero: clientData.gender || '',
