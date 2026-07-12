@@ -67,6 +67,7 @@ function RegisterSellPage() {
     const [productModalType, setProductModalType] = useState<'frame' | 'lens' | null>(null);
     const navigate = useNavigate();
     const [formData, setFormData] = useState<OrderFormData>(initialFormData);
+    const [initialLoadedData, setInitialLoadedData] = useState<OrderFormData>(initialFormData);
     const [selectedFrame, setSelectedFrame] = useState<ProductResponse | null>(null);
     const [selectedLens, setSelectedLens] = useState<ProductResponse | null>(null);
 
@@ -153,6 +154,7 @@ function RegisterSellPage() {
                 };
 
                 setFormData(dadosDoFormulario);
+                setInitialLoadedData(dadosDoFormulario);
 
             } catch (err) {
                 setError("Falha ao carregar os dados do pedido.");
@@ -427,6 +429,97 @@ function RegisterSellPage() {
         setProductModalType(null);
     };
 
+    const isPrescriptionEmpty = (prescription: ReceituarioPayload) => {
+        if (!prescription) return true;
+        return Object.values(prescription).every(val => val === undefined || val === null || val === '');
+    };
+
+    const isFormEmpty = (data: OrderFormData) => {
+        return (
+            data.customer === null &&
+            isPrescriptionEmpty(data.prescription) &&
+            data.items.length === 0 &&
+            data.payments.length === 0 &&
+            data.serviceOrder === '' &&
+            data.orderDate === '' &&
+            data.deliveryForecastDate === '' &&
+            data.deliveryDate === '' &&
+            data.discount === 0 &&
+            data.lensValue === 0 &&
+            data.frameValue === 0 &&
+            data.observations === ''
+        );
+    };
+
+    const arePrescriptionsEqual = (p1: ReceituarioPayload = {}, p2: ReceituarioPayload = {}) => {
+        const keys = [
+            'esfericoOd', 'cilindricoOd', 'eixoOd', 'esfericoOe', 'cilindricoOe', 'eixoOe',
+            'adicao', 'distanciaPupilar', 'dnpOd', 'dnpOe', 'centroOpticoOd', 'centroOpticoOe',
+            'anguloMaior', 'ponteAro', 'anguloVertical', 'nomeMedico', 'crmMedico', 'dataReceita'
+        ] as const;
+        return keys.every(key => {
+            const val1 = p1[key];
+            const val2 = p2[key];
+            const norm1 = (val1 === undefined || val1 === null) ? '' : String(val1);
+            const norm2 = (val2 === undefined || val2 === null) ? '' : String(val2);
+            return norm1 === norm2;
+        });
+    };
+
+    const areItemsEqual = (items1: OrderItemPayload[] = [], items2: OrderItemPayload[] = []) => {
+        if (items1.length !== items2.length) return false;
+        const sorted1 = [...items1].sort((a, b) => a.productId.localeCompare(b.productId));
+        const sorted2 = [...items2].sort((a, b) => a.productId.localeCompare(b.productId));
+        return sorted1.every((item, i) => {
+            const other = sorted2[i];
+            return (
+                item.productId === other.productId &&
+                Number(item.quantity) === Number(other.quantity) &&
+                Number(item.unitPrice) === Number(other.unitPrice)
+            );
+        });
+    };
+
+    const arePaymentsEqual = (p1: PaymentPayload[] = [], p2: PaymentPayload[] = []) => {
+        if (p1.length !== p2.length) return false;
+        return p1.every((pay, i) => {
+            const other = p2[i];
+            return (
+                pay.paymentMethod === other.paymentMethod &&
+                Number(pay.amountPaid) === Number(other.amountPaid) &&
+                Number(pay.installments ?? 1) === Number(other.installments ?? 1)
+            );
+        });
+    };
+
+    const areSimpleFieldsEqual = (current: OrderFormData, initial: OrderFormData) => {
+        return (
+            (current.customer?.id === initial.customer?.id) &&
+            current.serviceOrder === initial.serviceOrder &&
+            current.orderDate === initial.orderDate &&
+            current.deliveryForecastDate === initial.deliveryForecastDate &&
+            current.deliveryDate === initial.deliveryDate &&
+            Number(current.discount) === Number(initial.discount) &&
+            Number(current.lensValue) === Number(initial.lensValue) &&
+            Number(current.frameValue) === Number(initial.frameValue) &&
+            current.status === initial.status &&
+            current.observations === initial.observations
+        );
+    };
+
+    const isFormUnchanged = (current: OrderFormData, initial: OrderFormData) => {
+        return (
+            areSimpleFieldsEqual(current, initial) &&
+            arePrescriptionsEqual(current.prescription, initial.prescription) &&
+            areItemsEqual(current.items, initial.items) &&
+            arePaymentsEqual(current.payments, initial.payments)
+        );
+    };
+
+    const isSaveDisabled = isEditMode
+        ? isFormUnchanged(formData, initialLoadedData)
+        : isFormEmpty(formData);
+
     return (
         <div className=" flex flex-col w-fit box-border">
             <div className="flex justify-between items-center print:hidden">
@@ -512,7 +605,7 @@ function RegisterSellPage() {
                             />
                         </div>
                     </div>
-                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={(isEditMode && 'Salvar alterações') || 'Finalizar Venda'} isLoading={isLoading} />
+                    <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath="/vendas" textButton2={(isEditMode && 'Salvar alterações') || 'Finalizar Venda'} isLoading={isLoading} isSaveDisabled={isSaveDisabled} />
                 </form>
             </div>
             <AddClientModal

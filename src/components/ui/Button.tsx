@@ -11,6 +11,7 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', loading=
     relative inline-flex items-center justify-center gap-2 
      text-sm font-medium rounded-md 
     transition-colors duration-200 cursor-pointer
+    disabled:cursor-default disabled:opacity-50
   `;
 
   const variantClasses = {

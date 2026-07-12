@@ -6,6 +6,7 @@ interface ButtonsAreaProps {
   textButton2?: string;
   cancelButtonPath?: string;
   isLoading?: boolean;
+  isSaveDisabled?: boolean;
 }
 
 const SaveCancelButtonsArea = (props: ButtonsAreaProps) => {
@@ -16,7 +17,7 @@ const SaveCancelButtonsArea = (props: ButtonsAreaProps) => {
           {props.textButton1}
         </Button>
       </NavLink>
-      <Button type="submit" variant="primary" loading={props.isLoading}>
+      <Button type="submit" variant="primary" loading={props.isLoading} disabled={props.isSaveDisabled}>
         {props.textButton2}
       </Button>
     </div>

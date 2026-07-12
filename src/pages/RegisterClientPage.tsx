@@ -27,7 +27,7 @@ const RegisterClientPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState(initialFormData);
-  const [isFetching, setIsFetching] = useState(isEditMode);
+  const [initialLoadedData, setInitialLoadedData] = useState(initialFormData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -36,7 +36,6 @@ const RegisterClientPage = () => {
 
   useEffect(() => {
     const loadPageData = async () => {
-      setIsFetching(true);
       setError(null);
       try {
         if (isEditMode && clientId) {
@@ -63,12 +62,11 @@ const RegisterClientPage = () => {
             cep: clientData.zipCode || '',
           };
           setFormData(flattenedData);
+          setInitialLoadedData(flattenedData);
         }
       } catch (err) {
         setError("Falha ao carregar os dados. Verifique a conexão e tente novamente.");
         console.error(err);
-      } finally {
-        setIsFetching(false);
       }
     };
     loadPageData();
@@ -124,49 +122,61 @@ const RegisterClientPage = () => {
     }
   };
 
-  return (
-    <div className="flex flex-1 flex-col w-full box-border">
-      <HeaderTitlePage page_name={isEditMode ? "Editar dados do cliente" : "Cadastrar novo cliente"} />
-      <div className="w-full flex flex-1 flex-col p-4 box-border">
-        <form onSubmit={handleSubmit}>
-          <FormSection title="Dados pessoais">
-            <InputField label="Nome *" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" required />
-            <InputField label="Sobrenome *" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" required />
-            <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" />
-            <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-00" className="md:col-span-2" />
-            <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-2" />
-            <InputField label="Nascimento" id="nascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} placeholder="dd/mm/aaaa" className="md:col-span-2" />
-            <InputField label="Naturalidade" id="naturalidade" name="naturalidade" value={formData.naturalidade} onChange={handleChange} placeholder="Naturalidade do cliente..." className="md:col-span-3" />
-          </FormSection>
+          const isFormEmpty = (data: typeof initialFormData) => {
+            return Object.values(data).every(val => val === '');
+          };
 
-          <FormSection title="Endereço">
-            <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-5" />
-            <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-2" />
-            <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-3" />
-            <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-3" />
-            <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
-            <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
-            <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
-          </FormSection>
+          const isFormUnchanged = (current: typeof initialFormData, initial: typeof initialFormData) => {
+            return Object.keys(current).every(key => current[key as keyof typeof initialFormData] === initial[key as keyof typeof initialFormData]);
+          };
 
-          <FormSection title="Informações de contato">
-            <InputField label="Telefone" id="telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
-            <InputField label="Tel. secundário" id="telSecundario" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
-            <InputField label="E-mail (opcional)" id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Ex: joao@email.com" className="md:col-span-4" />
-          </FormSection>
+          const isSaveDisabled = isEditMode
+            ? isFormUnchanged(formData, initialLoadedData)
+            : isFormEmpty(formData);
 
-          <FormSection title="Informações adicionais">
-            <TextareaField label="Observações" id="observacoes" name="observacoes" value={formData.observacoes} onChange={handleChange} className="md:col-span-8" />
+          return (
+            <div className="flex flex-1 flex-col w-full box-border">
+              <HeaderTitlePage page_name={isEditMode ? "Editar dados do client" : "Cadastrar novo cliente"} />
+              <div className="w-full flex flex-1 flex-col p-4 box-border">
+                <form onSubmit={handleSubmit}>
+                  <FormSection title="Dados pessoais">
+                    <InputField label="Nome *" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" required />
+                    <InputField label="Sobrenome *" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" required />
+                    <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" />
+                    <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-00" className="md:col-span-2" />
+                    <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-2" />
+                    <InputField label="Nascimento" id="nascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} placeholder="dd/mm/aaaa" className="md:col-span-2" />
+                    <InputField label="Naturalidade" id="naturalidade" name="naturalidade" value={formData.naturalidade} onChange={handleChange} placeholder="Naturalidade do cliente..." className="md:col-span-3" />
+                  </FormSection>
+
+                  <FormSection title="Endereço">
+                    <InputField label="Logradouro" name="logradouro" value={formData.logradouro} onChange={handleChange} className="md:col-span-5" />
+                    <InputField label="Número" name="numero" value={formData.numero} onChange={handleChange} className="md:col-span-2" />
+                    <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-3" />
+                    <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-3" />
+                    <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
+                    <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
+                    <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
+                  </FormSection>
+
+                  <FormSection title="Informações de contato">
+                    <InputField label="Telefone" id="telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
+                    <InputField label="Tel. secundário" id="telSecundario" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
+                    <InputField label="E-mail (opcional)" id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Ex: joao@email.com" className="md:col-span-4" />
+                  </FormSection>
+
+                  <FormSection title="Informações adicionais">
+                    <TextareaField label="Observações" id="observacoes" name="observacoes" value={formData.observacoes} onChange={handleChange} className="md:col-span-8" />
 
 
-            <div className="md:col-span-4 flex flex-col gap-5">
-              {/* <InputField label="D. Cadastro" id="dataCadastro" name="dataCadastro" type="date" value={formData.dataCadastro} onChange={handleChange} placeholder="dd/mm/aaaa" /> */}
-              {/* <Button variant='secondary' className='w-35'>Última compra</Button> */}
-            </div>
-          </FormSection>
+                    <div className="md:col-span-4 flex flex-col gap-5">
+                      {/* <InputField label="D. Cadastro" id="dataCadastro" name="dataCadastro" type="date" value={formData.dataCadastro} onChange={handleChange} placeholder="dd/mm/aaaa" /> */}
+                      {/* <Button variant='secondary' className='w-35'>Última compra</Button> */}
+                    </div>
+                  </FormSection>
 
-          <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} />
-        </form>
+                  <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/clientes' textButton2={isEditMode ? 'Salvar alterações' : 'Cadastrar'} isLoading={isLoading} isSaveDisabled={isSaveDisabled} />
+                </form>
       </div>
       {error && (
         <ErrorPopup message={error} onClose={() => setError(null)} />
