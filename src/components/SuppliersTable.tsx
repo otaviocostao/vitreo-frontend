@@ -4,6 +4,7 @@ import type { SupplierResponse } from '../types/supplier';
 import LoadingSpinner from './LoadingSpinner';
 import Button from './ui/Button';
 import { Trash2 } from 'lucide-react';
+import { formatCNPJ } from '../lib/utils';
 
 interface SuppliersTableProps {
   suppliers: SupplierResponse[];
@@ -64,7 +65,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.corporateName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.tradeName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.cnpj}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatCNPJ(supplier.cnpj)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.street}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.number}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.neighborhood}</td>
