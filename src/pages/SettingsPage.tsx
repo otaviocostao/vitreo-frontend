@@ -36,7 +36,6 @@ const Home = () => {
   
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      console.log('Dados de configurações para Enviar:', formData);
     };
   
   return (

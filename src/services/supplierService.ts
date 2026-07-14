@@ -93,7 +93,7 @@ export const getFornecedorById = async (id: string): Promise<SupplierResponse> =
 
 export const updateFornecedor = async (id: string, data: SupplierPayload): Promise<SupplierResponse> => {
   try {
-    const response = await api.put<SupplierResponse>(`/suppliers/${id}`, data);
+    const response = await api.patch<SupplierResponse>(`/suppliers/${id}`, data);
     return response.data;
   } catch (error) {
     console.error(`Erro ao atualizar fornecedor com ID ${id}:`, error);
@@ -121,7 +121,6 @@ export const dissociateMarca = async (supplierId: string, brandId: string): Prom
 
 export const deleteFornecedorById = async (id: string): Promise<void> => {
   try {
-    console.log("deletando fornecedor com id", id)
     await api.delete(`/suppliers/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar fornecedor com ID ${id}:`, error);

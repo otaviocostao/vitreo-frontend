@@ -70,12 +70,12 @@ const RegisterSupplierPage = () => {
             city: supplierData.city || '',
             state: supplierData.state || '',
             zipCode: supplierData.zipCode,
-            brands: supplierData.brands,
+            brands: supplierData.brands || [],
           };
 
           setFormData(flattenedData);
           setInitialLoadedData(flattenedData);
-          setInitialBrands(supplierData.brands);
+          setInitialBrands(supplierData.brands || []);
         }
       } catch (err) {
         setError("Falha ao carregar os dados. Verifique a conexão e tente novamente.");
@@ -168,10 +168,12 @@ const RegisterSupplierPage = () => {
     return <LoadingSpinner text='Carregando dados do fornecedor...' />
   }
 
-  const areBrandsEqual = (arr1: BrandResponse[], arr2: BrandResponse[]) => {
-    if (arr1.length !== arr2.length) return false;
-    const set1 = new Set(arr1.map(b => b.id));
-    return arr2.every(b => set1.has(b.id));
+  const areBrandsEqual = (arr1: BrandResponse[] | undefined, arr2: BrandResponse[] | undefined) => {
+    const a1 = arr1 || [];
+    const a2 = arr2 || [];
+    if (a1.length !== a2.length) return false;
+    const set1 = new Set(a1.map(b => b.id));
+    return a2.every(b => set1.has(b.id));
   };
 
   const isFormEmpty = (data: SupplierFormData) => {

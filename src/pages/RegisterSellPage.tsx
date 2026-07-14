@@ -108,7 +108,6 @@ function RegisterSellPage() {
             try {
                 const orderData = await getOrderById(pedidoId);
                 setFetchedOrder(orderData);
-                console.log(orderData);
 
                 const frameItem = orderData.items.find(item => item.product.productType === 'frame');
                 const lensItem = orderData.items.find(item => item.product.productType === 'lens');
@@ -317,7 +316,6 @@ function RegisterSellPage() {
                 };
 
                 await updateOrder(pedidoId, updatePayload);
-                console.log("PAYLOAD ENVIADO:", JSON.stringify(updatePayload, null, 2));
                 navigate(`/vendas/${pedidoId}/detalhes`);
             } else {
                 const orderPayload: OrderPayload = {
@@ -344,7 +342,6 @@ function RegisterSellPage() {
                 };
 
                 const novoPedido = await createOrder(orderPayload);
-                console.log("Resposta da API de criação:", novoPedido);
                 navigate(`/vendas/${novoPedido.id}/detalhes`);
             }
 
