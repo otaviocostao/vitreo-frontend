@@ -8,7 +8,7 @@ import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import ProductsTable from '../components/ProductsTable';
 import type { ProductResponse } from '../types/product';
-import { deleteProductById, getProducts } from '../services/productService';
+import { deleteProductById, getProducts, updateProductStatus } from '../services/productService';
 import type { Page } from '../types/pagination';
 import { NavLink } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
@@ -176,6 +176,19 @@ const StockPage = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await updateProductStatus(id, !currentStatus);
+      fetchProdutos(currentPage, debouncedSearchTerm);
+      if (selectedProduct && selectedProduct.id === id) {
+        setSelectedProduct((prev) => prev ? { ...prev, isActive: !currentStatus } : null);
+      }
+    } catch (err) {
+      setError(`Falha ao ${currentStatus ? 'desativar' : 'ativar'} o produto.`);
+      console.error(err);
+    }
+  };
+
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -222,6 +235,7 @@ const StockPage = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           onDeleteClick={handleOpenDeleteModal}
+          onDeactivateClick={handleToggleActive}
           onRowClick={(product) => setSelectedProduct(product)}
         />
       </div>

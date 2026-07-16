@@ -101,6 +101,16 @@ export const updateFornecedor = async (id: string, data: SupplierPayload): Promi
   }
 };
 
+export const updateFornecedorStatus = async (id: string, isActive: boolean): Promise<SupplierResponse> => {
+  try {
+    const response = await api.patch<SupplierResponse>(`/suppliers/${id}/active`, { isActive });
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao atualizar status do fornecedor com ID ${id}:`, error);
+    throw error;
+  }
+};
+
 export const associateMarca = async (supplierId: string, brandId: string): Promise<void> => {
   try {
     await api.post(`/suppliers/${supplierId}/brands/${brandId}`);

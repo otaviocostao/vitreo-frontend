@@ -11,11 +11,12 @@ interface SuppliersTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, fornecedorNome: string) => void;
+  onDeactivateClick?: (id: string, currentStatus: boolean) => void;
   onRowClick: (supplier: SupplierResponse) => void;
 }
 
-const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
-  const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
+const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoading, currentPage, pageSize, onDeleteClick, onDeactivateClick, onRowClick }) => {
+  const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', 'Status', ''];
 
   const navigate = useNavigate();
 
@@ -47,7 +48,6 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
                 </td>
               </tr>
             ) : suppliers.length === 0 ? (
-
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8 text-gray-500">
                   Nenhum fornecedor encontrado.
@@ -57,7 +57,11 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
               suppliers.map((supplier, i) => {
                 const rowNumber = (currentPage - 1) * pageSize + i + 1;
                 return (
-                  <tr key={supplier.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onRowClick(supplier)}>
+                  <tr
+                    key={supplier.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => onRowClick(supplier)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.corporateName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.tradeName}</td>
@@ -67,10 +71,21 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.neighborhood}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs ${
+                        supplier.isActive !== false
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {supplier.isActive !== false ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
                         onEdit={() => navigate(`/fornecedores/${supplier.id}`)}
                         onDelete={() => onDeleteClick(supplier.id, supplier.tradeName)}
+                        isActive={supplier.isActive}
+                        onDeactivate={onDeactivateClick ? () => onDeactivateClick(supplier.id, supplier.isActive) : undefined}
                       />
                     </td>
                   </tr>

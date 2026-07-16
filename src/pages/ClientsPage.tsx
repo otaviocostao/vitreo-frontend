@@ -10,7 +10,7 @@ import HeaderTitlePage from '../components/HeaderTitlePage';
 import { NavLink } from 'react-router-dom';
 import type { Page } from '../types/pagination';
 import type { CustomerResponse } from '../types/customer';
-import { deleteClienteById, getClientes } from '../services/clienteService';
+import { deleteClienteById, getClientes, updateClienteStatus } from '../services/clienteService';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
@@ -33,14 +33,23 @@ const ClientDetailsView: React.FC<{ client: CustomerResponse }> = ({ client }) =
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
-        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-          {client.firstName[0].toUpperCase()}{client.lastName[0].toUpperCase()}
+      <div className="flex items-center justify-between bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            {client.firstName[0].toUpperCase()}{client.lastName[0].toUpperCase()}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{client.firstName} {client.lastName}</h3>
+            <p className="text-xs text-blue-600 font-medium">{client.isActive !== false ? 'Cliente ativo' : 'Cliente inativo'}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">{client.firstName} {client.lastName}</h3>
-          <p className="text-xs text-blue-600 font-medium">Cliente ativo</p>
-        </div>
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold shadow-sm ${
+          client.isActive !== false
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-gray-100 text-gray-800 border border-gray-200'
+        }`}>
+          {client.isActive !== false ? 'Ativo' : 'Inativo'}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -162,6 +171,19 @@ const ClientsPage = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await updateClienteStatus(id, !currentStatus);
+      fetchClients(currentPage, debouncedSearchTerm);
+      if (selectedClient && selectedClient.id === id) {
+        setSelectedClient((prev) => prev ? { ...prev, isActive: !currentStatus } : null);
+      }
+    } catch (err) {
+      setError(`Falha ao ${currentStatus ? 'desativar' : 'ativar'} o cliente.`);
+      console.error(err);
+    }
+  };
+
 
   return (
     <div className='flex flex-col w-full box-border'>
@@ -205,6 +227,7 @@ const ClientsPage = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           onDeleteClick={handleOpenDeleteModal}
+          onDeactivateClick={handleToggleActive}
           onRowClick={(client) => setSelectedClient(client)}
         />
       </div>

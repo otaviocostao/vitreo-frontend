@@ -17,6 +17,7 @@ export interface CustomerPayload {
   state?: string;
   zipCode?: string;
   observations?: string;
+  isActive?: boolean;
 }
 
 export interface CustomerResponse {
@@ -39,6 +40,7 @@ export interface CustomerResponse {
   state: string;
   zipCode: string;
   observations: string;
+  isActive: boolean;
 }
 
 export interface ClienteSimplificadoDTO {

@@ -105,6 +105,16 @@ export const updateProduct = async (id: string, data: ProductPayload): Promise<P
   }
 };
 
+export const updateProductStatus = async (id: string, isActive: boolean): Promise<ProductResponse> => {
+  try {
+    const response = await api.patch<ProductResponse>(`/products/${id}/active`, { isActive });
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao atualizar status do produto com ID ${id}:`, error);
+    throw error;
+  }
+};
+
 export const deleteProductById = async (id: string): Promise<void> => {
   try {
     await api.delete(`/products/${id}`);

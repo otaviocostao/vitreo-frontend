@@ -13,11 +13,12 @@ interface ClientsTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, fornecedorNome: string) => void;
+  onDeactivateClick?: (id: string, currentStatus: boolean) => void;
   onRowClick: (customer: CustomerResponse) => void;
 }
 
-const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
-  const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
+const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, currentPage, pageSize, onDeleteClick, onDeactivateClick, onRowClick }) => {
+  const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', 'Status', ''];
 
   const navigate = useNavigate();
 
@@ -60,7 +61,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
                 const nomeCompleto = `${customer.firstName} ${customer.lastName}`;
 
                 return (
-                  <tr key={customer.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onRowClick(customer)}>
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => onRowClick(customer)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeCompleto}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatDate(customer.birthDate)}</td>
@@ -70,10 +75,21 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.neighborhood || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.city || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.state || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs ${
+                        customer.isActive !== false
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {customer.isActive !== false ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
                         onEdit={() => navigate(`/clientes/${customer.id}`)}
                         onDelete={() => onDeleteClick(customer.id, nomeCompleto)}
+                        isActive={customer.isActive}
+                        onDeactivate={onDeactivateClick ? () => onDeactivateClick(customer.id, customer.isActive) : undefined}
                       />
                     </td>
                   </tr>

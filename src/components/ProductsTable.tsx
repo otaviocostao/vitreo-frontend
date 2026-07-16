@@ -9,11 +9,12 @@ interface ProductsTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, productName: string) => void;
+  onDeactivateClick?: (id: string, currentStatus: boolean) => void;
   onRowClick: (product: ProductResponse) => void;
 }
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
-  const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor', ''];
+const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, currentPage, pageSize, onDeleteClick, onDeactivateClick, onRowClick }) => {
+  const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor', 'Status', ''];
   const navigate = useNavigate();
 
   return (
@@ -69,10 +70,20 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, curr
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prod.salePrice)}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs ${prod.isActive !== false
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                        }`}>
+                        {prod.isActive !== false ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
                         onEdit={() => navigate(`/produtos/${prod.id}`)}
                         onDelete={() => onDeleteClick(prod.id, prod.name)}
+                        isActive={prod.isActive}
+                        onDeactivate={onDeactivateClick ? () => onDeactivateClick(prod.id, prod.isActive) : undefined}
                       />
                     </td>
                   </tr>

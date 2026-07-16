@@ -85,6 +85,16 @@ export const updateCliente = async (id: string, data: CustomerPayload): Promise<
   }
 };
 
+export const updateClienteStatus = async (id: string, isActive: boolean): Promise<CustomerResponse> => {
+  try {
+    const response = await api.patch<CustomerResponse>(`/customers/${id}/active`, { isActive });
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao atualizar status do cliente com ID ${id}:`, error);
+    throw error;
+  }
+};
+
 export const deleteClienteById = async (id: string): Promise<void> => {
   try {
     await api.delete(`/customers/${id}`);

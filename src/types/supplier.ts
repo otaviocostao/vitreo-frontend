@@ -16,6 +16,7 @@ export interface SupplierPayload {
   city?: string;
   state?: string;
   zipCode?: string;
+  isActive?: boolean;
 }
 
 export interface SupplierResponse {
@@ -36,4 +37,5 @@ export interface SupplierResponse {
   state: string;
   zipCode: string;
   brands: BrandResponse[];
+  isActive: boolean;
 }

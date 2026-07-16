@@ -10,7 +10,7 @@ import { NavLink } from 'react-router-dom';
 import SuppliersTable from '../components/SuppliersTable';
 import type { SupplierResponse } from '../types/supplier';
 import type { Page } from '../types/pagination';
-import { deleteFornecedorById, getFornecedores } from '../services/supplierService';
+import { deleteFornecedorById, getFornecedores, updateFornecedorStatus } from '../services/supplierService';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
@@ -31,14 +31,23 @@ const InfoField: React.FC<{ label: string; value?: string | number | React.React
 const SupplierDetailsView: React.FC<{ supplier: SupplierResponse }> = ({ supplier }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
-        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-          {supplier.tradeName ? supplier.tradeName[0].toUpperCase() : supplier.corporateName[0].toUpperCase()}
+      <div className="flex items-center justify-between bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            {supplier.tradeName ? supplier.tradeName[0].toUpperCase() : supplier.corporateName[0].toUpperCase()}
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{supplier.tradeName || supplier.corporateName}</h3>
+            <p className="text-xs text-blue-600 font-semibold mt-0.5">{supplier.isActive !== false ? 'Fornecedor ativo' : 'Fornecedor inativo'}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">{supplier.tradeName || supplier.corporateName}</h3>
-          <p className="text-xs text-blue-600 font-semibold mt-0.5">Fornecedor registrado</p>
-        </div>
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold shadow-sm ${
+          supplier.isActive !== false
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-gray-100 text-gray-800 border border-gray-200'
+        }`}>
+          {supplier.isActive !== false ? 'Ativo' : 'Inativo'}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -167,6 +176,19 @@ const SuppliersPage = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    try {
+      await updateFornecedorStatus(id, !currentStatus);
+      fetchFornecedores(currentPage, debouncedSearchTerm);
+      if (selectedSupplier && selectedSupplier.id === id) {
+        setSelectedSupplier((prev) => prev ? { ...prev, isActive: !currentStatus } : null);
+      }
+    } catch (err) {
+      setError(`Falha ao ${currentStatus ? 'desativar' : 'ativar'} o fornecedor.`);
+      console.error(err);
+    }
+  };
+
   return (
     <div className='flex flex-col w-full box-border'>
       <HeaderTitlePage page_name='Fornecedores' />
@@ -211,6 +233,7 @@ const SuppliersPage = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           onDeleteClick={handleOpenDeleteModal}
+          onDeactivateClick={handleToggleActive}
           onRowClick={(supplier) => setSelectedSupplier(supplier)}
         />
       </div>
