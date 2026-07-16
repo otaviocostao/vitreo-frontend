@@ -11,16 +11,13 @@ interface SuppliersTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, fornecedorNome: string) => void;
-
+  onRowClick: (supplier: SupplierResponse) => void;
 }
 
-const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoading, currentPage, pageSize, onDeleteClick }) => {
+const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
   const tableHeaders = ['#', 'Razão Social', 'N. Fantasia', 'CNPJ', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
 
   const navigate = useNavigate();
-  const handleRowClick = (supplierId: string) => {
-    navigate(`/fornecedores/${supplierId}`);
-  };
 
   return (
     <div className="bg-white border-1 border-gray-200 rounded-lg overflow-x-auto">
@@ -60,7 +57,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
               suppliers.map((supplier, i) => {
                 const rowNumber = (currentPage - 1) * pageSize + i + 1;
                 return (
-                  <tr key={supplier.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(supplier.id)}>
+                  <tr key={supplier.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onRowClick(supplier)}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.corporateName}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.tradeName}</td>
@@ -72,7 +69,7 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
-                        onEdit={() => handleRowClick(supplier.id)}
+                        onEdit={() => navigate(`/fornecedores/${supplier.id}`)}
                         onDelete={() => onDeleteClick(supplier.id, supplier.tradeName)}
                       />
                     </td>

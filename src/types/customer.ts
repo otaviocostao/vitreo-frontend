@@ -1,5 +1,3 @@
-import type { EnderecoPayload, EnderecoResponse } from "./endereco";
-
 export interface CustomerPayload {
   firstName: string;
   lastName: string;

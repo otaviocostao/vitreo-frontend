@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import InputField from '../components/ui/InputField';
 import Button from '../components/ui/Button';
@@ -14,9 +14,88 @@ import { deleteFornecedorById, getFornecedores } from '../services/supplierServi
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
+import SideDrawer from '../components/ui/SideDrawer';
+import { formatCNPJ } from '../lib/utils';
+import { formatPhone } from '../helpers/formatters';
 
+const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
+  if (value === undefined || value === null || value === '') return null;
+  return (
+    <div className={`bg-gray-50/60 p-3 rounded-lg border border-gray-100/60 ${className}`}>
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
+      <div className="mt-1 text-sm font-medium text-gray-800 break-words">{value}</div>
+    </div>
+  );
+};
+
+const SupplierDetailsView: React.FC<{ supplier: SupplierResponse }> = ({ supplier }) => {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          {supplier.tradeName ? supplier.tradeName[0].toUpperCase() : supplier.corporateName[0].toUpperCase()}
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">{supplier.tradeName || supplier.corporateName}</h3>
+          <p className="text-xs text-blue-600 font-semibold mt-0.5">Fornecedor registrado</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Informações da Empresa</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="Razão Social" value={supplier.corporateName} className="col-span-2" />
+          <InfoField label="Nome Fantasia" value={supplier.tradeName || '-'} className="col-span-2" />
+          <InfoField label="CNPJ" value={supplier.cnpj ? formatCNPJ(supplier.cnpj) : '-'} />
+          <InfoField label="Inscrição Estadual" value={supplier.stateRegistration || '-'} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Informações de Contato</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="E-mail" value={supplier.email || '-'} className="col-span-2" />
+          <InfoField label="Celular" value={formatPhone(supplier.cellPhone) || '-'} />
+          <InfoField label="Telefone Fixo" value={formatPhone(supplier.phone) || '-'} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Endereço</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="CEP" value={supplier.zipCode || '-'} />
+          <InfoField label="Estado" value={supplier.state || '-'} />
+          <InfoField label="Cidade" value={supplier.city || '-'} />
+          <InfoField label="Bairro" value={supplier.neighborhood || '-'} />
+          <InfoField label="Logradouro" value={supplier.street || '-'} className="col-span-2" />
+          <InfoField label="Número" value={supplier.number || '-'} />
+          <InfoField label="Complemento" value={supplier.complement || '-'} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Marcas Associadas</h4>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {supplier.brands && supplier.brands.length > 0 ? (
+            supplier.brands.map((brand) => (
+              <span
+                key={brand.id}
+                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200"
+              >
+                {brand.name}
+              </span>
+            ))
+          ) : (
+            <p className="text-sm text-gray-400 italic">Nenhuma marca associada</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SuppliersPage = () => {
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierResponse | null>(null);
   const [fornecedores, setFornecedores] = useState<SupplierResponse[]>([]);
   const [pageInfo, setPageInfo] = useState<Page<SupplierResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,7 +205,14 @@ const SuppliersPage = () => {
             </div>
           </div>
         </div>
-        <SuppliersTable suppliers={fornecedores} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} onDeleteClick={handleOpenDeleteModal} />
+        <SuppliersTable
+          suppliers={fornecedores}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onDeleteClick={handleOpenDeleteModal}
+          onRowClick={(supplier) => setSelectedSupplier(supplier)}
+        />
       </div>
       <PopupModal
         isOpen={isDeleteModalOpen}
@@ -136,6 +222,13 @@ const SuppliersPage = () => {
         message="Tem certeza que deseja deletar o fornecedor "
         itemName={nomefornecedorToDelete}
       />
+      <SideDrawer
+        isOpen={selectedSupplier !== null}
+        onClose={() => setSelectedSupplier(null)}
+        title="Detalhes do Fornecedor"
+      >
+        {selectedSupplier && <SupplierDetailsView supplier={selectedSupplier} />}
+      </SideDrawer>
       {error && (
         <ErrorPopup
           message={error}

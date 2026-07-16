@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { CustomerResponse } from '../types/customer';
 import LoadingSpinner from './LoadingSpinner';
 import ActionDropdown from './ui/ActionDropdown';
+import { formatDate, formatPhone } from '../helpers/formatters';
 
 
 
@@ -12,29 +13,13 @@ interface ClientsTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, fornecedorNome: string) => void;
+  onRowClick: (customer: CustomerResponse) => void;
 }
 
-const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, currentPage, pageSize, onDeleteClick }) => {
+const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
   const tableHeaders = ['#', 'Cliente', 'D/N', 'Telefone', 'Logradouro', 'Nº', 'Bairro', 'Cidade', 'Estado', ''];
 
   const navigate = useNavigate();
-  const handleRowClick = (clienteId: string) => {
-    navigate(`/clientes/${clienteId}`);
-  };
-
-  const formatarData = (data: string | null | undefined): string => {
-    if (!data) {
-      return '';
-    }
-
-    const dateObj = new Date(`${data}T00:00:00`);
-
-    if (isNaN(dateObj.getTime())) {
-      return 'Data inválida';
-    }
-
-    return new Intl.DateTimeFormat('pt-BR').format(dateObj);
-  };
 
   return (
     <div className="bg-white border-1 border-gray-200 rounded-lg overflow-x-auto">
@@ -58,9 +43,9 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
               <tr>
                 <td colSpan={tableHeaders.length} className="text-center p-8">
                   <LoadingSpinner
-                    size="h-8 w-8"
-                    text="Carregando clientes..."
-                  />
+                     size="h-8 w-8"
+                     text="Carregando clientes..."
+                   />
                 </td>
               </tr>
             ) : customers.length === 0 ? (
@@ -75,11 +60,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
                 const nomeCompleto = `${customer.firstName} ${customer.lastName}`;
 
                 return (
-                  <tr key={customer.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(customer.id)}>
+                  <tr key={customer.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onRowClick(customer)}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeCompleto}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatarData(customer.birthDate)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.phone || ''}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatDate(customer.birthDate)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{formatPhone(customer.phone)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.street || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.number || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.neighborhood || ''}</td>
@@ -87,7 +72,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.state || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
-                        onEdit={() => handleRowClick(customer.id)}
+                        onEdit={() => navigate(`/clientes/${customer.id}`)}
                         onDelete={() => onDeleteClick(customer.id, nomeCompleto)}
                       />
                     </td>

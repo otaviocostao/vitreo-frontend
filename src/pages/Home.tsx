@@ -1,4 +1,4 @@
-import { Filter, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 import TopDashboardCard from '../components/dashboard/TopDashboardCard';
 import ChartCard from '../components/dashboard/ChartCard';
@@ -16,7 +16,6 @@ const paraInputDate = (data: Date) => data.toISOString().split('T')[0];
 const Home = () => {
 
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const hoje = new Date();
@@ -26,8 +25,7 @@ const Home = () => {
   const [dataInicio, setDataInicio] = useState(paraInputDate(primeiroDiaDoMes));
   const [dataFim, setDataFim] = useState(paraInputDate(ultimoDiaDoMes));
 
-  const fetchPedidos = useCallback(async (page: number, size:number) => {
-    setIsLoading(true);
+  const fetchPedidos = useCallback(async () => {
     setError(null);
 
     try {
@@ -36,13 +34,11 @@ const Home = () => {
       } catch (err) {
         setError('Falha ao carregar os dados do Dashboard. Tente novamente');
         console.error(err);
-      } finally {
-        setIsLoading(false);
-    }
+      }
     }, [dataInicio, dataFim]);
 
     useEffect(() => {
-      fetchPedidos(0, 4 );
+      fetchPedidos();
     }, [fetchPedidos]);
 
 

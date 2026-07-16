@@ -14,8 +14,82 @@ import { deleteClienteById, getClientes } from '../services/clienteService';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
+import SideDrawer from '../components/ui/SideDrawer';
+import { formatCPF } from '../lib/utils';
+import { formatDate, formatPhone } from '../helpers/formatters';
+
+const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
+  if (value === undefined || value === null || value === '') return null;
+  return (
+    <div className={`bg-gray-50/60 p-3 rounded-lg border border-gray-100/60 ${className}`}>
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
+      <div className="mt-1 text-sm font-medium text-gray-800 break-words">{value}</div>
+    </div>
+  );
+};
+
+const ClientDetailsView: React.FC<{ client: CustomerResponse }> = ({ client }) => {
+  
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          {client.firstName[0].toUpperCase()}{client.lastName[0].toUpperCase()}
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">{client.firstName} {client.lastName}</h3>
+          <p className="text-xs text-blue-600 font-medium">Cliente ativo</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Dados Pessoais</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="CPF" value={client.cpf ? formatCPF(client.cpf) : '-'} />
+          <InfoField label="RG" value={client.rg || '-'} />
+          <InfoField label="Gênero" value={client.gender ? (client.gender.charAt(0).toUpperCase() + client.gender.slice(1)) : '-'} />
+          <InfoField label="Nascimento" value={formatDate(client.birthDate) || '-'} />
+          <InfoField label="Naturalidade" value={client.naturality || '-'} className="col-span-2" />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Informações de Contato</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="E-mail" value={client.email || '-'} className="col-span-2" />
+          <InfoField label="Telefone" value={formatPhone(client.phone) || '-'} />
+          <InfoField label="Telefone Secundário" value={formatPhone(client.secondaryPhone) || '-'} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Endereço</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="CEP" value={client.zipCode || '-'} />
+          <InfoField label="Estado" value={client.state || '-'} />
+          <InfoField label="Cidade" value={client.city || '-'} />
+          <InfoField label="Bairro" value={client.neighborhood || '-'} />
+          <InfoField label="Logradouro" value={client.street || '-'} className="col-span-2" />
+          <InfoField label="Número" value={client.number || '-'} />
+          <InfoField label="Complemento" value={client.complement || '-'} />
+        </div>
+      </div>
+
+      {client.observations && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Observações</h4>
+          <div className="bg-gray-50/60 p-3 rounded-lg border border-gray-100/60 text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+            {client.observations}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ClientsPage = () => {
+  const [selectedClient, setSelectedClient] = useState<CustomerResponse | null>(null);
 
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
   const [pageInfo, setPageInfo] = useState<Page<CustomerResponse> | null>(null);
@@ -125,7 +199,14 @@ const ClientsPage = () => {
             </div>
           </div>
         </div>
-        <ClientsTable customers={customers} isLoading={isLoading} currentPage={currentPage} pageSize={pageSize} onDeleteClick={handleOpenDeleteModal} />
+        <ClientsTable
+          customers={customers}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onDeleteClick={handleOpenDeleteModal}
+          onRowClick={(client) => setSelectedClient(client)}
+        />
       </div>
       <PopupModal
         isOpen={isDeleteModalOpen}
@@ -135,6 +216,13 @@ const ClientsPage = () => {
         message="Tem certeza que deseja deletar o(a) cliente "
         itemName={nomeClienteToDelete}
       />
+      <SideDrawer
+        isOpen={selectedClient !== null}
+        onClose={() => setSelectedClient(null)}
+        title="Detalhes do Cliente"
+      >
+        {selectedClient && <ClientDetailsView client={selectedClient} />}
+      </SideDrawer>
       {error && (
         <ErrorPopup
           message={error}

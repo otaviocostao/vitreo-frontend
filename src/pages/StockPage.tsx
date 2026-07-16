@@ -14,9 +14,97 @@ import { NavLink } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
+import SideDrawer from '../components/ui/SideDrawer';
 
+const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
+  if (value === undefined || value === null || value === '') return null;
+  return (
+    <div className={`bg-gray-50/60 p-3 rounded-lg border border-gray-100/60 ${className}`}>
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
+      <div className="mt-1 text-sm font-medium text-gray-800 break-words">{value}</div>
+    </div>
+  );
+};
+
+const ProductDetailsView: React.FC<{ product: ProductResponse }> = ({ product }) => {
+  const formatarMoeda = (val: number): string => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+  };
+
+  const getProductTypeLabel = (type: string): string => {
+    if (type === 'frame') return 'Armação';
+    if (type === 'lens') return 'Lente';
+    return type;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-blue-50/50 p-4 rounded-xl border border-blue-100/50">
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
+          <p className="text-xs text-blue-600 font-semibold mt-0.5">{getProductTypeLabel(product.productType)}</p>
+        </div>
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold shadow-sm ${
+          product.isActive 
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-gray-100 text-gray-800 border border-gray-200'
+        }`}>
+          {product.isActive ? 'Ativo' : 'Inativo'}
+        </span>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Informações Gerais</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="Referência" value={product.reference || '-'} />
+          <InfoField label="Código de Barras" value={product.barcode || '-'} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Valores e Estoque</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="Preço de Custo" value={formatarMoeda(product.cost)} />
+          <InfoField label="Margem de Lucro %" value={product.profitMargin !== null ? `${product.profitMargin}%` : '-'} />
+          <InfoField label="Preço de Venda" value={formatarMoeda(product.salePrice)} />
+          <InfoField label="Quantidade em Estoque" value={product.stockQuantity} />
+        </div>
+      </div>
+
+      {(product.productType === 'frame' || product.productType === 'lens') && (
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Especificações Técnicas</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {product.productType === 'frame' ? (
+              <>
+                <InfoField label="Cor" value={product.color || '-'} />
+                <InfoField label="Material" value={product.material || '-'} />
+                <InfoField label="Tamanho" value={product.size || '-'} />
+              </>
+            ) : (
+              <>
+                <InfoField label="Material da Lente" value={product.lensMaterial || '-'} />
+                <InfoField label="Tratamento" value={product.treatment || '-'} />
+                <InfoField label="Tipo de Lente" value={product.lensType || '-'} />
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Marca e Fornecedor</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoField label="Marca" value={product.brand?.name || '-'} />
+          <InfoField label="Fornecedor" value={product.supplier?.corporateName || '-'} className="col-span-2" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const StockPage = () => {
+  const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [pageInfo, setPageInfo] = useState<Page<ProductResponse> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,6 +222,7 @@ const StockPage = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           onDeleteClick={handleOpenDeleteModal}
+          onRowClick={(product) => setSelectedProduct(product)}
         />
       </div>
       <PopupModal
@@ -144,6 +233,13 @@ const StockPage = () => {
         message="Tem certeza que deseja deletar o produto "
         itemName={productNameToDelete}
       />
+      <SideDrawer
+        isOpen={selectedProduct !== null}
+        onClose={() => setSelectedProduct(null)}
+        title="Detalhes do Produto"
+      >
+        {selectedProduct && <ProductDetailsView product={selectedProduct} />}
+      </SideDrawer>
       {error && (
         <ErrorPopup
           message={error}

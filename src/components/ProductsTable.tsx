@@ -9,15 +9,12 @@ interface ProductsTableProps {
   currentPage: number;
   pageSize: number;
   onDeleteClick: (productId: string, productName: string) => void;
+  onRowClick: (product: ProductResponse) => void;
 }
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, currentPage, pageSize, onDeleteClick }) => {
+const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, currentPage, pageSize, onDeleteClick, onRowClick }) => {
   const tableHeaders = ['#', 'Descrição', 'Marca', 'Quantidade', 'Custo', 'Margem %', 'Valor', ''];
   const navigate = useNavigate();
-
-  const handleRowClick = (productId: string) => {
-    navigate(`/produtos/${productId}`);
-  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
@@ -59,7 +56,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, curr
                   <tr
                     key={prod.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => handleRowClick(prod.id)}
+                    onClick={() => onRowClick(prod)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rowNumber}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{prod.name}</td>
@@ -74,7 +71,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, curr
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown
-                        onEdit={() => handleRowClick(prod.id)}
+                        onEdit={() => navigate(`/produtos/${prod.id}`)}
                         onDelete={() => onDeleteClick(prod.id, prod.name)}
                       />
                     </td>

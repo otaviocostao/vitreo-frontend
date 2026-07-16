@@ -1,5 +1,5 @@
 import Select from 'react-select';
-import type { ActionMeta, SingleValue } from 'react-select';
+import type { SingleValue } from 'react-select';
 import Button from './ui/Button';
 
 interface SearchableSelectWithButtonProps {
