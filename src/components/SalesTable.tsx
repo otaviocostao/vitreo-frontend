@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import StatusBadge from './ui/StatusBadge';
 import type { OrderResponse } from '../types/order';
 import LoadingSpinner from './LoadingSpinner';
+import ActionDropdown from './ui/ActionDropdown';
 
 
 interface SalesTableProps {
@@ -10,7 +11,7 @@ interface SalesTableProps {
 }
 
 const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
-  const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status'];
+  const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status', ''];
   const navigate = useNavigate();
 
   const handleRowClick = (orderId: string) => {
@@ -104,6 +105,9 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                 <StatusBadge status={order.status} />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <ActionDropdown onEdit={() => handleRowClick(order.id)} />
               </td>
             </tr>
           );

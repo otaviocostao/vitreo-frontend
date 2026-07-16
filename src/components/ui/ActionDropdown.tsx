@@ -3,7 +3,7 @@ import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 interface ActionDropdownProps {
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete }) => {
@@ -42,7 +42,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete }) => 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
-    onDelete();
+    onDelete?.();
   };
 
   return (
@@ -65,13 +65,15 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete }) => 
               <Pencil className="w-3.5 h-3.5 text-gray-600" />
               <span>Editar</span>
             </button>
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors duration-150 cursor-pointer text-left font-medium"
-            >
-              <Trash2 className="w-3.5 h-3.5 text-gray-600" />
-              <span>Deletar</span>
-            </button>
+            {onDelete && (
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors duration-150 cursor-pointer text-left font-medium"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-gray-600" />
+                <span>Deletar</span>
+              </button>
+            )}
           </div>
         </div>
       )}
