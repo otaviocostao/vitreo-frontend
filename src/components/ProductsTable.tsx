@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { ProductResponse } from '../types/product';
 import LoadingSpinner from './LoadingSpinner';
-import Button from './ui/Button';
-import { Trash2 } from 'lucide-react';
+import ActionDropdown from './ui/ActionDropdown';
 
 interface ProductsTableProps {
   products: ProductResponse[];
@@ -73,16 +72,11 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products, isLoading, curr
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prod.salePrice)}
                     </td>
-                    <td>
-                      <Button
-                        variant="smallDelete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteClick(prod.id, prod.name);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <ActionDropdown
+                        onEdit={() => handleRowClick(prod.id)}
+                        onDelete={() => onDeleteClick(prod.id, prod.name)}
+                      />
                     </td>
                   </tr>
                 );

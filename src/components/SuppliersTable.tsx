@@ -2,8 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { SupplierResponse } from '../types/supplier';
 import LoadingSpinner from './LoadingSpinner';
-import Button from './ui/Button';
-import { Trash2 } from 'lucide-react';
+import ActionDropdown from './ui/ActionDropdown';
 import { formatCNPJ } from '../lib/utils';
 
 interface SuppliersTableProps {
@@ -71,16 +70,11 @@ const SuppliersTable: React.FC<SuppliersTableProps> = ({ suppliers = [], isLoadi
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.neighborhood}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.city}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{supplier.state}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <Button
-                        variant="smallDelete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteClick(supplier.id, supplier.tradeName);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <ActionDropdown
+                        onEdit={() => handleRowClick(supplier.id)}
+                        onDelete={() => onDeleteClick(supplier.id, supplier.tradeName)}
+                      />
                     </td>
                   </tr>
                 )

@@ -2,8 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { CustomerResponse } from '../types/customer';
 import LoadingSpinner from './LoadingSpinner';
-import Button from './ui/Button';
-import { Trash2 } from 'lucide-react';
+import ActionDropdown from './ui/ActionDropdown';
 
 
 
@@ -86,18 +85,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ customers, isLoading, curre
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.neighborhood || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.city || ''}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{customer.state || ''}</td>
-                    <td>
-                      <Button
-                        variant="smallDelete"
-                        onClick={
-                          (e) => {
-                            e.stopPropagation();
-                            onDeleteClick(customer.id, nomeCompleto);
-                          }
-                        }
-                      >
-                        <Trash2 className="w-4 h-4 " />
-                      </Button>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <ActionDropdown
+                        onEdit={() => handleRowClick(customer.id)}
+                        onDelete={() => onDeleteClick(customer.id, nomeCompleto)}
+                      />
                     </td>
                   </tr>
                 )
