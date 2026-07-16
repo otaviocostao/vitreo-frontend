@@ -8,6 +8,7 @@ import { createCliente } from '../services/clienteService';
 import type { CustomerPayload, CustomerResponse } from '../types/customer';
 import ErrorPopup from './ErrorPopup';
 import { formatCPF } from '../lib/utils';
+import { formatZipCode, formatPhone } from '../helpers/formatters';
 
 
 interface AddClientModalProps {
@@ -30,7 +31,14 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const processedValue = name === 'cpf' ? formatCPF(value) : value;
+    let processedValue = value;
+    if (name === 'cpf') {
+      processedValue = formatCPF(value);
+    } else if (name === 'cep') {
+      processedValue = formatZipCode(value);
+    } else if (name === 'telefone' || name === 'telefoneSecundario') {
+      processedValue = formatPhone(value);
+    }
     setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
@@ -54,6 +62,8 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
     const cleanedCpf = formData.cpf.replace(/[^\d]/g, '');
     const cleanedRg = formData.rg.replace(/[^\d]/g, '');
     const cleanedTelefone = formData.telefone.replace(/[^\d]/g, '');
+    const cleanedTelefoneSecundario = formData.telefoneSecundario.replace(/[^\d]/g, '');
+    const cleanedCep = formData.cep.replace(/[^\d]/g, '');
 
     const customerPayload: CustomerPayload = {
       firstName: formData.nome,
@@ -65,14 +75,14 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
       naturality: formData.naturalidade || undefined,
       email: formData.email || undefined,
       phone: cleanedTelefone || undefined,
-      secondaryPhone: formData.telefoneSecundario || undefined,
+      secondaryPhone: cleanedTelefoneSecundario || undefined,
       street: formData.logradouro || '',
       number: formData.numero || '',
       neighborhood: formData.bairro || '',
       complement: formData.complemento || '',
       city: formData.cidade || '',
       state: formData.estado || '',
-      zipCode: formData.cep || '',
+      zipCode: cleanedCep || '',
       observations: formData.observacoes || undefined
     };
 

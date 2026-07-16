@@ -16,7 +16,7 @@ import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
 import SideDrawer from '../components/ui/SideDrawer';
 import { formatCNPJ } from '../lib/utils';
-import { formatPhone } from '../helpers/formatters';
+import { formatPhone, formatZipCode } from '../helpers/formatters';
 
 const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
   if (value === undefined || value === null || value === '') return null;
@@ -72,7 +72,7 @@ const SupplierDetailsView: React.FC<{ supplier: SupplierResponse }> = ({ supplie
       <div className="space-y-3">
         <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Endereço</h4>
         <div className="grid grid-cols-2 gap-3">
-          <InfoField label="CEP" value={supplier.zipCode || '-'} />
+          <InfoField label="CEP" value={formatZipCode(supplier.zipCode) || '-'} />
           <InfoField label="Estado" value={supplier.state || '-'} />
           <InfoField label="Cidade" value={supplier.city || '-'} />
           <InfoField label="Bairro" value={supplier.neighborhood || '-'} />

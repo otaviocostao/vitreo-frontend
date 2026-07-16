@@ -10,6 +10,7 @@ import { createCliente, getClienteById, updateCliente } from '../services/client
 import { useNavigate, useParams } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 import { formatCPF } from '../lib/utils';
+import { formatZipCode, formatPhone } from '../helpers/formatters';
 
 const initialFormData = {
   nome: '', sobrenome: '', cpf: '', rg: '', genero: '', dataNascimento: '', naturalidade: '',
@@ -32,7 +33,14 @@ const RegisterClientPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const processedValue = name === 'cpf' ? formatCPF(value) : value;
+    let processedValue = value;
+    if (name === 'cpf') {
+      processedValue = formatCPF(value);
+    } else if (name === 'cep') {
+      processedValue = formatZipCode(value);
+    } else if (name === 'telefone' || name === 'telefoneSecundario') {
+      processedValue = formatPhone(value);
+    }
     setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
@@ -51,8 +59,8 @@ const RegisterClientPage = () => {
             dataNascimento: clientData.birthDate || '',
             genero: clientData.gender || '',
             naturalidade: clientData.naturality || '',
-            telefone: clientData.phone || '',
-            telefoneSecundario: clientData.secondaryPhone || '',
+            telefone: formatPhone(clientData.phone || ''),
+            telefoneSecundario: formatPhone(clientData.secondaryPhone || ''),
             email: clientData.email || '',
             observacoes: clientData.observations || '',
             logradouro: clientData.street || '',
@@ -61,7 +69,7 @@ const RegisterClientPage = () => {
             complemento: clientData.complement || '',
             cidade: clientData.city || '',
             estado: clientData.state || '',
-            cep: clientData.zipCode || '',
+            cep: formatZipCode(clientData.zipCode || ''),
           };
           setFormData(flattenedData);
           setInitialLoadedData(flattenedData);
@@ -82,6 +90,8 @@ const RegisterClientPage = () => {
     const cleanedCpf = formData.cpf.replace(/[^\d]/g, '');
     const cleanedRg = formData.rg.replace(/[^\d]/g, '');
     const cleanedTelefone = formData.telefone.replace(/[^\d]/g, '');
+    const cleanedTelefoneSecundario = formData.telefoneSecundario.replace(/[^\d]/g, '');
+    const cleanedCep = formData.cep.replace(/[^\d]/g, '');
 
     const customerPayload: CustomerPayload = {
       firstName: formData.nome,
@@ -93,14 +103,14 @@ const RegisterClientPage = () => {
       naturality: formData.naturalidade || undefined,
       email: formData.email || undefined,
       phone: cleanedTelefone || undefined,
-      secondaryPhone: formData.telefoneSecundario || undefined,
+      secondaryPhone: cleanedTelefoneSecundario || undefined,
       street: formData.logradouro || '',
       number: formData.numero || '',
       neighborhood: formData.bairro || '',
       complement: formData.complemento || '',
       city: formData.cidade || '',
       state: formData.estado || '',
-      zipCode: formData.cep || '',
+      zipCode: cleanedCep || '',
       observations: formData.observacoes || undefined
     };
 

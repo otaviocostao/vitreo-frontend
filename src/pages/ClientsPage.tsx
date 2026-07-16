@@ -16,7 +16,7 @@ import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
 import SideDrawer from '../components/ui/SideDrawer';
 import { formatCPF } from '../lib/utils';
-import { formatDate, formatPhone } from '../helpers/formatters';
+import { formatDate, formatPhone, formatZipCode } from '../helpers/formatters';
 
 const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
   if (value === undefined || value === null || value === '') return null;
@@ -75,7 +75,7 @@ const ClientDetailsView: React.FC<{ client: CustomerResponse }> = ({ client }) =
       <div className="space-y-3">
         <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Endereço</h4>
         <div className="grid grid-cols-2 gap-3">
-          <InfoField label="CEP" value={client.zipCode || '-'} />
+          <InfoField label="CEP" value={formatZipCode(client.zipCode) || '-'} />
           <InfoField label="Estado" value={client.state || '-'} />
           <InfoField label="Cidade" value={client.city || '-'} />
           <InfoField label="Bairro" value={client.neighborhood || '-'} />

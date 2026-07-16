@@ -11,6 +11,7 @@ import { associateMarca, createFornecedor, dissociateMarca, getFornecedorById, u
 import type { BrandResponse } from '../types/marca';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatCNPJ } from '../lib/utils';
+import { formatZipCode, formatPhone } from '../helpers/formatters';
 
 interface SupplierFormData {
   corporateName: string;
@@ -61,7 +62,7 @@ const RegisterSupplierPage = () => {
             tradeName: supplierData.tradeName,
             cnpj: formatCNPJ(supplierData.cnpj),
             stateRegistration: supplierData.stateRegistration,
-            cellPhone: supplierData.cellPhone,
+            cellPhone: formatPhone(supplierData.cellPhone),
             email: supplierData.email,
             street: supplierData.street || '',
             number: supplierData.number || '',
@@ -69,7 +70,7 @@ const RegisterSupplierPage = () => {
             complement: supplierData.complement || '',
             city: supplierData.city || '',
             state: supplierData.state || '',
-            zipCode: supplierData.zipCode,
+            zipCode: formatZipCode(supplierData.zipCode),
             brands: supplierData.brands || [],
           };
 
@@ -90,7 +91,14 @@ const RegisterSupplierPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const processedValue = name === 'cnpj' ? formatCNPJ(value) : value;
+    let processedValue = value;
+    if (name === 'cnpj') {
+      processedValue = formatCNPJ(value);
+    } else if (name === 'zipCode') {
+      processedValue = formatZipCode(value);
+    } else if (name === 'cellPhone') {
+      processedValue = formatPhone(value);
+    }
     setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
@@ -104,6 +112,8 @@ const RegisterSupplierPage = () => {
     setError(null);
 
     const cleanedCnpj = formData.cnpj.replace(/[^a-zA-Z0-9]/g, '');
+    const cleanedCellPhone = formData.cellPhone ? formData.cellPhone.replace(/\D/g, '') : undefined;
+    const cleanedZipCode = formData.zipCode ? formData.zipCode.replace(/\D/g, '') : undefined;
 
 
     const supplierPayload: SupplierPayload = {
@@ -111,7 +121,7 @@ const RegisterSupplierPage = () => {
       tradeName: formData.tradeName,
       cnpj: cleanedCnpj,
       stateRegistration: formData.stateRegistration,
-      cellPhone: formData.cellPhone,
+      cellPhone: cleanedCellPhone,
       email: formData.email,
       street: formData.street,
       number: formData.number,
@@ -119,7 +129,7 @@ const RegisterSupplierPage = () => {
       complement: formData.complement,
       city: formData.city,
       state: formData.state,
-      zipCode: formData.zipCode,
+      zipCode: cleanedZipCode,
     };
 
     try {
