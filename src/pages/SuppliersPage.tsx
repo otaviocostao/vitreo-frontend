@@ -41,10 +41,10 @@ const SupplierDetailsView: React.FC<{ supplier: SupplierResponse }> = ({ supplie
             <p className="text-xs text-blue-600 font-semibold mt-0.5">{supplier.isActive !== false ? 'Fornecedor ativo' : 'Fornecedor inativo'}</p>
           </div>
         </div>
-        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold shadow-sm ${
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
           supplier.isActive !== false
-            ? 'bg-green-100 text-green-800 border border-green-200' 
-            : 'bg-gray-100 text-gray-800 border border-gray-200'
+            ? 'bg-green-100 text-green-700' 
+            : 'bg-red-100 text-red-700'
         }`}>
           {supplier.isActive !== false ? 'Ativo' : 'Inativo'}
         </span>
