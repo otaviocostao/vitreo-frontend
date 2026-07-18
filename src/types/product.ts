@@ -53,4 +53,9 @@ export interface SupplierOption {
 export interface BrandOption {
   id: string;
   name: string;
+  supplierId?: string | null;
+  supplier?: {
+    id: string;
+    corporateName: string;
+  } | null;
 }

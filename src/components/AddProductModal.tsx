@@ -67,6 +67,17 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
     }));
   };
 
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const brandId = e.target.value;
+    const selectedBrand = marcas.find(m => m.id === brandId);
+    
+    setFormData(prev => ({
+      ...prev,
+      brandId,
+      supplierId: selectedBrand?.supplier?.id || selectedBrand?.supplierId || '',
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -105,8 +116,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
   };
 
   const productTypeOptions = [{ value: 'frame', label: 'Armação' }, { value: 'lens', label: 'Lente' }];
-  const supplierOptions = fornecedores.map(f => ({ value: f.id, label: f.corporateName }));
   const brandOptions = marcas.map(m => ({ value: m.id, label: m.name }));
+  const selectedSupplierName = fornecedores.find(f => f.id === formData.supplierId)?.corporateName || '';
 
   return (
     <div onClick={onClose} className="fixed inset-0 p-4 bg-black/60 flex justify-center items-center z-50 backdrop-blur-sm">
@@ -120,8 +131,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
             <SelectField label="Tipo do Produto" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} disabled />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectField label="Fornecedor *" name="supplierId" value={formData.supplierId} onChange={handleChange} options={supplierOptions} required />
-              <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleChange} options={brandOptions} />
+              <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." required />
+              <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} />
             </div>
             <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator" required />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

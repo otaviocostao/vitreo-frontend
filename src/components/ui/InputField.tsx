@@ -13,6 +13,11 @@ const InputField: React.FC<InputFieldProps> = ({ label, id, className, error, ..
     ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
     : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500';
 
+  const readOnlyOrDisabled = rest.readOnly || rest.disabled;
+  const bgClasses = readOnlyOrDisabled
+    ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-not-allowed'
+    : 'bg-white text-gray-800';
+
   return (
 
     <div className={className}>
@@ -23,11 +28,12 @@ const InputField: React.FC<InputFieldProps> = ({ label, id, className, error, ..
         id={id}
 
         className={`
-          block w-full px-3 py-2 bg-white border rounded-sm 
+          block w-full px-3 py-2 border rounded-sm 
           placeholder-gray-400 sm:text-sm
           focus:outline-none focus:ring-0.5 
           transition duration-150 ease-in-out
           ${errorClasses}
+          ${bgClasses}
         `}
         {...rest}
       />

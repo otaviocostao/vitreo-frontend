@@ -6,10 +6,18 @@ export const getMarcasOptions = async (): Promise<BrandOption[]> => {
   try {
     const response = await api.get<BrandResponse[]>('/brands');
     const data = Array.isArray(response.data) ? response.data : [];
-    return data.map((brand) => ({
-      id: brand.id,
-      name: brand.name,
-    }));
+    return data.map((brand: any) => {
+      const supplierObj = brand.supplier || null;
+      return {
+        id: brand.id,
+        name: brand.name,
+        supplierId: brand.supplierId || brand.supplier_id || (supplierObj ? supplierObj.id : null),
+        supplier: supplierObj ? {
+          id: supplierObj.id,
+          corporateName: supplierObj.corporateName || supplierObj.corporate_name,
+        } : null,
+      };
+    });
   } catch (error) {
     console.error("Erro ao buscar marcas:", error);
     throw error;

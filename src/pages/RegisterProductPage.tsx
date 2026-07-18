@@ -86,6 +86,17 @@ const RegisterProductPage = () => {
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const brandId = e.target.value;
+    const selectedBrand = marcas.find(m => m.id === brandId);
+    
+    setFormData(prev => ({
+      ...prev,
+      brandId,
+      supplierId: selectedBrand?.supplier?.id || selectedBrand?.supplierId || '',
+    }));
+  };
+
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newType = e.target.value as ProductType;
     setFormData(prev => ({
@@ -142,8 +153,8 @@ const RegisterProductPage = () => {
   };
 
   const productTypeOptions = [{ value: 'frame', label: 'Armação' }, { value: 'lens', label: 'Lente' }];
-  const supplierOptions = fornecedores.map(f => ({ value: f.id, label: f.corporateName }));
   const brandOptions = marcas.map(m => ({ value: m.id, label: m.name }));
+  const selectedSupplierName = fornecedores.find(f => f.id === formData.supplierId)?.corporateName || '';
 
   if (isFetching) {
     return <LoadingSpinner text='Carregando dados do fornecedor...' />
@@ -186,8 +197,8 @@ const RegisterProductPage = () => {
 
                   <FormSection title="Informações Gerais">
                     <SelectField label="Tipo do Produto *" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
-                    <SelectField label="Fornecedor *" name="supplierId" value={formData.supplierId} onChange={handleChange} options={supplierOptions} className="md:col-span-4" required />
-                    <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleChange} options={brandOptions} className="md:col-span-4" />
+                    <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." className="md:col-span-4" required />
+                    <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} className="md:col-span-4" />
 
                     <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
                     <InputField label="Referência" name="reference" value={formData.reference} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
