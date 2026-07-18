@@ -10,7 +10,8 @@ import { createCliente, getClienteById, updateCliente } from '../services/client
 import { useNavigate, useParams } from 'react-router-dom';
 import ErrorPopup from '../components/ErrorPopup';
 import { formatCPF } from '../lib/utils';
-import { formatZipCode, formatPhone } from '../helpers/formatters';
+import { formatZipCode, formatPhone, formatRg } from '../helpers/formatters';
+import { validateCPF, validatePhone, validateCEP } from '../lib/validators';
 
 const initialFormData = {
   nome: '', sobrenome: '', cpf: '', rg: '', genero: '', dataNascimento: '', naturalidade: '',
@@ -27,6 +28,7 @@ const RegisterClientPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState(initialFormData);
   const [initialLoadedData, setInitialLoadedData] = useState(initialFormData);
@@ -40,8 +42,18 @@ const RegisterClientPage = () => {
       processedValue = formatZipCode(value);
     } else if (name === 'telefone' || name === 'telefoneSecundario') {
       processedValue = formatPhone(value);
+    } else if (name === 'rg') {
+      processedValue = formatRg(value);
     }
+
     setFormData(prev => ({ ...prev, [name]: processedValue }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   useEffect(() => {
@@ -55,9 +67,9 @@ const RegisterClientPage = () => {
             nome: clientData.firstName || '',
             sobrenome: clientData.lastName || '',
             cpf: formatCPF(clientData.cpf || ''),
-            rg: clientData.rg || '',
+            rg: formatRg(clientData.rg || ''),
             dataNascimento: clientData.birthDate || '',
-            genero: clientData.gender || '',
+            genero: clientData.gender || '',    
             naturalidade: clientData.naturality || '',
             telefone: formatPhone(clientData.phone || ''),
             telefoneSecundario: formatPhone(clientData.secondaryPhone || ''),
@@ -86,6 +98,28 @@ const RegisterClientPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // Validation
+    const validationErrors: Record<string, string> = {};
+    if (!validateCPF(formData.cpf)) {
+      validationErrors.cpf = 'CPF inválido';
+    }
+    if (!validateCEP(formData.cep)) {
+      validationErrors.cep = 'CEP inválido';
+    }
+    if (!validatePhone(formData.telefone)) {
+      validationErrors.telefone = 'Telefone inválido';
+    }
+    if (!validatePhone(formData.telefoneSecundario)) {
+      validationErrors.telefoneSecundario = 'Telefone secundário inválido';
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setError('Por favor, corrija os erros no formulário antes de continuar.');
+      setIsLoading(false);
+      return;
+    }
 
     const cleanedCpf = formData.cpf.replace(/[^\d]/g, '');
     const cleanedRg = formData.rg.replace(/[^\d]/g, '');
@@ -154,7 +188,7 @@ const RegisterClientPage = () => {
                   <FormSection title="Dados pessoais">
                     <InputField label="Nome *" id="nome" name="nome" value={formData.nome} onChange={handleChange} placeholder="Digite o nome do cliente..." className="md:col-span-4" required />
                     <InputField label="Sobrenome *" id="sobrenome" name="sobrenome" value={formData.sobrenome} onChange={handleChange} placeholder="Digite o sobrenome do cliente..." className="md:col-span-4" required />
-                    <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" />
+                    <InputField label="CPF" id="cpf" name="cpf" value={formData.cpf} onChange={handleChange} placeholder="000.000.000-00" className="md:col-span-2" error={errors.cpf} />
                     <InputField label="RG" id="rg" name="rg" value={formData.rg} onChange={handleChange} placeholder="00.000.000-00" className="md:col-span-2" />
                     <SelectField label="Gênero" id="genero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-2" />
                     <InputField label="Nascimento" id="nascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} placeholder="dd/mm/aaaa" className="md:col-span-2" />
@@ -167,13 +201,13 @@ const RegisterClientPage = () => {
                     <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-3" />
                     <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-3" />
                     <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
-                    <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
+                    <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" error={errors.cep} />
                     <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
                   </FormSection>
 
                   <FormSection title="Informações de contato">
-                    <InputField label="Telefone" id="telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
-                    <InputField label="Tel. secundário" id="telSecundario" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" />
+                    <InputField label="Telefone" id="telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" error={errors.telefone} />
+                    <InputField label="Tel. secundário" id="telSecundario" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} placeholder="(99) 99999-9999" className="md:col-span-4" error={errors.telefoneSecundario} />
                     <InputField label="E-mail (opcional)" id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Ex: joao@email.com" className="md:col-span-4" />
                   </FormSection>
 

@@ -8,7 +8,8 @@ import { createCliente } from '../services/clienteService';
 import type { CustomerPayload, CustomerResponse } from '../types/customer';
 import ErrorPopup from './ErrorPopup';
 import { formatCPF } from '../lib/utils';
-import { formatZipCode, formatPhone } from '../helpers/formatters';
+import { formatZipCode, formatPhone, formatRg } from '../helpers/formatters';
+import { validateCPF, validatePhone, validateCEP } from '../lib/validators';
 
 
 interface AddClientModalProps {
@@ -21,6 +22,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState({
     nome: '', sobrenome: '', cpf: '', rg: '', genero: '', dataNascimento: '', naturalidade: '',
@@ -38,26 +40,55 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
       processedValue = formatZipCode(value);
     } else if (name === 'telefone' || name === 'telefoneSecundario') {
       processedValue = formatPhone(value);
+    } else if (name === 'rg') {
+      processedValue = formatRg(value);
     }
     setFormData(prev => ({ ...prev, [name]: processedValue }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
-
-
 
   useEffect(() => {
     if (isOpen) {
       setFormData(formData);
       setError(null);
+      setErrors({});
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // Validation
+    const validationErrors: Record<string, string> = {};
+    if (!validateCPF(formData.cpf)) {
+      validationErrors.cpf = 'CPF inválido';
+    }
+    if (!validateCEP(formData.cep)) {
+      validationErrors.cep = 'CEP inválido';
+    }
+    if (!validatePhone(formData.telefone)) {
+      validationErrors.telefone = 'Telefone inválido';
+    }
+    if (!validatePhone(formData.telefoneSecundario)) {
+      validationErrors.telefoneSecundario = 'Telefone secundário inválido';
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setError('Por favor, corrija os erros no formulário.');
+      setIsLoading(false);
+      return;
+    }
 
     const cleanedCpf = formData.cpf.replace(/[^\d]/g, '');
     const cleanedRg = formData.rg.replace(/[^\d]/g, '');
@@ -111,7 +142,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
             <FormSection title="Dados pessoais">
               <InputField label="Nome *" name="nome" value={formData.nome} onChange={handleChange} className="md:col-span-12 lg:col-span-6" required />
               <InputField label="Sobrenome *" name="sobrenome" value={formData.sobrenome} onChange={handleChange} className="md:col-span-12 lg:col-span-6" required />
-              <InputField label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} className="md:col-span-6 lg:col-span-3" />
+              <InputField label="CPF" name="cpf" value={formData.cpf} onChange={handleChange} className="md:col-span-6 lg:col-span-3" error={errors.cpf} />
               <InputField label="RG" name="rg" value={formData.rg} onChange={handleChange} className="md:col-span-6 lg:col-span-3" />
               <SelectField label="Gênero" name="genero" value={formData.genero} onChange={handleChange} options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }, { value: 'outro', label: 'Outro' }]} className="md:col-span-4" />
               <InputField label="Nascimento" name="dataNascimento" type="date" value={formData.dataNascimento} onChange={handleChange} className="md:col-span-3" />
@@ -124,13 +155,13 @@ const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSubm
               <InputField label="Bairro" name="bairro" value={formData.bairro} onChange={handleChange} className="md:col-span-3" />
               <InputField label="Cidade" name="cidade" value={formData.cidade} onChange={handleChange} className="md:col-span-3" />
               <InputField label="Estado" name="estado" value={formData.estado} onChange={handleChange} className="md:col-span-3" />
-              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" />
+              <InputField label="CEP" name="cep" value={formData.cep} onChange={handleChange} className="md:col-span-3" error={errors.cep} />
               <InputField label="Complemento" name="complemento" value={formData.complemento} onChange={handleChange} className="md:col-span-9" />
             </FormSection>
 
             <FormSection title="Informações de contato">
-              <InputField label="Telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} className="md:col-span-4" />
-              <InputField label="Tel. secundário" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} className="md:col-span-4" />
+              <InputField label="Telefone" name="telefone" type="tel" value={formData.telefone} onChange={handleChange} className="md:col-span-4" error={errors.telefone} />
+              <InputField label="Tel. secundário" name="telefoneSecundario" type="tel" value={formData.telefoneSecundario} onChange={handleChange} className="md:col-span-4" error={errors.telefoneSecundario} />
               <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-4" />
             </FormSection>
 

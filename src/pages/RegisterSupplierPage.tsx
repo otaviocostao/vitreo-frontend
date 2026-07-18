@@ -12,6 +12,7 @@ import type { BrandResponse } from '../types/marca';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatCNPJ } from '../lib/utils';
 import { formatZipCode, formatPhone } from '../helpers/formatters';
+import { validateCNPJ, validatePhone, validateCEP } from '../lib/validators';
 
 interface SupplierFormData {
   corporateName: string;
@@ -46,6 +47,7 @@ const RegisterSupplierPage = () => {
   const [initialBrands, setInitialBrands] = useState<BrandResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFetching, setIsFetching] = useState(isEditMode);
 
   useEffect(() => {
@@ -100,6 +102,13 @@ const RegisterSupplierPage = () => {
       processedValue = formatPhone(value);
     }
     setFormData(prev => ({ ...prev, [name]: processedValue }));
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleBrandChange = (updatedBrands: BrandResponse[]) => {
@@ -110,6 +119,25 @@ const RegisterSupplierPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // Validation
+    const validationErrors: Record<string, string> = {};
+    if (!validateCNPJ(formData.cnpj)) {
+      validationErrors.cnpj = 'CNPJ inválido';
+    }
+    if (!validateCEP(formData.zipCode)) {
+      validationErrors.zipCode = 'CEP inválido';
+    }
+    if (!validatePhone(formData.cellPhone)) {
+      validationErrors.cellPhone = 'Telefone inválido';
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setError('Por favor, corrija os erros no formulário antes de continuar.');
+      setIsLoading(false);
+      return;
+    }
 
     const cleanedCnpj = formData.cnpj.replace(/[^a-zA-Z0-9]/g, '');
     const cleanedCellPhone = formData.cellPhone ? formData.cellPhone.replace(/\D/g, '') : undefined;
@@ -239,7 +267,7 @@ const RegisterSupplierPage = () => {
           <FormSection title="Dados da Empresa">
             <InputField label="Razão Social *" name="corporateName" value={formData.corporateName} onChange={handleChange} className="md:col-span-7" required />
             <InputField label="Nome Fantasia" name="tradeName" value={formData.tradeName} onChange={handleChange} className="md:col-span-5" />
-            <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-3" placeholder="00.000.000/0000-00" required />
+            <InputField label="CNPJ *" name="cnpj" value={formData.cnpj} onChange={handleChange} className="md:col-span-3" placeholder="00.000.000/0000-00" error={errors.cnpj} required />
             <InputField label="Inscrição Estadual" name="stateRegistration" value={formData.stateRegistration} onChange={handleChange} className="md:col-span-3" />
           </FormSection>
 
@@ -249,12 +277,12 @@ const RegisterSupplierPage = () => {
             <InputField label="Bairro" name="neighborhood" value={formData.neighborhood} onChange={handleChange} className="md:col-span-4" />
             <InputField label="Cidade" name="city" value={formData.city} onChange={handleChange} className="md:col-span-4" />
             <InputField label="Estado" name="state" value={formData.state} onChange={handleChange} className="md:col-span-4" />
-            <InputField label="CEP" name="zipCode" value={formData.zipCode} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" />
+            <InputField label="CEP" name="zipCode" value={formData.zipCode} onChange={handleChange} className="md:col-span-3" placeholder="00000-000" error={errors.zipCode} />
             <InputField label="Complemento" name="complement" value={formData.complement} onChange={handleChange} className="md:col-span-9" />
           </FormSection>
 
           <FormSection title="Informações de Contato">
-            <InputField label="Telefone" name="cellPhone" type="tel" value={formData.cellPhone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" />
+            <InputField label="Telefone" name="cellPhone" type="tel" value={formData.cellPhone} onChange={handleChange} className="md:col-span-6" placeholder="(99) 9999-9999" error={errors.cellPhone} />
             <InputField label="E-mail" name="email" type="email" value={formData.email} onChange={handleChange} className="md:col-span-6" placeholder="contato@empresa.com" />
           </FormSection>
 

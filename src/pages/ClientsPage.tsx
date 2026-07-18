@@ -16,7 +16,7 @@ import PopupModal from '../components/ui/ModalPopup';
 import { useDebounce } from '../hooks/useDebounce';
 import SideDrawer from '../components/ui/SideDrawer';
 import { formatCPF } from '../lib/utils';
-import { formatDate, formatPhone, formatZipCode } from '../helpers/formatters';
+import { formatDate, formatPhone, formatRg, formatZipCode } from '../helpers/formatters';
 
 const InfoField: React.FC<{ label: string; value?: string | number | React.ReactNode; className?: string }> = ({ label, value, className = '' }) => {
   if (value === undefined || value === null || value === '') return null;
@@ -56,7 +56,7 @@ const ClientDetailsView: React.FC<{ client: CustomerResponse }> = ({ client }) =
         <h4 className="text-xs font-bold uppercase tracking-wider text-blue-600 border-b border-blue-100 pb-1.5">Dados Pessoais</h4>
         <div className="grid grid-cols-2 gap-3">
           <InfoField label="CPF" value={client.cpf ? formatCPF(client.cpf) : '-'} />
-          <InfoField label="RG" value={client.rg || '-'} />
+          <InfoField label="RG" value={client.rg ? formatRg(client.rg) : '-'} />
           <InfoField label="Gênero" value={client.gender ? (client.gender.charAt(0).toUpperCase() + client.gender.slice(1)) : '-'} />
           <InfoField label="Nascimento" value={formatDate(client.birthDate) || '-'} />
           <InfoField label="Naturalidade" value={client.naturality || '-'} className="col-span-2" />

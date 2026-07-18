@@ -46,3 +46,26 @@ export function formatZipCode(zipCode: string | null | undefined): string {
 
   return `${truncated.slice(0, 5)}-${truncated.slice(5)}`;
 }
+
+export function formatRg(rg: string | null | undefined): string {
+  if (!rg) {
+    return ''
+  };
+
+  const digits = rg.replace(/\D/g, '');
+  const truncated = digits.slice(0, 10);
+
+  if (truncated.length <= 2) {
+    return truncated.length > 0 ? `${truncated}` : '';
+  }
+
+  if (truncated.length <= 5) {
+    return `${truncated.slice(0, 2)}.${truncated.slice(2)}`;
+  }
+
+  if (truncated.length <= 8) {
+    return `${truncated.slice(0, 2)}.${truncated.slice(2, 5)}.${truncated.slice(5)}`;
+  }
+
+  return `${truncated.slice(0, 2)}.${truncated.slice(2, 5)}.${truncated.slice(5, 8)}-${truncated.slice(8)}`;
+}
