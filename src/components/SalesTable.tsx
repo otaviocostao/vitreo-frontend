@@ -104,7 +104,10 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick }
                 <StatusBadge status={order.status} />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <ActionDropdown onEdit={() => navigate(`/vendas/${order.id}`)} />
+                <ActionDropdown 
+                  onEdit={() => navigate(`/vendas/${order.id}`)} 
+                  onPrint={() => navigate(`/vendas/${order.id}/detalhes`, { state: { hideSuccessBanner: true, triggerPrint: true } })}
+                />
               </td>
             </tr>
           );

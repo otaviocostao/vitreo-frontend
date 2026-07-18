@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { Printer, Edit, CheckCircle, Scissors } from 'lucide-react';
 
 import { getOrderById } from '../services/orderService';
@@ -13,6 +13,7 @@ import DetailItem from '../components/DetailItem';
 import StatusBadge from '../components/ui/StatusBadge';
 import ClientReceipt from '../components/ClientReceipt';
 import SelectField from '../components/ui/SelectField';
+import { formatPhone } from '../helpers/formatters';
 
 const formatarMoeda = (valor: number | null | undefined): string => {
   if (valor === null || valor === undefined) return 'R$ 0,00';
@@ -21,6 +22,11 @@ const formatarMoeda = (valor: number | null | undefined): string => {
 
 const SaleConfirmationPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const state = location.state as { hideSuccessBanner?: boolean; triggerPrint?: boolean } | null;
+  const hideSuccessBanner = state?.hideSuccessBanner || false;
+  const triggerPrint = state?.triggerPrint || false;
+
   const [order, setOrder] = useState<OrderResponse | null>(null);
   const [selectedPrintOption, setSelectedPrintOption] = useState<'AMBAS' | 'OTICA' | 'CLIENTE'>('AMBAS');
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +56,15 @@ const SaleConfirmationPage = () => {
 
     fetchOrder();
   }, [id]);
+
+  useEffect(() => {
+    if (!isLoading && order && triggerPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, order, triggerPrint]);
 
   const valorTotalPago = useMemo(() => {
     if (!order || !order.payments) {
@@ -92,6 +107,7 @@ const SaleConfirmationPage = () => {
   }
 
   const nomeCliente = `${order.customer.firstName} ${order.customer.lastName}`;
+  const address = `${order.customer.street}, ${order.customer.number}, ${order.customer.neighborhood}`;
 
   return (
     <div className="flex flex-col w-full">
@@ -100,23 +116,25 @@ const SaleConfirmationPage = () => {
       </div>
 
       <div className="px-4 py-6">
-        <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6 print:hidden" role="alert">
-          <div className="flex items-center">
-            <CheckCircle className="h-6 w-6 mr-3" />
-            <div>
-              {!isEditMode ? (
-                <>
-                  <p className="font-bold">Venda Finalizada com Sucesso!</p>
-                </>
-              ) : (
-                <>
-                  <p className="font-bold">Venda Atualizada com Sucesso!</p>
-                </>
-              )}
-              <p className="text-sm">Os detalhes do pedido estão listados abaixo.</p>
+        {!hideSuccessBanner && (
+          <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6 print:hidden" role="alert">
+            <div className="flex items-center">
+              <CheckCircle className="h-6 w-6 mr-3" />
+              <div>
+                {!isEditMode ? (
+                  <>
+                    <p className="font-bold">Venda Finalizada com Sucesso!</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-bold">Venda Atualizada com Sucesso!</p>
+                  </>
+                )}
+                <p className="text-sm">Os detalhes do pedido estão listados abaixo.</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="flex justify-end items-center gap-4 mb-6 print:hidden">
           <SelectField label="" className="w-38" value={selectedPrintOption} options={printOptions} defaultValue="AMBAS" onChange={handlePrintOptionChange} />
@@ -148,8 +166,12 @@ const SaleConfirmationPage = () => {
                 </div>
               </DetailSection>
 
-              <DetailSection title="Cliente">
-                <DetailItem label="Nome:" value={nomeCliente} />
+              <DetailSection title="Dados do cliente">
+                <div className="flex gap-4">
+                  <DetailItem label="Nome:" value={nomeCliente} />
+                  <DetailItem label="Telefone:" value={formatPhone(order.customer.phone)} />
+                </div>
+                <DetailItem label="Endereço:" value={address} />
               </DetailSection>
 
               <div className='flex flex-col lg:flex-row divide-x divide-gray-200 print:flex-row print:divide-x print:divide-gray-200'>
@@ -210,12 +232,17 @@ const SaleConfirmationPage = () => {
                     {order.items.map(item => (
                       <div key={item.id} className="flex gap-1 items-center py-1">
                         {item.product.productType === 'frame' ? (
-                          <p className="text-sm text-gray-700">Armação:</p>
-
+                          <div className='flex flex-col gap-4'>
+                            <DetailItem label="Referência da Armação:" value={item.product.name} />
+                            {item.product.brand && (
+                              <DetailItem label="Marca da Armação:" value={item.product.brand.name} />
+                            )}
+                          </div>
                         ) : (
-                          <p className="text-sm text-gray-700">Lentes:</p>
+                          <DetailItem label="Lentes:" value={item.product.name} />
                         )}
-                        <p className="text-sm text-gray-700 font-semibold">{item.product.name}</p>
+
+
                       </div>
                     ))}
                   </DetailSection>

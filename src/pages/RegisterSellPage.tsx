@@ -522,10 +522,9 @@ function RegisterSellPage() {
             <div className="flex justify-between items-center print:hidden">
                 <HeaderTitlePage page_name={isEditMode ? 'Editar Venda' : 'Nova Venda'} />
 
-                {/* O botão só aparece no modo de edição */}
                 {isEditMode && (
                     <div className="p-4">
-                        <Link to={`/vendas/${pedidoId}/detalhes`}>
+                        <Link to={`/vendas/${pedidoId}/detalhes`} state={{ hideSuccessBanner: true }}>
                             <Button variant="secondary" >
                                 <FileText size={16} />
                                 <span>Ver Comprovante</span>

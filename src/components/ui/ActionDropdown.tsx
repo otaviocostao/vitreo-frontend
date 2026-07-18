@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreHorizontal, Pencil, Trash2, Ban, Check } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Ban, Check, Printer } from 'lucide-react';
 
 interface ActionDropdownProps {
   onEdit: () => void;
   onDelete?: () => void;
   isActive?: boolean;
   onDeactivate?: () => void;
+  onPrint?: () => void;
 }
 
-const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete, isActive = true, onDeactivate }) => {
+const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete, isActive = true, onDeactivate, onPrint }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   
@@ -80,6 +81,12 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete, isAct
     onDeactivate?.();
   };
 
+  const handlePrint = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(false);
+    onPrint?.();
+  };
+
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
@@ -110,6 +117,15 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({ onEdit, onDelete, isAct
               <Pencil className="w-3.5 h-3.5 text-gray-600" />
               <span>Editar</span>
             </button>
+            {onPrint && (
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors duration-150 cursor-pointer text-left font-medium"
+              >
+                <Printer className="w-3.5 h-3.5 text-gray-600" />
+                <span>Imprimir</span>
+              </button>
+            )}
             {onDeactivate && (
               <button
                 onClick={handleDeactivate}
