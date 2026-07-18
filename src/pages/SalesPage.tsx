@@ -12,6 +12,7 @@ import type { OrderResponse } from '../types/order';
 import { getOrders } from '../services/orderService';
 import ErrorPopup from '../components/ErrorPopup';
 import { useDebounce } from '../hooks/useDebounce';
+import SaleDetailsDrawer from '../components/SaleDetailsDrawer';
 
 const SalesPage = () => {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
@@ -22,6 +23,8 @@ const SalesPage = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  
+  const [selectedOrder, setSelectedOrder] = useState<OrderResponse | null>(null);
   
 
   const fetchOrders = useCallback(async () => {
@@ -107,8 +110,16 @@ const SalesPage = () => {
                     </div>
                 </div>
             </div>
-        <SalesTable orders={paginatedOrders} isLoading={isLoading} />
+        <SalesTable 
+          orders={paginatedOrders} 
+          isLoading={isLoading} 
+          onRowClick={(order) => setSelectedOrder(order)} 
+        />
         </div>
+        <SaleDetailsDrawer 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)} 
+        />
         {error && (
         <ErrorPopup
           message={error}

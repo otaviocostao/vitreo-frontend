@@ -8,15 +8,12 @@ import ActionDropdown from './ui/ActionDropdown';
 interface SalesTableProps {
   orders: OrderResponse[];
   isLoading: boolean;
+  onRowClick: (order: OrderResponse) => void;
 }
 
-const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
+const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick }) => {
   const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status', ''];
   const navigate = useNavigate();
-
-  const handleRowClick = (orderId: string) => {
-    navigate(`/vendas/${orderId}`);
-  };
 
   const formatarData = (data: string | null | undefined): string => {
     if (!data) {
@@ -92,7 +89,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
             <tr 
               key={order.id} 
               className="hover:bg-gray-50 cursor-pointer"
-              onClick={() => handleRowClick(order.id)}
+              onClick={() => onRowClick(order)}
             >
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{order.serviceOrder || '-'}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{nomeCliente}</td>
@@ -107,7 +104,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading }) => {
                 <StatusBadge status={order.status} />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <ActionDropdown onEdit={() => handleRowClick(order.id)} />
+                <ActionDropdown onEdit={() => navigate(`/vendas/${order.id}`)} />
               </td>
             </tr>
           );
