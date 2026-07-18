@@ -3,12 +3,12 @@ import {
   Building2,
   LayoutDashboard,
   LogOut,
-  PlusCircle,
   Settings,
   ShoppingCart,
   Users,
 } from "lucide-react";
 import SidebarButton from "./ui/SidebarButton";
+import SidebarAccordion from "./ui/SidebarAccordion";
 import { handleLogout } from "../services/authService";
 
 const Sidebar = () => {
@@ -27,32 +27,41 @@ const Sidebar = () => {
           icon={<LayoutDashboard size={iconSize} />}
           end
         />
-        <SidebarButton
-          page_name="Nova Venda"
-          to="/vendas/nova"
-          icon={<PlusCircle size={iconSize} />}
-          end
-        />
-        <SidebarButton
+
+        <SidebarAccordion
           page_name="Vendas"
-          to="/vendas"
           icon={<ShoppingCart size={iconSize} />}
-          end
+          items={[
+            { page_name: "Nova venda", to: "/vendas/nova" },
+            { page_name: "Listagem de vendas", to: "/vendas" },
+          ]}
         />
-        <SidebarButton
+
+        <SidebarAccordion
           page_name="Clientes"
-          to="/clientes"
           icon={<Users size={iconSize} />}
+          items={[
+            { page_name: "Novo cliente", to: "/clientes/novo" },
+            { page_name: "Listagem de clientes", to: "/clientes" },
+          ]}
         />
-        <SidebarButton
+
+        <SidebarAccordion
           page_name="Estoque"
-          to="/produtos"
           icon={<Boxes size={iconSize} />}
+          items={[
+            { page_name: "Novo produto", to: "/produtos/novo" },
+            { page_name: "Listagem de produtos", to: "/produtos" },
+          ]}
         />
-        <SidebarButton
+
+        <SidebarAccordion
           page_name="Fornecedores"
-          to="/fornecedores"
           icon={<Building2 size={iconSize} />}
+          items={[
+            { page_name: "Novo fornecedor", to: "/fornecedores/novo" },
+            { page_name: "Listagem de fornecedores", to: "/fornecedores" },
+          ]}
         />
       </div>
       <div className="w-full flex flex-col justify-items-center box-border p-2 gap-3">
