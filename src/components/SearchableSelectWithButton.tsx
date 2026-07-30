@@ -10,7 +10,7 @@ interface SearchableSelectWithButtonProps {
   onButtonClick: () => void; 
   buttonIcon: React.ReactNode;
   placeholder?: string;
-  onInputChange?: (inputValue: string) => void;
+  onInputChange?: (inputValue: string, actionMeta: { action: string }) => void;
   isLoading?: boolean;
 }
 
@@ -37,7 +37,11 @@ const SearchableSelectWithButton: React.FC<SearchableSelectWithButtonProps> = ({
             placeholder={placeholder}
             isLoading={isLoading}
             isClearable
-            onInputChange={onInputChange}
+            onInputChange={(inputValue, actionMeta) => {
+              if (onInputChange) {
+                onInputChange(inputValue, actionMeta);
+              }
+            }}
             filterOption={() => true}
             noOptionsMessage={() => "Nenhum resultado encontrado"}
             className='border-gray-300 text-sm text-gray-700 placeholder-gray-400 '

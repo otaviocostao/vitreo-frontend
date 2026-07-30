@@ -32,17 +32,18 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
   );
 
   useEffect(() => {
-    if (searchTerm.length < 2) {
+    if (searchTerm.trim().length < 2) {
       setOptions([]);
       return;
     }
     const debounceTimeout = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await getProducts({ query: searchTerm, type: type, size: 20 });
+        const data = await getProducts({ query: searchTerm.trim(), type: type, size: 20 });
         const productOptions = data.content.map(p => ({
           value: p.id,
-          label: `${p.name}`,
+          label: `${p.name}${p.brand?.name ? ` (${p.brand.name})` : ''}${p.reference ? ` - Ref: ${p.reference}` : ''}`,
+          product: p,
         }));
         setOptions(productOptions);
       } catch (error) {
@@ -50,12 +51,27 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
       } finally {
         setIsLoading(false);
       }
-    }, 500);
+    }, 300);
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm, type]);
 
+  const handleInputChange = (inputValue: string, actionMeta: { action: string }) => {
+    if (actionMeta.action === 'input-change') {
+      setSearchTerm(inputValue);
+    }
+  };
+
   const handleSelectChange = async (selectedOption: any) => {
     if (selectedOption && selectedOption.value) {
+      if (selectedOption.product) {
+        onProductSelect(selectedOption.product);
+        return;
+      }
+      const existingInProps = produtosDisponiveis.find(p => p.id === selectedOption.value);
+      if (existingInProps) {
+        onProductSelect(existingInProps);
+        return;
+      }
       setIsLoading(true);
       try {
         const fullProductData = await getProductById(selectedOption.value);
@@ -97,7 +113,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
           options={options}
           value={null}
           onChange={handleSelectChange}
-          onInputChange={(inputValue) => setSearchTerm(inputValue)}
+          onInputChange={handleInputChange}
           onButtonClick={onOpenProductModal}
           buttonIcon={<PlusCircle size={20} />}
           placeholder={`Buscar por ${label.toLowerCase()}...`}

@@ -23,7 +23,12 @@ export const createProduct = async (data: ProductPayload) => {
 
 export const getProducts = async (filters: ProductFilters = {}): Promise<Page<ProductResponse>> => {
   try {
-    const response = await api.get<ProductResponse[]>('/products');
+    const response = await api.get<any>('/products', { params: filters });
+    
+    if (response.data && Array.isArray(response.data.content)) {
+      return response.data;
+    }
+
     let content = Array.isArray(response.data) ? response.data : [];
 
     if (filters.query) {
@@ -31,12 +36,14 @@ export const getProducts = async (filters: ProductFilters = {}): Promise<Page<Pr
       content = content.filter(
         (p) =>
           p.name?.toLowerCase().includes(q) ||
-          p.reference?.toLowerCase().includes(q)
+          p.reference?.toLowerCase().includes(q) ||
+          p.barcode?.toLowerCase().includes(q) ||
+          p.brand?.name?.toLowerCase().includes(q)
       );
     }
 
     if (filters.type) {
-      content = content.filter((p) => p.productType === filters.type);
+      content = content.filter((p) => p.productType?.toLowerCase() === filters.type?.toLowerCase());
     }
 
     const sortField = filters.sort?.split(',')[0] || 'name';
