@@ -22,6 +22,7 @@ import StatusSelector from "../components/StatusSelector";
 import Button from "../components/ui/Button";
 import { FileText } from "lucide-react";
 import api from "../services/api";
+import PaymentWarningModal from "../components/PaymentWarningModal";
 
 interface OrderFormData {
     customer: CustomerResponse | null;
@@ -38,6 +39,11 @@ interface OrderFormData {
     status: OrderStatus;
     observations: string;
 }
+
+type PendingProductChange =
+    | { type: 'frame'; produto: ProductResponse | null; oldTotal: number; newTotal: number }
+    | { type: 'lens'; produto: ProductResponse | null; oldTotal: number; newTotal: number }
+    | { type: 'value'; campo: 'lentes' | 'armacao'; valor: number; oldTotal: number; newTotal: number };
 
 const initialFormData = {
     customer: null,
@@ -70,6 +76,7 @@ function RegisterSellPage() {
     const [initialLoadedData, setInitialLoadedData] = useState<OrderFormData>(initialFormData);
     const [selectedFrame, setSelectedFrame] = useState<ProductResponse | null>(null);
     const [selectedLens, setSelectedLens] = useState<ProductResponse | null>(null);
+    const [pendingChange, setPendingChange] = useState<PendingProductChange | null>(null);
 
     const mapPrescriptionToPortuguese = (prescription: any): ReceituarioPayload => {
         if (!prescription) return {} as ReceituarioPayload;
@@ -186,13 +193,38 @@ function RegisterSellPage() {
         setFormData(prev => ({ ...prev, payments: novosPagamentos }));
     };
 
-    const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
+    const calculateTotalOrderValue = (lensVal: number, frameVal: number, discountVal: number) => {
+        return Math.max(0, (Number(lensVal) || 0) + (Number(frameVal) || 0) - (Number(discountVal) || 0));
+    };
+
+    const applyValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number, clearPayments = false) => {
         const nomeDaPropriedade = campo === 'desconto'
             ? 'discount'
             : (campo === 'lentes' ? 'lensValue' : 'frameValue');
 
-        setFormData(prev => ({ ...prev, [nomeDaPropriedade]: valor }));
+        setFormData(prev => ({
+            ...prev,
+            [nomeDaPropriedade]: valor,
+            ...(clearPayments ? { payments: [] } : {})
+        }));
     };
+
+    const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
+        if (campo === 'lentes' || campo === 'armacao') {
+            const nextLens = campo === 'lentes' ? valor : formData.lensValue;
+            const nextFrame = campo === 'armacao' ? valor : formData.frameValue;
+            const oldTotal = calculateTotalOrderValue(formData.lensValue, formData.frameValue, formData.discount);
+            const newTotal = calculateTotalOrderValue(nextLens, nextFrame, formData.discount);
+
+            if (formData.payments.length > 0 && Math.abs(oldTotal - newTotal) > 0.001) {
+                setPendingChange({ type: 'value', campo, valor, oldTotal, newTotal });
+                return;
+            }
+        }
+
+        applyValorChange(campo, valor);
+    };
+
 
     const handleClienteSelect = (cliente: CustomerResponse | null) => {
         setFormData(prev => ({ ...prev, customer: cliente }));
@@ -373,7 +405,7 @@ function RegisterSellPage() {
     }, []);
 
 
-    const handleArmacaoSelect = (produto: ProductResponse | null) => {
+    const applyArmacaoSelect = (produto: ProductResponse | null, clearPayments = false) => {
         setSelectedFrame(produto);
         setFormData(prev => {
             const outrosItens = selectedFrame
@@ -388,13 +420,26 @@ function RegisterSellPage() {
             return {
                 ...prev,
                 items: novosItens,
-                frameValue: produto ? produto.salePrice : 0
-            }
+                frameValue: produto ? produto.salePrice : 0,
+                ...(clearPayments ? { payments: [] } : {})
+            };
         });
     };
 
+    const handleArmacaoSelect = (produto: ProductResponse | null) => {
+        const newFrameValue = produto ? produto.salePrice : 0;
+        const oldTotal = calculateTotalOrderValue(formData.lensValue, formData.frameValue, formData.discount);
+        const newTotal = calculateTotalOrderValue(formData.lensValue, newFrameValue, formData.discount);
 
-    const handleLenteSelect = (produto: ProductResponse | null) => {
+        if (formData.payments.length > 0 && Math.abs(oldTotal - newTotal) > 0.001) {
+            setPendingChange({ type: 'frame', produto, oldTotal, newTotal });
+            return;
+        }
+
+        applyArmacaoSelect(produto);
+    };
+
+    const applyLenteSelect = (produto: ProductResponse | null, clearPayments = false) => {
         setSelectedLens(produto);
         setFormData(prev => {
             const outrosItens = selectedLens
@@ -409,9 +454,41 @@ function RegisterSellPage() {
             return {
                 ...prev,
                 items: novosItens,
-                lensValue: produto ? produto.salePrice : 0
-            }
+                lensValue: produto ? produto.salePrice : 0,
+                ...(clearPayments ? { payments: [] } : {})
+            };
         });
+    };
+
+    const handleLenteSelect = (produto: ProductResponse | null) => {
+        const newLensValue = produto ? produto.salePrice : 0;
+        const oldTotal = calculateTotalOrderValue(formData.lensValue, formData.frameValue, formData.discount);
+        const newTotal = calculateTotalOrderValue(newLensValue, formData.frameValue, formData.discount);
+
+        if (formData.payments.length > 0 && Math.abs(oldTotal - newTotal) > 0.001) {
+            setPendingChange({ type: 'lens', produto, oldTotal, newTotal });
+            return;
+        }
+
+        applyLenteSelect(produto);
+    };
+
+    const handleConfirmChange = () => {
+        if (!pendingChange) return;
+
+        if (pendingChange.type === 'frame') {
+            applyArmacaoSelect(pendingChange.produto, true);
+        } else if (pendingChange.type === 'lens') {
+            applyLenteSelect(pendingChange.produto, true);
+        } else if (pendingChange.type === 'value') {
+            applyValorChange(pendingChange.campo, pendingChange.valor, true);
+        }
+
+        setPendingChange(null);
+    };
+
+    const handleCancelChange = () => {
+        setPendingChange(null);
     };
 
     const handleStatusChange = (newStatus: OrderStatus) => {
@@ -615,6 +692,14 @@ function RegisterSellPage() {
             {productModalType !== null && (
                 <AddProductModal isOpen={!!productModalType} onClose={handleCloseProductModal} onSubmit={handleProductSubmit} initialType={productModalType} />
             )}
+            <PaymentWarningModal
+                isOpen={pendingChange !== null}
+                onConfirm={handleConfirmChange}
+                onCancel={handleCancelChange}
+                oldTotal={pendingChange?.oldTotal ?? 0}
+                newTotal={pendingChange?.newTotal ?? 0}
+                payments={formData.payments}
+            />
         </div>
 
     )
