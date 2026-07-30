@@ -32,12 +32,20 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
   const [newPaymentAmount, setNewPaymentAmount] = useState<number | ''>('');
   const [newPaymentInstallments, setNewPaymentInstallments] = useState(1);
 
+  const subtotal = useMemo(() => {
+    return (Number(valorLentes) || 0) + (Number(valorArmacao) || 0);
+  }, [valorLentes, valorArmacao]);
+
+  const valorDesconto = useMemo(() => {
+    return Number(desconto) || 0;
+  }, [desconto]);
+
   const totalOrderValue = useMemo(() => {
-    return (Number(valorLentes) || 0) + (Number(valorArmacao) || 0) - (Number(desconto) || 0);
-  }, [valorLentes, valorArmacao, desconto]);
+    return Math.max(0, subtotal - valorDesconto);
+  }, [subtotal, valorDesconto]);
 
   const totalPaid = useMemo(() => {
-    return payments.reduce((sum, payment) => sum + payment.amountPaid, 0);
+    return payments.reduce((sum, payment) => sum + Number(payment.amountPaid), 0);
   }, [payments]);
 
   const remainingBalance = useMemo(() => {
@@ -209,7 +217,17 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
         </div>
         
         <div className="mt-6 pt-4 border-t border-gray-200 space-y-2">
-          <div className="flex justify-between text-md font-medium text-gray-700">
+          <div className="flex justify-between text-sm font-medium text-gray-600">
+            <span>Subtotal:</span>
+            <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subtotal)}</span>
+          </div>
+          {valorDesconto > 0 && (
+            <div className="flex justify-between text-sm font-medium text-amber-600">
+              <span>Desconto:</span>
+              <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorDesconto)}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-md font-bold text-gray-800 pt-1 border-t border-gray-100">
             <span>Total do Pedido:</span>
             <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOrderValue)}</span>
           </div>

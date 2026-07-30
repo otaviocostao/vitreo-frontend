@@ -43,7 +43,7 @@ interface OrderFormData {
 type PendingProductChange =
     | { type: 'frame'; produto: ProductResponse | null; oldTotal: number; newTotal: number }
     | { type: 'lens'; produto: ProductResponse | null; oldTotal: number; newTotal: number }
-    | { type: 'value'; campo: 'lentes' | 'armacao'; valor: number; oldTotal: number; newTotal: number };
+    | { type: 'value'; campo: 'lentes' | 'armacao' | 'desconto'; valor: number; oldTotal: number; newTotal: number };
 
 const initialFormData = {
     customer: null,
@@ -152,9 +152,9 @@ function RegisterSellPage() {
                     orderDate: formatarParaInputDate(orderData.orderDate) ?? '',
                     deliveryForecastDate: orderData.deliveryForecastDate ? orderData.deliveryForecastDate.substring(0, 10) : '',
                     deliveryDate: orderData.deliveryDate ? orderData.deliveryDate.substring(0, 10) : '',
-                    lensValue: orderData.lensValue ?? 0,
-                    frameValue: orderData.frameValue ?? 0,
-                    discount: orderData.discount ?? 0,
+                    lensValue: Number(orderData.lensValue) || 0,
+                    frameValue: Number(orderData.frameValue) || 0,
+                    discount: Number(orderData.discount) || 0,
                     status: orderData.status ?? 'PENDING',
                     observations: orderData.observations || '',
                 };
@@ -210,16 +210,15 @@ function RegisterSellPage() {
     };
 
     const handleValorChange = (campo: 'lentes' | 'armacao' | 'desconto', valor: number) => {
-        if (campo === 'lentes' || campo === 'armacao') {
-            const nextLens = campo === 'lentes' ? valor : formData.lensValue;
-            const nextFrame = campo === 'armacao' ? valor : formData.frameValue;
-            const oldTotal = calculateTotalOrderValue(formData.lensValue, formData.frameValue, formData.discount);
-            const newTotal = calculateTotalOrderValue(nextLens, nextFrame, formData.discount);
+        const nextLens = campo === 'lentes' ? valor : formData.lensValue;
+        const nextFrame = campo === 'armacao' ? valor : formData.frameValue;
+        const nextDiscount = campo === 'desconto' ? valor : formData.discount;
+        const oldTotal = calculateTotalOrderValue(formData.lensValue, formData.frameValue, formData.discount);
+        const newTotal = calculateTotalOrderValue(nextLens, nextFrame, nextDiscount);
 
-            if (formData.payments.length > 0 && Math.abs(oldTotal - newTotal) > 0.001) {
-                setPendingChange({ type: 'value', campo, valor, oldTotal, newTotal });
-                return;
-            }
+        if (formData.payments.length > 0 && Math.abs(oldTotal - newTotal) > 0.001) {
+            setPendingChange({ type: 'value', campo, valor, oldTotal, newTotal });
+            return;
         }
 
         applyValorChange(campo, valor);
