@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import type { VendaRecente } from '../../types/dashboard';
 interface SaleListItemProps {
   sale: VendaRecente;
+  ocultarValores?: boolean;
 }
 
-const SaleListItem: React.FC<SaleListItemProps> = ({ sale }) => {
+const SaleListItem: React.FC<SaleListItemProps> = ({ sale, ocultarValores = false }) => {
   const navigate = useNavigate();
 
   const getInitials = (name: string) => {
@@ -14,13 +15,13 @@ const SaleListItem: React.FC<SaleListItemProps> = ({ sale }) => {
 
   const formatarLocalDateTimeParaData = (dataHoraString: string | null | undefined): string => {
     if (!dataHoraString) {
-        return '';
+      return '';
     }
-    
+
     const dateObj = new Date(dataHoraString);
 
     if (isNaN(dateObj.getTime())) {
-        return 'Data inválida';
+      return 'Data inválida';
     }
 
     return new Intl.DateTimeFormat('pt-BR').format(dateObj);
@@ -42,7 +43,9 @@ const SaleListItem: React.FC<SaleListItemProps> = ({ sale }) => {
         </div>
       </div>
       <p className="font-medium text-white text-sm">
-        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.valorFinal)}
+        {ocultarValores
+          ? 'R$ ••••'
+          : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.valorFinal)}
       </p>
     </li>
   );

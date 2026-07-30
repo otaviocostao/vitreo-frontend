@@ -3,7 +3,8 @@ import type { GraficoReceita } from '../../types/dashboard';
 import { useMemo } from 'react';
 
 interface SalesChartProps {
-  data: GraficoReceita[],
+  data: GraficoReceita[];
+  ocultarValores?: boolean;
 }
 
 const formatarDataEixo = (dateString: string): string => {
@@ -21,7 +22,7 @@ const formatarMoeda = (valor: number): string => {
   }).format(valor);
 };
 
-const TotalRevenueChart: React.FC<SalesChartProps> = ({ data }) => {
+const TotalRevenueChart: React.FC<SalesChartProps> = ({ data, ocultarValores = false }) => {
 
   if (!data || data.length === 0) {
     return (
@@ -39,31 +40,38 @@ const TotalRevenueChart: React.FC<SalesChartProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} tickFormatter={(value: number) => `${value / 1000}k`} />
-        <Tooltip
-          formatter={(value: number) => [formatarMoeda(value), 'Receita']}
-          contentStyle={{
-            backgroundColor: '#1f2937',
-            borderColor: '#374151',
-            color: '#ffffff',
-            borderRadius: '0.5rem', 
-          }}
-          cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '3 3' }}
-          labelStyle={{ fontWeight: 'bold' }}
-        />
-        <defs>
-          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#bfdbfe" strokeWidth={2} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div className={`w-full h-full relative transition-all duration-300 ${ocultarValores ? 'filter blur-sm select-none pointer-events-none' : ''}`}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+          <YAxis 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fontSize: 12 }} 
+            tickFormatter={(value: number) => ocultarValores ? '••••' : `${value / 1000}k`} 
+          />
+          <Tooltip
+            formatter={(value: number) => [ocultarValores ? '••••••' : formatarMoeda(value), 'Receita']}
+            contentStyle={{
+              backgroundColor: '#1f2937',
+              borderColor: '#374151',
+              color: '#ffffff',
+              borderRadius: '0.5rem', 
+            }}
+            cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '3 3' }}
+            labelStyle={{ fontWeight: 'bold' }}
+          />
+          <defs>
+            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#bfdbfe" strokeWidth={2} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

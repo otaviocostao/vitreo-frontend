@@ -6,9 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface LastSalesCardProps {
   sales: VendaRecente[];
+  ocultarValores?: boolean;
 }
 
-const LastSalesCard: React.FC<LastSalesCardProps> = ({ sales }) => {
+const LastSalesCard: React.FC<LastSalesCardProps> = ({ sales, ocultarValores = false }) => {
 
   const navigate = useNavigate();
   
@@ -20,7 +21,7 @@ const LastSalesCard: React.FC<LastSalesCardProps> = ({ sales }) => {
 
       <ul className="flex-1 space-y-1 -mx-3">
         {sales.map((sale) => (
-          <SaleListItem key={sale.id} sale={sale} />
+          <SaleListItem key={sale.id} sale={sale} ocultarValores={ocultarValores} />
         ))}
       </ul>
       

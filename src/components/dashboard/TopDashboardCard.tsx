@@ -7,9 +7,17 @@ interface TopCardProps {
   trend: 'up' | 'down';
   percentage: number;
   contextText: string;
+  ocultarValores?: boolean;
 }
 
-const TopDashboardCard: React.FC<TopCardProps> = ({ title, value, trend, percentage, contextText }) => {
+const TopDashboardCard: React.FC<TopCardProps> = ({
+  title,
+  value,
+  trend,
+  percentage,
+  contextText,
+  ocultarValores = false,
+}) => {
   const isPositive = trend === 'up';
 
   const trendClasses = {
@@ -18,18 +26,23 @@ const TopDashboardCard: React.FC<TopCardProps> = ({ title, value, trend, percent
     icon: isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />,
   };
 
+  const displayValue = ocultarValores ? '•••••' : value;
+  const displayContext = ocultarValores
+    ? contextText.replace(/\([^)]+\)/, '(••••)')
+    : contextText;
+
   return (
     <div className="w-full flex flex-col gap-1 bg-white border border-gray-200 rounded-lg p-4 ">
       <p className="text-sm text-gray-600">{title}</p>
       <div className="flex items-baseline gap-2">
-        <h1 className="text-3xl font-bold text-gray-900">{value}</h1>
-        
+        <h1 className="text-3xl font-bold text-gray-900">{displayValue}</h1>
+
         <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${trendClasses.bg} ${trendClasses.text}`}>
           {trendClasses.icon}
           <span>{percentage}%</span>
         </div>
       </div>
-      <p className="text-xs text-gray-500 mt-1">{contextText}</p>
+      <p className="text-xs text-gray-500 mt-1">{displayContext}</p>
     </div>
   );
 };
