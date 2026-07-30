@@ -10,7 +10,9 @@ interface SearchableSelectWithButtonProps {
   onButtonClick: () => void; 
   buttonIcon: React.ReactNode;
   placeholder?: string;
+  inputValue?: string;
   onInputChange?: (inputValue: string, actionMeta: { action: string }) => void;
+  onMenuClose?: () => void;
   isLoading?: boolean;
 }
 
@@ -23,7 +25,9 @@ const SearchableSelectWithButton: React.FC<SearchableSelectWithButtonProps> = ({
   buttonIcon,
   placeholder = "Selecione ou digite para buscar...",
   isLoading = false,
-  onInputChange
+  inputValue,
+  onInputChange,
+  onMenuClose
 }) => {
   return (
     <div className='flex-1'>
@@ -37,11 +41,13 @@ const SearchableSelectWithButton: React.FC<SearchableSelectWithButtonProps> = ({
             placeholder={placeholder}
             isLoading={isLoading}
             isClearable
+            inputValue={inputValue}
             onInputChange={(inputValue, actionMeta) => {
               if (onInputChange) {
                 onInputChange(inputValue, actionMeta);
               }
             }}
+            onMenuClose={onMenuClose}
             filterOption={() => true}
             noOptionsMessage={() => "Nenhum resultado encontrado"}
             className='border-gray-300 text-sm text-gray-700 placeholder-gray-400 '

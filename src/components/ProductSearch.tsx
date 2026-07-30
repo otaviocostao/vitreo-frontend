@@ -55,13 +55,21 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm, type]);
 
+  const resetSearch = () => {
+    setSearchTerm('');
+    setOptions([]);
+  };
+
   const handleInputChange = (inputValue: string, actionMeta: { action: string }) => {
     if (actionMeta.action === 'input-change') {
       setSearchTerm(inputValue);
+    } else if (actionMeta.action === 'menu-close' || actionMeta.action === 'input-blur') {
+      resetSearch();
     }
   };
 
   const handleSelectChange = async (selectedOption: any) => {
+    resetSearch();
     if (selectedOption && selectedOption.value) {
       if (selectedOption.product) {
         onProductSelect(selectedOption.product);
@@ -87,6 +95,16 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     }
   };
 
+  const handleButtonClick = () => {
+    resetSearch();
+    onOpenProductModal();
+  };
+
+  const handleUnselect = () => {
+    resetSearch();
+    onProductSelect(null);
+  };
+
   return (
     <div className='flex flex-1 items-end justify-start '>
       {selectedProduct ? (
@@ -100,7 +118,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => onProductSelect(null)}
+              onClick={handleUnselect}
               className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
             >
               <X />
@@ -112,9 +130,11 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
           label={label}
           options={options}
           value={null}
+          inputValue={searchTerm}
           onChange={handleSelectChange}
           onInputChange={handleInputChange}
-          onButtonClick={onOpenProductModal}
+          onMenuClose={resetSearch}
+          onButtonClick={handleButtonClick}
           buttonIcon={<PlusCircle size={20} />}
           placeholder={`Buscar por ${label.toLowerCase()}...`}
           isLoading={isLoading}

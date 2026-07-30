@@ -48,18 +48,36 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm]);
 
+  const resetSearch = () => {
+    setSearchTerm('');
+    setOptions([]);
+  };
+
   const handleInputChange = (inputValue: string, actionMeta: { action: string }) => {
     if (actionMeta.action === 'input-change') {
       setSearchTerm(inputValue);
+    } else if (actionMeta.action === 'menu-close' || actionMeta.action === 'input-blur') {
+      resetSearch();
     }
   };
 
   const handleSelectChange = async (selectedOption: any) => {
+    resetSearch();
     if (selectedOption) {
       onClienteSelect(selectedOption.fullClient);
     } else {
       onClienteSelect(null);
     }
+  };
+
+  const handleButtonClick = () => {
+    resetSearch();
+    onOpenClientModal();
+  };
+
+  const handleUnselect = () => {
+    resetSearch();
+    onClienteSelect(null);
   };
 
   return (
@@ -78,7 +96,7 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
           {!isEditMode && (
             <button
               type="button"
-              onClick={() => onClienteSelect(null)}
+              onClick={handleUnselect}
               className="text-gray-600 hover:text-red-600 cursor-pointer transition-discrete duration-200 text-xs"
             >
               <X />
@@ -90,9 +108,11 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
           label=""
           options={options}
           value={null}
+          inputValue={searchTerm}
           onChange={handleSelectChange}
           onInputChange={handleInputChange}
-          onButtonClick={onOpenClientModal}
+          onMenuClose={resetSearch}
+          onButtonClick={handleButtonClick}
           buttonIcon={<PlusCircle size={20} />}
           placeholder="Buscar por nome ou CPF..."
           isLoading={isLoading}
