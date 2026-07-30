@@ -48,6 +48,12 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
     return () => clearTimeout(debounceTimeout);
   }, [searchTerm]);
 
+  const handleInputChange = (inputValue: string, actionMeta: { action: string }) => {
+    if (actionMeta.action === 'input-change') {
+      setSearchTerm(inputValue);
+    }
+  };
+
   const handleSelectChange = async (selectedOption: any) => {
     if (selectedOption) {
       onClienteSelect(selectedOption.fullClient);
@@ -85,7 +91,7 @@ const ClienteSearch: React.FC<ClienteSearchProps> = ({
           options={options}
           value={null}
           onChange={handleSelectChange}
-          onInputChange={(inputValue) => setSearchTerm(inputValue)}
+          onInputChange={handleInputChange}
           onButtonClick={onOpenClientModal}
           buttonIcon={<PlusCircle size={20} />}
           placeholder="Buscar por nome ou CPF..."
