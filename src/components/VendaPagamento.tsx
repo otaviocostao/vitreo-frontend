@@ -6,6 +6,7 @@ import SelectField from './ui/SelectField';
 import Button from './ui/Button';
 import PriceInput from './ui/PriceInput';
 import type { PaymentPayload, PaymentMethodType } from '../types/order';
+import { formatCurrency, parseCurrency } from '../helpers/formatters';
 
 interface VendaPagamentoProps {
   valorLentes: number;
@@ -29,7 +30,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
 
 
   const [newPaymentMethod, setNewPaymentMethod] = useState<PaymentMethodType>('CASH');
-  const [newPaymentAmount, setNewPaymentAmount] = useState<number | ''>('');
+  const [newPaymentAmount, setNewPaymentAmount] = useState<string>('');
   const [newPaymentInstallments, setNewPaymentInstallments] = useState(1);
 
   const subtotal = useMemo(() => {
@@ -53,7 +54,7 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
   }, [totalOrderValue, totalPaid]);
 
   const handleAddPayment = () => {
-    const valorASerAdicionado = newPaymentAmount === '' || newPaymentAmount === 0 ? remainingBalance : newPaymentAmount;
+    const valorASerAdicionado = newPaymentAmount === '' ? remainingBalance : parseCurrency(newPaymentAmount);
 
     if (valorASerAdicionado <= 0) {
       onError('Não há saldo restante para adicionar um pagamento.');
@@ -125,29 +126,23 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
           <PriceInput
             label="Valor das lentes:"
             id="lentes_valor"
-            type="number"
-            min={0}
-            value={valorLentes === 0 ? '' : valorLentes}
-            onChange={(e) => onValorChange('lentes', parseFloat(e.target.value) || 0)}
-            placeholder="R$ 0,00"
+            value={formatCurrency(valorLentes)}
+            onChange={(e) => onValorChange('lentes', parseCurrency(e.target.value))}
+            placeholder="0,00"
           />
           <PriceInput
             label="Valor da armação:"
             id="armacao_valor"
-            type="number"
-            min={0}
-            value={valorArmacao === 0 ? '' : valorArmacao}
-            onChange={(e) => onValorChange('armacao', parseFloat(e.target.value) || 0)}
-            placeholder="R$ 0,00"
+            value={formatCurrency(valorArmacao)}
+            onChange={(e) => onValorChange('armacao', parseCurrency(e.target.value))}
+            placeholder="0,00"
           />
           <PriceInput
             label="Desconto:"
             id="desconto"
-            type="number"
-            min={0}
-            value={desconto  === 0 ? '' : desconto}
-            onChange={(e) => onValorChange('desconto', parseFloat(e.target.value) || 0)}
-            placeholder="R$ 0,00"
+            value={formatCurrency(desconto)}
+            onChange={(e) => onValorChange('desconto', parseCurrency(e.target.value))}
+            placeholder="0,00"
           />
         </div>
       </div>
@@ -164,10 +159,9 @@ const VendaPagamento: React.FC<VendaPagamentoProps> = ({
           />
           <InputField 
             label="Valor:" 
-            type="number" 
-            placeholder="R$ 0,00" 
+            placeholder="0,00" 
             value={newPaymentAmount} 
-            onChange={(e) => setNewPaymentAmount(parseFloat(e.target.value))} 
+            onChange={(e) => setNewPaymentAmount(formatCurrency(e.target.value))} 
             id={'amountPaid'} 
             onKeyDown={handleKeyDown}
           />

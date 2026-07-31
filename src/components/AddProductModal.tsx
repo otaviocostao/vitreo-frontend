@@ -8,6 +8,7 @@ import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import ErrorPopup from './ErrorPopup';
+import { formatCurrency, parseCurrency } from '../helpers/formatters';
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -56,6 +57,27 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
+
+    if (name === 'cost' || name === 'salePrice') {
+      const formattedValue = formatCurrency(value);
+      setFormData(prev => {
+        const nextData = { ...prev, [name]: formattedValue };
+        const newCost = name === 'cost' ? formattedValue : prev.cost;
+        const newSalePrice = name === 'salePrice' ? formattedValue : prev.salePrice;
+
+        const costNum = parseCurrency(newCost);
+        const salePriceNum = parseCurrency(newSalePrice);
+
+        let newMargin = prev.profitMargin;
+        if (costNum > 0 && salePriceNum > 0) {
+          const marginVal = ((salePriceNum - costNum) / costNum) * 100;
+          newMargin = marginVal % 1 === 0 ? String(marginVal) : marginVal.toFixed(2);
+        }
+        return { ...nextData, profitMargin: newMargin };
+      });
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
@@ -90,8 +112,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
       name: formData.name,
       reference: formData.reference,
       barcode: formData.barcode,
-      cost: formData.cost ? parseFloat(formData.cost.replace(',', '.')) : 0,
-      salePrice: formData.salePrice ? parseFloat(formData.salePrice.replace(',', '.')) : 0,
+      cost: formData.cost ? parseCurrency(formData.cost) : 0,
+      salePrice: formData.salePrice ? parseCurrency(formData.salePrice) : 0,
       profitMargin: formData.profitMargin ? parseFloat(formData.profitMargin.replace(',', '.')) : 0,
       stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 0,
       isActive: formData.isActive,
@@ -140,8 +162,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
               <InputField label="Código de Barras" name="barcode" value={formData.barcode} onChange={handleChange} placeholder="789..." />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InputField label="Custo (R$)" name="cost" type="number" value={formData.cost} onChange={handleChange} placeholder="0.00" />
-              <InputField label="Valor de venda (R$) *" name="salePrice" type="number" value={formData.salePrice} onChange={handleChange} placeholder="0.00" required />
+              <InputField label="Custo (R$)" name="cost" value={formData.cost} onChange={handleChange} placeholder="0,00" />
+              <InputField label="Valor de venda (R$) *" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="0,00" required />
               <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={formData.stockQuantity} onChange={handleChange} placeholder="0" />
             </div>
 

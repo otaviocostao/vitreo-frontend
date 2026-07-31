@@ -69,3 +69,49 @@ export function formatRg(rg: string | null | undefined): string {
 
   return `${truncated.slice(0, 2)}.${truncated.slice(2, 5)}.${truncated.slice(5, 8)}-${truncated.slice(8)}`;
 }
+
+export function formatCurrency(
+  value: string | number | null | undefined,
+  showSymbol: boolean = false
+): string {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  let numberValue: number;
+
+  if (typeof value === 'number') {
+    if (isNaN(value)) return '';
+    numberValue = value;
+  } else {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    numberValue = Number(digits) / 100;
+  }
+
+  if (showSymbol) {
+    return numberValue.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  }
+
+  return numberValue.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function parseCurrency(value: string | number | null | undefined): number {
+  if (value === null || value === undefined || value === '') {
+    return 0;
+  }
+
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : value;
+  }
+
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return 0;
+  return Number(digits) / 100;
+}

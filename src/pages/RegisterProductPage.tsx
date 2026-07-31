@@ -11,6 +11,7 @@ import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
 import ErrorPopup from '../components/ErrorPopup';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { formatCurrency, parseCurrency } from '../helpers/formatters';
 
 const initialFormData = {
   productType: 'frame' as ProductType,
@@ -55,8 +56,8 @@ const RegisterProductPage = () => {
             name: productData.name,
             reference: productData.reference || '',
             barcode: productData.barcode || '',
-            cost: String(productData.cost || ''),
-            salePrice: String(productData.salePrice || ''),
+            cost: productData.cost ? formatCurrency(productData.cost) : '',
+            salePrice: productData.salePrice ? formatCurrency(productData.salePrice) : '',
             profitMargin: String(productData.profitMargin || ''),
             stockQuantity: String(productData.stockQuantity),
             isActive: productData.isActive,
@@ -83,6 +84,27 @@ const RegisterProductPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
+
+    if (name === 'cost' || name === 'salePrice') {
+      const formattedValue = formatCurrency(value);
+      setFormData(prev => {
+        const nextData = { ...prev, [name]: formattedValue };
+        const newCost = name === 'cost' ? formattedValue : prev.cost;
+        const newSalePrice = name === 'salePrice' ? formattedValue : prev.salePrice;
+
+        const costNum = parseCurrency(newCost);
+        const salePriceNum = parseCurrency(newSalePrice);
+
+        let newMargin = prev.profitMargin;
+        if (costNum > 0 && salePriceNum > 0) {
+          const marginVal = ((salePriceNum - costNum) / costNum) * 100;
+          newMargin = marginVal % 1 === 0 ? String(marginVal) : marginVal.toFixed(2);
+        }
+        return { ...nextData, profitMargin: newMargin };
+      });
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
@@ -120,8 +142,8 @@ const RegisterProductPage = () => {
       name: formData.name,
       reference: formData.reference,
       barcode: formData.barcode,
-      cost: formData.cost ? parseFloat(formData.cost.replace(',', '.')) : 0,
-      salePrice: formData.salePrice ? parseFloat(formData.salePrice.replace(',', '.')) : 0,
+      cost: formData.cost ? parseCurrency(formData.cost) : 0,
+      salePrice: formData.salePrice ? parseCurrency(formData.salePrice) : 0,
       profitMargin: formData.profitMargin ? parseFloat(formData.profitMargin.replace(',', '.')) : 0,
       stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 0,
       isActive: formData.isActive,
@@ -206,11 +228,12 @@ const RegisterProductPage = () => {
                   </FormSection>
 
                   <FormSection title="Valores e Estoque">
-                    <InputField label="Custo (R$)" name="cost" type="number" value={parseFloat(formData.cost) === 0 ? '' : formData.cost} onChange={handleChange} placeholder="0.00" className="md:col-span-2" />
-                    <InputField label="Valor Final (R$) *" name="salePrice" type="number" value={parseFloat(formData.salePrice) === 0 ? '' : formData.salePrice} onChange={handleChange} placeholder="0.00" className="md:col-span-2" required />
+                    <InputField label="Custo (R$)" name="cost" value={formData.cost} onChange={handleChange} placeholder="0,00" className="md:col-span-2" />
+                    <InputField label="Valor Final (R$) *" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="0,00" className="md:col-span-2" required />
                     <InputField label="Margem de Lucro (%)" readOnly name="profitMargin" type="number" value={parseFloat(formData.profitMargin) === 0 ? '' : formData.profitMargin} onChange={handleChange} placeholder="100" className="md:col-span-2" />
                     <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" />
                   </FormSection>
+
 
                   {formData.productType === 'frame' && (
                     <FormSection title="Detalhes da Armação">

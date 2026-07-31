@@ -273,7 +273,7 @@ function RegisterSellPage() {
             return;
         }
 
-        const parseCurrency = (value: string | number | undefined): number | undefined => {
+        const parseNumberOrUndefined = (value: string | number | undefined): number | undefined => {
             if (value === undefined || value === '') return undefined;
             return parseFloat(String(value).replace(',', '.'));
         };
@@ -289,21 +289,21 @@ function RegisterSellPage() {
             const hasPrescriptionData = Object.keys(formData.prescription).length > 0;
             const prescriptionPayload = hasPrescriptionData ? {
                 customerId: formData.customer.id,
-                sphericalOd: parseCurrency(formData.prescription.esfericoOd),
-                cylindricalOd: parseCurrency(formData.prescription.cilindricoOd),
-                axisOd: parseCurrency(formData.prescription.eixoOd),
-                sphericalOe: parseCurrency(formData.prescription.esfericoOe),
-                cylindricalOe: parseCurrency(formData.prescription.cilindricoOe),
-                axisOe: parseCurrency(formData.prescription.eixoOe),
-                addition: parseCurrency(formData.prescription.adicao),
-                dnpOd: parseCurrency(formData.prescription.dnpOd),
-                dnpOe: parseCurrency(formData.prescription.dnpOe),
-                opticalCenterOd: parseCurrency(formData.prescription.centroOpticoOd),
-                opticalCenterOe: parseCurrency(formData.prescription.centroOpticoOe),
-                pupillaryDistance: parseCurrency(formData.prescription.distanciaPupilar),
-                greaterAngle: parseCurrency(formData.prescription.anguloMaior),
-                bridgeFrame: parseCurrency(formData.prescription.ponteAro),
-                verticalAngle: parseCurrency(formData.prescription.anguloVertical),
+                sphericalOd: parseNumberOrUndefined(formData.prescription.esfericoOd),
+                cylindricalOd: parseNumberOrUndefined(formData.prescription.cilindricoOd),
+                axisOd: parseNumberOrUndefined(formData.prescription.eixoOd),
+                sphericalOe: parseNumberOrUndefined(formData.prescription.esfericoOe),
+                cylindricalOe: parseNumberOrUndefined(formData.prescription.cilindricoOe),
+                axisOe: parseNumberOrUndefined(formData.prescription.eixoOe),
+                addition: parseNumberOrUndefined(formData.prescription.adicao),
+                dnpOd: parseNumberOrUndefined(formData.prescription.dnpOd),
+                dnpOe: parseNumberOrUndefined(formData.prescription.dnpOe),
+                opticalCenterOd: parseNumberOrUndefined(formData.prescription.centroOpticoOd),
+                opticalCenterOe: parseNumberOrUndefined(formData.prescription.centroOpticoOe),
+                pupillaryDistance: parseNumberOrUndefined(formData.prescription.distanciaPupilar),
+                greaterAngle: parseNumberOrUndefined(formData.prescription.anguloMaior),
+                bridgeFrame: parseNumberOrUndefined(formData.prescription.ponteAro),
+                verticalAngle: parseNumberOrUndefined(formData.prescription.anguloVertical),
                 doctorName: formData.prescription.nomeMedico,
                 doctorCrm: formData.prescription.crmMedico,
                 prescriptionDate: formData.prescription.dataReceita || undefined,
@@ -336,9 +336,9 @@ function RegisterSellPage() {
                         amountPaid: Number(p.amountPaid),
                         installments: p.installments ? Number(p.installments) : 1,
                     })),
-                    discount: parseCurrency(formData.discount),
-                    lensValue: parseCurrency(formData.lensValue),
-                    frameValue: parseCurrency(formData.frameValue),
+                    discount: parseNumberOrUndefined(formData.discount),
+                    lensValue: parseNumberOrUndefined(formData.lensValue),
+                    frameValue: parseNumberOrUndefined(formData.frameValue),
                     orderDate: formatarDataParaLocalDateTime(formData.orderDate),
                     deliveryForecastDate: formData.deliveryForecastDate || undefined,
                     deliveryDate: formData.deliveryDate || undefined,
@@ -362,9 +362,9 @@ function RegisterSellPage() {
                         amountPaid: Number(p.amountPaid),
                         installments: p.installments ? Number(p.installments) : 1,
                     })),
-                    discount: parseCurrency(formData.discount),
-                    lensValue: parseCurrency(formData.lensValue),
-                    frameValue: parseCurrency(formData.frameValue),
+                    discount: parseNumberOrUndefined(formData.discount),
+                    lensValue: parseNumberOrUndefined(formData.lensValue),
+                    frameValue: parseNumberOrUndefined(formData.frameValue),
                     deliveryForecastDate: formData.deliveryForecastDate || undefined,
                     orderDate: formatarDataParaLocalDateTime(formData.orderDate) || new Date().toISOString(),
                     serviceOrder: formData.serviceOrder ? parseInt(formData.serviceOrder) : undefined,
