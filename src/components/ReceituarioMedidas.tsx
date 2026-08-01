@@ -58,6 +58,36 @@ const ReceituarioMedidas: React.FC<ReceituarioMedidasProps> = ({ data, onChange 
     }
   };
 
+  const handleAxisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (value === '') {
+      onChange({ [name]: '' });
+      return;
+    }
+    if (/^\d+$/.test(value)) {
+      const val = parseInt(value, 10);
+      if (val <= 180) {
+        onChange({ [name]: value });
+      }
+    }
+  };
+
+  const handleAxisBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (!value.trim()) {
+      onChange({ [name]: '' });
+      return;
+    }
+
+    const val = parseInt(value, 10);
+    if (!isNaN(val)) {
+      const clamped = Math.max(0, Math.min(180, val));
+      onChange({ [name]: clamped.toString() });
+    } else {
+      onChange({ [name]: '' });
+    }
+  };
+
   return (
     <div className="flex w-full divide-x divide-gray-200">
       <div className="flex-1 p-4 flex justify-start">
@@ -103,7 +133,14 @@ const ReceituarioMedidas: React.FC<ReceituarioMedidasProps> = ({ data, onChange 
                     />
                   </td>
                   <td className="min-w-18 text-center text-gray-800">
-                    <input type="text" name="eixoOd" value={data.eixoOd ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center ' />
+                    <input
+                      type="text"
+                      name="eixoOd"
+                      value={data.eixoOd ?? ''}
+                      onChange={handleAxisChange}
+                      onBlur={handleAxisBlur}
+                      className='w-full py-2 px-1 text-center '
+                    />
                   </td>
                   <td className="min-w-18 text-center text-gray-800">
                     <input type="text" name='dnpOd' value={data.dnpOd ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center ' />
@@ -138,7 +175,14 @@ const ReceituarioMedidas: React.FC<ReceituarioMedidasProps> = ({ data, onChange 
                     />
                   </td>
                   <td className="min-w-18 text-center text-gray-800">
-                    <input type="text" name="eixoOe" value={data.eixoOe ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center ' />
+                    <input
+                      type="text"
+                      name="eixoOe"
+                      value={data.eixoOe ?? ''}
+                      onChange={handleAxisChange}
+                      onBlur={handleAxisBlur}
+                      className='w-full py-2 px-1 text-center '
+                    />
                   </td>
                   <td className="min-w-18 text-center text-gray-800">
                     <input type="text" name='dnpOe' value={data.dnpOe ?? ''} onChange={handleChange} className='w-full py-2 px-1 text-center ' />
