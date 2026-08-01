@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
-import type { SupplierOption, BrandOption, ProductPayload, ProductResponse, ProductType } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductResponse, type ProductType, frameMaterialOptions } from '../types/product';
 import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
@@ -92,7 +92,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
   const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const brandId = e.target.value;
     const selectedBrand = marcas.find(m => m.id === brandId);
-    
+
     setFormData(prev => ({
       ...prev,
       brandId,
@@ -172,7 +172,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                 <h3 className="font-semibold text-gray-600">Detalhes da Armação</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <InputField label="Cor" name="color" value={formData.color} onChange={handleChange} placeholder="Preto, Dourado..." />
-                  <InputField label="Material" name="material" value={formData.material} onChange={handleChange} placeholder="Acetato, Metal..." />
+                  <SelectField label="Tipo da Armação" name="material" value={formData.material} onChange={handleChange} options={frameMaterialOptions} />
                   <InputField label="Tamanho" name="size" value={formData.size} onChange={handleChange} placeholder="58-14-140" />
                 </div>
               </div>

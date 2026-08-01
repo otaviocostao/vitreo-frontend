@@ -5,7 +5,7 @@ import SelectField from '../components/ui/SelectField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { SupplierOption, BrandOption, ProductPayload, ProductType } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductType, frameMaterialOptions, } from '../types/product';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
@@ -111,7 +111,7 @@ const RegisterProductPage = () => {
   const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const brandId = e.target.value;
     const selectedBrand = marcas.find(m => m.id === brandId);
-    
+
     setFormData(prev => ({
       ...prev,
       brandId,
@@ -182,76 +182,76 @@ const RegisterProductPage = () => {
     return <LoadingSpinner text='Carregando dados do fornecedor...' />
   }
 
-          const isFormEmpty = (data: typeof initialFormData) => {
-            return (
-              data.supplierId === '' &&
-              data.brandId === '' &&
-              data.name === '' &&
-              data.reference === '' &&
-              data.barcode === '' &&
-              data.cost === '' &&
-              data.salePrice === '' &&
-              data.profitMargin === '' &&
-              data.stockQuantity === '' &&
-              data.color === '' &&
-              data.material === '' &&
-              data.size === '' &&
-              data.lensMaterial === '' &&
-              data.treatment === '' &&
-              data.lensType === ''
-            );
-          };
+  const isFormEmpty = (data: typeof initialFormData) => {
+    return (
+      data.supplierId === '' &&
+      data.brandId === '' &&
+      data.name === '' &&
+      data.reference === '' &&
+      data.barcode === '' &&
+      data.cost === '' &&
+      data.salePrice === '' &&
+      data.profitMargin === '' &&
+      data.stockQuantity === '' &&
+      data.color === '' &&
+      data.material === '' &&
+      data.size === '' &&
+      data.lensMaterial === '' &&
+      data.treatment === '' &&
+      data.lensType === ''
+    );
+  };
 
-          const isFormUnchanged = (current: typeof initialFormData, initial: typeof initialFormData) => {
-            return Object.keys(current).every(key => current[key as keyof typeof initialFormData] === initial[key as keyof typeof initialFormData]);
-          };
+  const isFormUnchanged = (current: typeof initialFormData, initial: typeof initialFormData) => {
+    return Object.keys(current).every(key => current[key as keyof typeof initialFormData] === initial[key as keyof typeof initialFormData]);
+  };
 
-          const isSaveDisabled = isEditMode
-            ? isFormUnchanged(formData, initialLoadedData)
-            : isFormEmpty(formData);
+  const isSaveDisabled = isEditMode
+    ? isFormUnchanged(formData, initialLoadedData)
+    : isFormEmpty(formData);
 
-          return (
-            <div className="w-full">
-              <HeaderTitlePage page_name={isEditMode ? "Editar Produto" : "Novo Produto"} />
+  return (
+    <div className="w-full">
+      <HeaderTitlePage page_name={isEditMode ? "Editar Produto" : "Novo Produto"} />
 
-              <div className="w-full bg-white p-6">
-                <form onSubmit={handleSubmit}>
+      <div className="w-full bg-white p-6">
+        <form onSubmit={handleSubmit}>
 
-                  <FormSection title="Informações Gerais">
-                    <SelectField label="Tipo do Produto *" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
-                    <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." className="md:col-span-4" required />
-                    <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} className="md:col-span-4" />
+          <FormSection title="Informações Gerais">
+            <SelectField label="Tipo do Produto *" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
+            <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." className="md:col-span-4" required />
+            <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} className="md:col-span-4" />
 
-                    <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
-                    <InputField label="Referência" name="reference" value={formData.reference} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
-                    <InputField label="Código de Barras" name="barcode" value={formData.barcode} onChange={handleChange} placeholder="789..." className="md:col-span-6" />
-                  </FormSection>
+            <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
+            <InputField label="Referência" name="reference" value={formData.reference} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />
+            <InputField label="Código de Barras" name="barcode" value={formData.barcode} onChange={handleChange} placeholder="789..." className="md:col-span-6" />
+          </FormSection>
 
-                  <FormSection title="Valores e Estoque">
-                    <InputField label="Custo (R$)" name="cost" value={formData.cost} onChange={handleChange} placeholder="0,00" className="md:col-span-2" />
-                    <InputField label="Valor Final (R$) *" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="0,00" className="md:col-span-2" required />
-                    <InputField label="Margem de Lucro (%)" readOnly name="profitMargin" type="number" value={parseFloat(formData.profitMargin) === 0 ? '' : formData.profitMargin} onChange={handleChange} placeholder="100" className="md:col-span-2" />
-                    <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" />
-                  </FormSection>
+          <FormSection title="Valores e Estoque">
+            <InputField label="Custo (R$)" name="cost" value={formData.cost} onChange={handleChange} placeholder="0,00" className="md:col-span-2" />
+            <InputField label="Valor Final (R$) *" name="salePrice" value={formData.salePrice} onChange={handleChange} placeholder="0,00" className="md:col-span-2" required />
+            <InputField label="Margem de Lucro (%)" readOnly name="profitMargin" type="number" value={parseFloat(formData.profitMargin) === 0 ? '' : formData.profitMargin} onChange={handleChange} placeholder="100" className="md:col-span-2" />
+            <InputField label="Estoque Inicial" name="stockQuantity" type="number" value={parseInt(formData.stockQuantity) === 0 ? '' : formData.stockQuantity} onChange={handleChange} placeholder="0" className="md:col-span-2" />
+          </FormSection>
 
 
-                  {formData.productType === 'frame' && (
-                    <FormSection title="Detalhes da Armação">
-                      <InputField label="Cor" name="color" value={formData.color} onChange={handleChange} placeholder="Preto, Dourado..." className="md:col-span-4" />
-                      <InputField label="Material" name="material" value={formData.material} onChange={handleChange} placeholder="Acetato, Metal..." className="md:col-span-4" />
-                      <InputField label="Tamanho" name="size" value={formData.size} onChange={handleChange} placeholder="58-14-140" className="md:col-span-4" />
-                    </FormSection>
-                  )}
+          {formData.productType === 'frame' && (
+            <FormSection title="Detalhes da Armação">
+              <InputField label="Cor" name="color" value={formData.color} onChange={handleChange} placeholder="Preto, Dourado..." className="md:col-span-4" />
+              <SelectField label="Tipo da Armação" name="material" value={formData.material} onChange={handleChange} options={frameMaterialOptions} className="md:col-span-4" />
+              <InputField label="Tamanho" name="size" value={formData.size} onChange={handleChange} placeholder="58-14-140" className="md:col-span-4" />
+            </FormSection>
+          )}
 
-                  {formData.productType === 'lens' && (
-                    <FormSection title="Detalhes da Lente">
-                      <InputField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} placeholder="Poli, Orma..." className="md:col-span-4" />
-                      <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
-                      <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
-                    </FormSection>
-                  )}
-                  <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} isSaveDisabled={isSaveDisabled} />
-                </form>
+          {formData.productType === 'lens' && (
+            <FormSection title="Detalhes da Lente">
+              <InputField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} placeholder="Poli, Orma..." className="md:col-span-4" />
+              <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
+              <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
+            </FormSection>
+          )}
+          <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} isSaveDisabled={isSaveDisabled} />
+        </form>
       </div>
       {error && (
         <ErrorPopup message={error} onClose={() => setError(null)} />

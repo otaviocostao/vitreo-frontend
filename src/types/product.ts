@@ -1,5 +1,14 @@
 export type ProductType = 'frame' | 'lens';
 
+export type FrameMaterial = 'Acetato' | 'Metal' | 'Flutuante' | 'Semi-Flutuante';
+
+export const frameMaterialOptions = [
+  { value: 'Acetato', label: 'Acetato' },
+  { value: 'Metal', label: 'Metal' },
+  { value: 'Flutuante', label: 'Flutuante' },
+  { value: 'Semi-Flutuante', label: 'Semi-Flutuante' },
+];
+
 export interface ProductPayload {
   productType: ProductType;
   name: string;
@@ -14,7 +23,7 @@ export interface ProductPayload {
   isActive?: boolean;
 
   color?: string;
-  material?: string;
+  material?: FrameMaterial | string;
   size?: string;
 
   lensMaterial?: string;
