@@ -9,6 +9,15 @@ export const frameMaterialOptions = [
   { value: 'Semi-Flutuante', label: 'Semi-Flutuante' },
 ];
 
+export type LensMaterial = 'Orma' | 'Policarbonato' | 'Alto Indice 1.67' | 'Alto Indice 1.74';
+
+export const lensMaterialOptions = [
+  { value: 'Orma', label: 'Orma' },
+  { value: 'Policarbonato', label: 'Policarbonato' },
+  { value: 'Alto Indice 1.67', label: 'Alto Índice 1.67' },
+  { value: 'Alto Indice 1.74', label: 'Alto Índice 1.74' },
+];
+
 export interface ProductPayload {
   productType: ProductType;
   name: string;
@@ -26,7 +35,7 @@ export interface ProductPayload {
   material?: FrameMaterial | string;
   size?: string;
 
-  lensMaterial?: string;
+  lensMaterial?: LensMaterial | string;
   treatment?: string;
   lensType?: string;
 }
@@ -49,7 +58,7 @@ export interface ProductResponse {
   material?: string;
   size?: string;
 
-  lensMaterial?: string;
+  lensMaterial?: LensMaterial | string;
   treatment?: string;
   lensType?: string;
 }

@@ -5,7 +5,7 @@ import SelectField from '../components/ui/SelectField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
-import { type SupplierOption, type BrandOption, type ProductPayload, type ProductType, frameMaterialOptions, } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductType, frameMaterialOptions, lensMaterialOptions } from '../types/product';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
@@ -140,19 +140,19 @@ const RegisterProductPage = () => {
       supplierId: formData.supplierId,
       brandId: formData.brandId || undefined,
       name: formData.name,
-      reference: formData.reference,
-      barcode: formData.barcode,
+      reference: formData.reference || undefined,
+      barcode: formData.barcode || undefined,
       cost: formData.cost ? parseCurrency(formData.cost) : 0,
       salePrice: formData.salePrice ? parseCurrency(formData.salePrice) : 0,
       profitMargin: formData.profitMargin ? parseFloat(formData.profitMargin.replace(',', '.')) : 0,
       stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 0,
       isActive: formData.isActive,
-      color: formData.color,
-      material: formData.material,
-      size: formData.size,
-      lensMaterial: formData.lensMaterial,
-      treatment: formData.treatment,
-      lensType: formData.lensType,
+      color: formData.productType === 'frame' ? (formData.color || undefined) : undefined,
+      material: formData.productType === 'frame' ? (formData.material || undefined) : undefined,
+      size: formData.productType === 'frame' ? (formData.size || undefined) : undefined,
+      lensMaterial: formData.productType === 'lens' ? (formData.lensMaterial || undefined) : undefined,
+      treatment: formData.productType === 'lens' ? (formData.treatment || undefined) : undefined,
+      lensType: formData.productType === 'lens' ? (formData.lensType || undefined) : undefined,
     };
 
     try {
@@ -245,7 +245,7 @@ const RegisterProductPage = () => {
 
           {formData.productType === 'lens' && (
             <FormSection title="Detalhes da Lente">
-              <InputField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} placeholder="Poli, Orma..." className="md:col-span-4" />
+              <SelectField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} options={lensMaterialOptions} className="md:col-span-4" />
               <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
               <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
             </FormSection>

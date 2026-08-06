@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
-import { type SupplierOption, type BrandOption, type ProductPayload, type ProductResponse, type ProductType, frameMaterialOptions } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductResponse, type ProductType, frameMaterialOptions, lensMaterialOptions } from '../types/product';
 import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
@@ -110,27 +110,29 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
       supplierId: formData.supplierId,
       brandId: formData.brandId || undefined,
       name: formData.name,
-      reference: formData.reference,
-      barcode: formData.barcode,
+      reference: formData.reference || undefined,
+      barcode: formData.barcode || undefined,
       cost: formData.cost ? parseCurrency(formData.cost) : 0,
       salePrice: formData.salePrice ? parseCurrency(formData.salePrice) : 0,
       profitMargin: formData.profitMargin ? parseFloat(formData.profitMargin.replace(',', '.')) : 0,
       stockQuantity: formData.stockQuantity ? parseInt(formData.stockQuantity, 10) : 0,
       isActive: formData.isActive,
-      color: formData.color,
-      material: formData.material,
-      size: formData.size,
-      lensMaterial: formData.lensMaterial,
-      treatment: formData.treatment,
-      lensType: formData.lensType,
+      color: formData.productType === 'frame' ? (formData.color || undefined) : undefined,
+      material: formData.productType === 'frame' ? (formData.material || undefined) : undefined,
+      size: formData.productType === 'frame' ? (formData.size || undefined) : undefined,
+      lensMaterial: formData.productType === 'lens' ? (formData.lensMaterial || undefined) : undefined,
+      treatment: formData.productType === 'lens' ? (formData.treatment || undefined) : undefined,
+      lensType: formData.productType === 'lens' ? (formData.lensType || undefined) : undefined,
     };
 
     try {
       const novoProduto = await createProduct(productPayload);
       onSubmit(novoProduto);
       onClose();
-    } catch (err) {
-      setError('Falha ao cadastrar o produto. Verifique os dados e tente novamente.');
+    } catch (err: any) {
+      const apiMessage = err?.response?.data?.message;
+      const formattedMessage = Array.isArray(apiMessage) ? apiMessage.join(', ') : apiMessage;
+      setError(formattedMessage ? `Falha ao cadastrar o produto: ${formattedMessage}` : 'Falha ao cadastrar o produto. Verifique os dados e tente novamente.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -182,7 +184,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
               <div className="p-4 bg-gray-50 rounded-md space-y-4">
                 <h3 className="font-semibold text-gray-600">Detalhes da Lente</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <InputField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} placeholder="Poli, Orma..." />
+                  <SelectField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} options={lensMaterialOptions} />
                   <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." />
                   <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." />
                 </div>
