@@ -18,6 +18,14 @@ export const lensMaterialOptions = [
   { value: 'Alto Indice 1.74', label: 'Alto Índice 1.74' },
 ];
 
+export type LensType = 'Visão Simples' | 'Multifocal' | 'Bifocal';
+
+export const lensTypeOptions = [
+  { value: 'Visão Simples', label: 'Visão Simples' },
+  { value: 'Multifocal', label: 'Multifocal' },
+  { value: 'Bifocal', label: 'Bifocal' },
+];
+
 export interface ProductPayload {
   productType: ProductType;
   name: string;
@@ -37,7 +45,7 @@ export interface ProductPayload {
 
   lensMaterial?: LensMaterial | string;
   treatment?: string;
-  lensType?: string;
+  lensType?: LensType | string;
 }
 
 export interface ProductResponse {
@@ -60,7 +68,7 @@ export interface ProductResponse {
 
   lensMaterial?: LensMaterial | string;
   treatment?: string;
-  lensType?: string;
+  lensType?: LensType | string;
 }
 
 export interface SupplierOption {

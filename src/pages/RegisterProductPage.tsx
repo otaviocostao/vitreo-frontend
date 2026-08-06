@@ -5,7 +5,7 @@ import SelectField from '../components/ui/SelectField';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SaveCancelButtonsArea from '../components/SaveCancelButtonsArea';
 import { useNavigate, useParams } from 'react-router-dom';
-import { type SupplierOption, type BrandOption, type ProductPayload, type ProductType, frameMaterialOptions, lensMaterialOptions } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductType, frameMaterialOptions, lensMaterialOptions, lensTypeOptions } from '../types/product';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
 import { createProduct, getProductById, updateProduct } from '../services/productService';
@@ -247,7 +247,7 @@ const RegisterProductPage = () => {
             <FormSection title="Detalhes da Lente">
               <SelectField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} options={lensMaterialOptions} className="md:col-span-4" />
               <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." className="md:col-span-4" />
-              <InputField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} placeholder="Visão Simples, Multifocal..." className="md:col-span-4" />
+              <SelectField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} options={lensTypeOptions} className="md:col-span-4" />
             </FormSection>
           )}
           <SaveCancelButtonsArea textButton1='Cancelar' cancelButtonPath='/produtos' textButton2={isEditMode ? "Salvar alterações" : 'Cadastrar'} isLoading={isLoading} isSaveDisabled={isSaveDisabled} />
