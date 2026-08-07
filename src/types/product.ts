@@ -26,6 +26,16 @@ export const lensTypeOptions = [
   { value: 'Bifocal', label: 'Bifocal' },
 ];
 
+export type LensTreatment = 'Nenhum' | 'Antirreflexo' | 'Fotossensível' | 'Fotossensível + Antirreflexo' | 'Coloração';
+
+export const lensTreatmentOptions = [
+  { value: 'Nenhum', label: 'Nenhum' },
+  { value: 'Antirreflexo', label: 'Antirreflexo' },
+  { value: 'Fotossensível', label: 'Fotossensível' },
+  { value: 'Fotossensível + Antirreflexo', label: 'Fotossensível + Antirreflexo' },
+  { value: 'Coloração', label: 'Coloração' },
+];
+
 export interface ProductPayload {
   productType: ProductType;
   name: string;
@@ -44,7 +54,7 @@ export interface ProductPayload {
   size?: string;
 
   lensMaterial?: LensMaterial | string;
-  treatment?: string;
+  treatment?: LensTreatment | string;
   lensType?: LensType | string;
 }
 
@@ -67,7 +77,7 @@ export interface ProductResponse {
   size?: string;
 
   lensMaterial?: LensMaterial | string;
-  treatment?: string;
+  treatment?: LensTreatment | string;
   lensType?: LensType | string;
 }
 

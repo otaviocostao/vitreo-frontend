@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './ui/InputField';
 import SelectField from './ui/SelectField';
 import Button from './ui/Button';
-import { type SupplierOption, type BrandOption, type ProductPayload, type ProductResponse, type ProductType, frameMaterialOptions, lensMaterialOptions, lensTypeOptions } from '../types/product';
+import { type SupplierOption, type BrandOption, type ProductPayload, type ProductResponse, type ProductType, frameMaterialOptions, lensMaterialOptions, lensTypeOptions, lensTreatmentOptions } from '../types/product';
 import { createProduct } from '../services/productService';
 import { getFornecedoresOptions } from '../services/supplierService';
 import { getMarcasOptions } from '../services/marcaService';
@@ -185,7 +185,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
                 <h3 className="font-semibold text-gray-600">Detalhes da Lente</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <SelectField label="Material" name="lensMaterial" value={formData.lensMaterial} onChange={handleChange} options={lensMaterialOptions} />
-                  <InputField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} placeholder="Antirreflexo, Blue Light..." />
+                  <SelectField label="Tratamento" name="treatment" value={formData.treatment} onChange={handleChange} options={lensTreatmentOptions} />
                   <SelectField label="Tipo da Lente" name="lensType" value={formData.lensType} onChange={handleChange} options={lensTypeOptions} />
                 </div>
               </div>
