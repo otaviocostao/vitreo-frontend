@@ -220,7 +220,7 @@ const RegisterProductPage = () => {
           <FormSection title="Informações Gerais">
             <SelectField label="Tipo do Produto *" name="productType" value={formData.productType} onChange={handleTypeChange} options={productTypeOptions} className="md:col-span-4" />
             <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." className="md:col-span-4" required />
-            <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} className="md:col-span-4" />
+            <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} className="md:col-span-4" required />
 
             <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator Clássico" className="md:col-span-12" required />
             <InputField label="Referência" name="reference" value={formData.reference} onChange={handleChange} placeholder="Ex: RB3025" className="md:col-span-6" />

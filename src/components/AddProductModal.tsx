@@ -156,7 +156,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSu
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField label="Fornecedor" name="supplierName" value={selectedSupplierName} readOnly placeholder="Selecione uma marca..." required />
-              <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} />
+              <SelectField label="Marca" name="brandId" value={formData.brandId} onChange={handleBrandChange} options={brandOptions} required />
             </div>
             <InputField label="Nome / Descrição *" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Ray-Ban Aviator" required />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
