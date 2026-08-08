@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Cog, Clock, XCircle } from 'lucide-react';
+import { CheckCircle, Cog, Clock, XCircle, Truck } from 'lucide-react';
 import type { OrderStatus } from '../../types/order';
 
 interface StatusBadgeProps {
@@ -29,9 +29,15 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
     },
     COMPLETED: {
       icon: <CheckCircle size={14} />,
-      label: 'Finalizado',
+      label: 'Pronto',
       text: 'text-green-700',
       bg: 'bg-green-100',
+    },
+    DELIVERED: {
+      icon: <Truck size={14} />,
+      label: 'Entregue',
+      text: 'text-teal-700',
+      bg: 'bg-teal-100',
     },
     CANCELLED: {
       icon: <XCircle size={14} />,

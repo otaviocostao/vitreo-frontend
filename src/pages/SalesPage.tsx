@@ -8,8 +8,8 @@ import Pagination from '../components/ui/Pagination';
 import HeaderTitlePage from '../components/HeaderTitlePage';
 import SalesTable from '../components/SalesTable';
 import { NavLink } from 'react-router-dom';
-import type { OrderResponse } from '../types/order';
-import { getOrders } from '../services/orderService';
+import type { OrderResponse, OrderStatus } from '../types/order';
+import { getOrders, updateOrderStatus } from '../services/orderService';
 import ErrorPopup from '../components/ErrorPopup';
 import { useDebounce } from '../hooks/useDebounce';
 import SaleDetailsDrawer from '../components/SaleDetailsDrawer';
@@ -52,6 +52,21 @@ const SalesPage = () => {
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     setCurrentPage(1);
+  };
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      const updatedOrder = await updateOrderStatus(orderId, newStatus);
+      setOrders(prevOrders =>
+        prevOrders.map(order => (order.id === orderId ? updatedOrder : order))
+      );
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder(updatedOrder);
+      }
+    } catch (err) {
+      setError('Falha ao atualizar o status do pedido.');
+      console.error(err);
+    }
   };
 
   const filteredOrders = useMemo(() => {
@@ -113,7 +128,8 @@ const SalesPage = () => {
         <SalesTable 
           orders={paginatedOrders} 
           isLoading={isLoading} 
-          onRowClick={(order) => setSelectedOrder(order)} 
+          onRowClick={(order) => setSelectedOrder(order)}
+          onStatusChange={handleStatusChange} 
         />
         </div>
         <SaleDetailsDrawer 

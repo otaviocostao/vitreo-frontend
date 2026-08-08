@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { OrderStatus } from "../types/order";
-import { CheckCircle, ChevronDown, Clock, Cog, XCircle } from "lucide-react";
+import { CheckCircle, ChevronDown, Clock, Cog, XCircle, Truck, PackageCheck } from "lucide-react";
 
 const useClickOutside = (
   ref: React.RefObject<HTMLElement | null>,
@@ -24,22 +24,22 @@ const useClickOutside = (
 
 
 interface StatusSelectorProps {
-    currentStatus: OrderStatus;
-    onStatusChange: (newStatus: OrderStatus) => void;
-    disabled?: boolean;
+  currentStatus: OrderStatus;
+  onStatusChange: (newStatus: OrderStatus) => void;
+  disabled?: boolean;
 }
 
 interface StatusConfig {
-    icon: React.ReactNode;
-    label: string;
-    text: string;
-    bg: string;
+  icon: React.ReactNode;
+  label: string;
+  text: string;
+  bg: string;
 }
 
-const statusOptions: OrderStatus[] = ['PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'];
+const statusOptions: OrderStatus[] = ['PENDING', 'PROCESSING', 'COMPLETED', 'DELIVERED', 'CANCELLED'];
 
 const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatusChange, disabled = false }) => {
-    
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsOpen(false));
@@ -47,15 +47,22 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatus
   const statusConfig: Record<OrderStatus, StatusConfig> = {
     PENDING: { icon: <Clock size={14} />, label: 'Pendente', text: 'text-blue-700', bg: 'bg-blue-100' },
     PROCESSING: { icon: <Cog size={14} />, label: 'Em processamento', text: 'text-yellow-700', bg: 'bg-yellow-100' },
-    COMPLETED: { icon: <CheckCircle size={14} />, label: 'Finalizado', text: 'text-green-700', bg: 'bg-green-100' },
+    COMPLETED: { icon: <CheckCircle size={14} />, label: 'Pronto', text: 'text-green-700', bg: 'bg-green-100' },
+    DELIVERED: { icon: <PackageCheck size={14} />, label: 'Entregue', text: 'text-teal-700', bg: 'bg-teal-100' },
     CANCELLED: { icon: <XCircle size={14} />, label: 'Cancelado', text: 'text-red-700', bg: 'bg-red-100' },
   };
 
   const currentConfig = statusConfig[currentStatus] || statusConfig.PENDING;
 
-  const handleSelect = (newStatus: OrderStatus) => {
+  const handleSelect = (e: React.MouseEvent, newStatus: OrderStatus) => {
+    e.stopPropagation();
     onStatusChange(newStatus);
     setIsOpen(false);
+  };
+
+  const handleToggleOpen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
   };
 
   return (
@@ -63,8 +70,8 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatus
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-fit flex items-center justify-between gap-1.5 px-2.5 py-3 box-border rounded-md text-xs font-medium transition-all ${currentConfig.bg} ${currentConfig.text} ${disabled ? 'opacity-70 cursor-not-allowed' : 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-500'}`}
+        onClick={handleToggleOpen}
+        className={`w-fit flex items-center justify-between gap-1.5 px-2.5 py-1.5 box-border rounded-md text-xs font-medium transition-all ${currentConfig.bg} ${currentConfig.text} ${disabled ? 'opacity-70 cursor-not-allowed' : 'hover:ring-2 hover:ring-offset-1 hover:ring-blue-500'}`}
       >
         <div className="flex items-center gap-1.5">
           {currentConfig.icon}
@@ -74,17 +81,16 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ currentStatus, onStatus
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg border rounded-md p-1">
+        <div className="absolute z-20 mt-1 min-w-[150px] bg-white shadow-lg border border-gray-200 rounded-md p-1">
           <ul className="space-y-1">
             {statusOptions.map((status) => {
               const config = statusConfig[status];
               return (
                 <li
                   key={status}
-                  onClick={() => handleSelect(status)}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer ${
-                    status === currentStatus ? `${config.bg} ${config.text}` : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  onClick={(e) => handleSelect(e, status)}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer ${status === currentStatus ? `${config.bg} ${config.text}` : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   {config.icon}
                   {config.label}

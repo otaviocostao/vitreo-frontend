@@ -1,7 +1,7 @@
 import type { CustomerResponse } from "./customer";
 import type { ProductResponse } from "./product";
 
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'DELIVERED' | 'CANCELLED';
 
 export interface OrderItemPayload {
   productId: string;

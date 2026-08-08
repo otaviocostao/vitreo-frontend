@@ -47,9 +47,10 @@ export const updateOrder = async (id: string, payload: OrderUpdatePayload): Prom
   }
 };
 
-export const updateOrderStatus = async (id: string, status: OrderStatus): Promise<void> => {
+export const updateOrderStatus = async (id: string, status: OrderStatus): Promise<OrderResponse> => {
   try {
-    await api.patch(`/orders/${id}`, { status });
+    const response = await api.patch<OrderResponse>(`/orders/${id}/status`, { status });
+    return response.data;
   } catch (error) {
     console.error(`Erro ao atualizar status do pedido ${id}:`, error);
     throw error;

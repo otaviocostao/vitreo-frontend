@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import StatusBadge from './ui/StatusBadge';
-import type { OrderResponse } from '../types/order';
+import StatusSelector from './StatusSelector';
+import type { OrderResponse, OrderStatus } from '../types/order';
 import LoadingSpinner from './LoadingSpinner';
 import ActionDropdown from './ui/ActionDropdown';
 
@@ -9,9 +9,10 @@ interface SalesTableProps {
   orders: OrderResponse[];
   isLoading: boolean;
   onRowClick: (order: OrderResponse) => void;
+  onStatusChange?: (orderId: string, newStatus: OrderStatus) => void;
 }
 
-const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick }) => {
+const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick, onStatusChange }) => {
   const tableHeaders = ['O.S', 'Cliente', 'D. Venda', 'D. Entrega', 'Lentes', 'Armação', 'Valor', 'Status', ''];
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick }
         return '';
     }
     
-    const dateObj = new Date(`${data}T00:00:00`);
+    const dateObj = data.includes('T') ? new Date(data) : new Date(`${data}T00:00:00`);
 
     if (isNaN(dateObj.getTime())) {
         return 'Data inválida';
@@ -100,8 +101,14 @@ const SalesTable: React.FC<SalesTableProps> = ({ orders, isLoading, onRowClick }
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.finalValue)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
-                <StatusBadge status={order.status} />
+              <td 
+                className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <StatusSelector 
+                  currentStatus={order.status}
+                  onStatusChange={(newStatus) => onStatusChange?.(order.id, newStatus)}
+                />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <ActionDropdown 
